@@ -13,3 +13,9 @@ The details of this project can be found on the wiki [homepage](https://github.c
 
 ### Language and Techniques
 The details on the language and techniques for SEO-ker can be found in the wiki [Language and Techniques](https://github.com/dietterc/SEO-ker/wiki/Language-and-Techniques).
+
+### Meeting Minutes
+Meeting Minutes can be found in the wiki [Meetings](https://github.com/dietterc/SEO-ker/wiki/Meetings).
+
+### Rules
+Rules of SEO-ker can be found [here](https://github.com/dietterc/SEO-ker/wiki/Rules).
