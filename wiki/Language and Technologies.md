@@ -1,6 +1,11 @@
 ## Next.js
 [Nextjs.org](https://nextjs.org/)  
-We will be using the Next.js JavaScript framework for the frontend and backend of our web application.
+Next.js is a react javascript framework that we will be using for the frontend of our web application.   
+Next.js also has server side functionality, but it is TBD if we will use it as such.
+
+## socket.io
+[socket.io](https://socket.io/)  
+We are looking into using socket.io for communication between the server and client side of our application. However, we have not made a final decision.
 
 ## MongoDB
 [MongoDB](https://www.mongodb.com/)  
