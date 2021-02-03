@@ -11,8 +11,8 @@ COMP4350 project for group Team n, n ∈ ℤ+
 ### Description
 The details of this project can be found on the [homepage](https://github.com/dietterc/SEO-ker/wiki) of our Wiki.
 
-### Language and Techniques
-The details on the language and techniques for SEO-ker can be found in the [Language and Techniques](https://github.com/dietterc/SEO-ker/wiki/Language-and-Techniques) section of our wiki.
+### Language and Technologies
+The details on the language and techniques for SEO-ker can be found in the [Language and Technologies](https://github.com/dietterc/SEO-ker/wiki/Language-and-Technologies) section of our wiki.
 
 ### Meeting Minutes
 Meeting Minutes can be found in the [Meetings](https://github.com/dietterc/SEO-ker/wiki/Meetings) section of the wiki.
