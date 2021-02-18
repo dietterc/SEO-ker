@@ -9,13 +9,52 @@ const dev = process.env.NODE_ENV !== 'production'
 const nextApp = next({ dev })
 const nextHandler = nextApp.getRequestHandler()
 
+// game objects/stuff
+
+class Lobby {
+  constructor(id) {
+    this.players = []
+    this.lobby_id = id //0 if not made yet?
+
+    //add player to this lobby
+    this.joinLobby = function (player) {
+      if(this.players.length <= 8) {
+        this.players.push(player)
+        console.log(player + ' joined the lobby')
+      }
+      else {
+        console.log(player + ' cannot join the lobby, lobby is full')
+      }
+    }
+
+    //remove player from this lobby
+    this.leaveLobby = function (player) {
+      var index = this.players.indexOf(player)
+      this.players.splice(index, 1)
+      console.log(player + ' left the lobby')
+    }
+  }
+}
+
+//just one game lobby for now
+const gameLobby = new Lobby(1)
+
+
 // socket.io server
 io.on('connection', (socket) => {
   console.log('connection');
-  socket.emit('status', 'Hello from Socket.io');
+  gameLobby.joinLobby(socket.id)
+  socket.emit("client-connection", gameLobby);
+  socket.broadcast.emit("client-connection", gameLobby);
+
+
 
   socket.on('disconnect', () => {
       console.log('client disconnected');
+      if(gameLobby.players.includes(socket.id)) {
+        gameLobby.leaveLobby(socket.id)
+        socket.broadcast.emit("client-disconnect", gameLobby);
+      }
   })
 });
 
