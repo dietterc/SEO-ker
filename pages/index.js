@@ -7,6 +7,20 @@ socket.on("connect", () => {
   console.log("Client " + socket.id); 
 });
 
+socket.on("client-connection", (...args) => {
+  var lobby = args[0]
+  var list = ""
+  for(var i = 0; i<lobby.players.length;i++){
+    list += " " + lobby.players[i]
+  }
+  console.log("Clients connected: " + list); 
+});
+
+socket.on("client-disconnect", (...args) => {
+  console.log("Client disconnected."); 
+});
+
+
 export default function Home() {
   return (
     <div className={styles.container}>
