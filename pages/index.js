@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
+import Link from 'next/link';
 const io = require("socket.io-client");
 const socket = io();
 
@@ -17,16 +18,35 @@ export default function Home() {
 
       <main className={styles.main}>
         <a href="https://github.com/dietterc/SEO-ker/wiki" target="_blank">
-           <img src="/SEO-ker.png" alt="SEO-ker" className="seoker" />
+                  <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
         </a>
         <p className={styles.description}>By: Team n, n ∈ ℤ<sup>+</sup> </p>
         <h2 className={styles.lobby}>Lobby</h2>
-        <div className="playerInLobby">
-           <p>Player Name</p>
-        </div>
-        <div className="playerInLobby">
-            <p>Player Name</p>
-        </div>
+
+              <div className={styles.playerInLobby}>
+                  <p>Player Name</p>
+              </div>
+              <div className={styles.playerInLobby}>
+                  <p>Player Name</p>
+              </div>
+              <div className={styles.playerInLobby}>
+                  <p>Player Name</p>
+              </div>
+              <div className={styles.playerInLobby}>
+                  <p>Player Name</p>
+              </div>
+              <div className={styles.playerInLobby}>
+                  <p>Player Name</p>
+              </div>
+              <div className={styles.playerInLobby}>
+                  <p>Player Name</p>
+              </div>
+              <div className={styles.playerInLobby}>
+                  <p>Player Name</p>
+              </div>
+              <Link href = "/game">
+                  <button className={styles.card}>Start Game</button>
+              </Link>
       </main>
 
       <footer className={styles.footer}>
@@ -51,25 +71,7 @@ export default function Home() {
       </footer>
 
       <style jsx>{`
-        .seoker{
-            width:80vw;
-            max-width:800px;
-            object-fit:contain;
-        }
-        .playerInLobby{
-            width: 100%;
-            text-align: center;
-            color: #8c8c8c;
-            text-decoration: none;
-            border: 1px solid #8c8c8c;
-            transition: color 0.15s ease, border-color 0.15s ease;
-        }
-        .playerInLobby:hover,
-        .playerInLobby:focus,
-        .playerInLobby:active {
-            color: #000000;
-            border-color: #000000;
-        }
+        
         `
       }</style>
     </div>
