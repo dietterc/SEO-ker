@@ -44,13 +44,17 @@ const gameLobby = new Lobby(1)
 io.on('connection', (socket) => {
   console.log('connection');
   gameLobby.joinLobby(socket.id)
+  socket.emit("client-connection", gameLobby);
   socket.broadcast.emit("client-connection", gameLobby);
+
 
 
   socket.on('disconnect', () => {
       console.log('client disconnected');
-      gameLobby.leaveLobby(socket.id)
-      socket.broadcast.emit("client-connection", gameLobby);
+      if(gameLobby.players.includes(socket.id)) {
+        gameLobby.leaveLobby(socket.id)
+        socket.broadcast.emit("client-disconnect", gameLobby);
+      }
   })
 });
 

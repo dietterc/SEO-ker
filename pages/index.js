@@ -17,7 +17,12 @@ socket.on("client-connection", (...args) => {
 });
 
 socket.on("client-disconnect", (...args) => {
-  console.log("Client disconnected."); 
+  var lobby = args[0]
+  var list = ""
+  for(var i = 0; i<lobby.players.length;i++){
+    list += " " + lobby.players[i]
+  }
+  console.log("Client disconnected. New lobby: " + list); 
 });
 
 
