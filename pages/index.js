@@ -10,29 +10,35 @@ socket.on("connect", () => {
 export default function Home() {
   return (
     <div className={styles.container}>
-      <Head>
+      <head>
         <title>COMP4350 Group Project</title>
         <link rel="icon" href="/favicon.ico" />
-      </Head>
+      </head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Template site for Team n, n ∈ ℤ<sup>+</sup>
-        </h1>
-
-        <p className={styles.description}>
-          description
-        </p>
-
-
-        <a className="card">
-            <h3>Send ping &rarr; 0 pings received.</h3>
-            <p>Send a ping to the server. (broken)</p>
+        <a href="https://github.com/dietterc/SEO-ker/wiki" target="_blank">
+           <img src="/SEO-ker.png" alt="SEO-ker" className="seoker" />
         </a>
-        
+        <p className={styles.description}>By: Team n, n ∈ ℤ<sup>+</sup> </p>
+        <h2 className={styles.lobby}>Lobby</h2>
+        <div className="playerInLobby">
+           <p>Player Name</p>
+        </div>
+        <div className="playerInLobby">
+            <p>Player Name</p>
+        </div>
       </main>
 
       <footer className={styles.footer}>
+        <p>
+        <a
+          href="https://github.com/dietterc/SEO-ker/wiki/Rules"
+          target="_blank"
+        >
+          Rules: {'\t'}
+          <img src="/Rule_Book.png" alt="Rule Book" className={styles.logo} />
+        </a>
+        
         <a
           href="https://github.com/dietterc/SEO-ker"
           target="_blank"
@@ -41,41 +47,33 @@ export default function Home() {
           Repo: {' '}
           <img src="/GitHub_Logo.png" alt="Repo" className={styles.logo} />
         </a>
+        </p>
       </footer>
 
       <style jsx>{`
-        .card {
-            margin: 1rem;
-            flex-basis: 45%;
-            padding: 1.5rem;
-            text-align: left;
-            color: inherit;
+        .seoker{
+            width:80vw;
+            max-width:800px;
+            object-fit:contain;
+        }
+        .playerInLobby{
+            width: 100%;
+            text-align: center;
+            color: #8c8c8c;
             text-decoration: none;
-            border: 1px solid #eaeaea;
-            border-radius: 10px;
+            border: 1px solid #8c8c8c;
             transition: color 0.15s ease, border-color 0.15s ease;
-          }
-
-          .card:hover,
-          .card:focus,
-          .card:active {
-            color: #0070f3;
-            border-color: #0070f3;
-          }
-
-          .card h3 {
-            margin: 0 0 1rem 0;
-            font-size: 1.5rem;
-          }
-
-          .card p {
-            margin: 0;
-            font-size: 1.25rem;
-            line-height: 1.5;
-          }
-        `}</style>
-
+        }
+        .playerInLobby:hover,
+        .playerInLobby:focus,
+        .playerInLobby:active {
+            color: #000000;
+            border-color: #000000;
+        }
+        `
+      }</style>
     </div>
+
   )
 }
 
