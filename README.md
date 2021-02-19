@@ -23,7 +23,7 @@ Comprehensive rules for SEO-ker can be found [here](https://github.com/dietterc/
 
 ### Starting the app
 
-run this: (node and npm are required)
+run this: (node, express, socket.io, and npm are required)
 
 ```bash
 npm run dev

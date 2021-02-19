@@ -1,19 +1,25 @@
 .container {
-    min-height: 100vh;
-    padding: 0 0.5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  min-height: 100vh;
+  padding: 0 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .main {
-  padding: 5rem 0;
+  padding: 1rem 0;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.seoker {
+    width: 80vw;
+    max-width: 800px;
+    object-fit: contain;
 }
 
 .footer {
@@ -53,20 +59,14 @@
 }
 
 .title,
-.description,
-.playerLobby{
+.description{
   text-align: center;
 }
 
 .description {
-  line-height: 1.5;
+  line-height: 1;
   font-size: 1.5rem;
 }
-
-.playerLobby {
-    color: #8c8c8c;
-}
-
 .code {
   background: #fafafa;
   border-radius: 5px;
@@ -89,19 +89,29 @@
   margin: 1rem;
   flex-basis: 45%;
   padding: 1.5rem;
-  text-align: left;
-  color: inherit;
+  text-align: center;
+  color: #8e8e8e;
   text-decoration: none;
   border: 1px solid #eaeaea;
   border-radius: 10px;
   transition: color 0.15s ease, border-color 0.15s ease;
 }
-
+.playerInLobby {
+    width: 50%;
+    text-align: center;
+    color: #8c8c8c;
+    text-decoration: none;
+    border: 1px solid #8c8c8c;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
 .card:hover,
 .card:focus,
-.card:active {
-  color: #0070f3;
-  border-color: #0070f3;
+.card:active,
+.playerInLobby:hover,
+.playerInLobby:focus,
+.playerInLobby:active{
+  color: #000000;
+  border-color: #000000;
 }
 
 .card h3 {
