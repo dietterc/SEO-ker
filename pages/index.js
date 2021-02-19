@@ -9,12 +9,12 @@ socket.on("connect", () => {
 });
 
 socket.on("client-connection", (...args) => {
-  var lobby = args[0]
-  var list = ""
+    var lobby = args[0];
+    var list = "";
   for(var i = 0; i<lobby.players.length;i++){
-    list += " " + lobby.players[i]
+      list += " " + lobby.players[i];
   }
-  console.log("Clients connected: " + list); 
+    console.log("Clients connected: " + list); 
 });
 
 socket.on("client-disconnect", (...args) => {
@@ -30,18 +30,17 @@ socket.on("client-disconnect", (...args) => {
 export default function Home() {
   return (
     <div className={styles.container}>
-      <head>
+      <Head>
         <title>COMP4350 Group Project</title>
         <link rel="icon" href="/favicon.ico" />
-      </head>
+      </Head>
 
       <main className={styles.main}>
-        <a href="https://github.com/dietterc/SEO-ker/wiki" target="_blank">
-                  <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
-        </a>
+        <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
+        
         <p className={styles.description}>By: Team n, n ∈ ℤ<sup>+</sup> </p>
         <h2 className={styles.lobby}>Lobby</h2>
-
+              <script></script>
               <div className={styles.playerInLobby}>
                   <p>Player Name</p>
               </div>
