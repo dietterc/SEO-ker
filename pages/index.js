@@ -9,8 +9,9 @@ socket.on("connect", () => {
 });
 
 socket.on("client-connection", (...args) => {
-    var lobby = args[0];
-    var list = "";
+  var lobby = args[0]
+
+  var list = ""
   for(var i = 0; i<lobby.players.length;i++){
       list += " " + lobby.players[i];
   }
