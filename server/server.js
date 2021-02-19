@@ -94,7 +94,7 @@ const gameList = []
 
 // socket.io server
 io.on('connection', (socket) => {
-  var player = new Player(socket.id,"Default name")  
+  var player = new Player(socket.id,"Default name")
 
   gameLobby.joinLobby(player)
   socket.emit("client-connection", gameLobby);
