@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\pages",
+    "\\server",
     "\\styles"
   ],
-  "SelectedNode": "\\pages\\game.js",
+  "SelectedNode": "\\pages\\index.js",
   "PreviewInSolutionExplorer": false
 }
