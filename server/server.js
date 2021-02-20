@@ -90,7 +90,6 @@ class Game {
 
 //just one game lobby for now
 const gameLobby = new Lobby(1)
-const gameList = []
 
 // socket.io server
 io.on('connection', (socket) => {
@@ -108,6 +107,7 @@ io.on('connection', (socket) => {
       }
   })
 
+  //host sends this to signal start of the game
   socket.on('request-start-game', (...args) => {
     if(args[0] != gameLobby.lobbyId) {
       console.log('error, no lobby given');
@@ -116,13 +116,20 @@ io.on('connection', (socket) => {
 
     console.log('Starting game for lobby ' + args[0]);
     game = new Game(args[0],gameLobby.players)
-    gameList.push(game)
 
+    //tell everyone the game is starting
     socket.emit("game-start", game);
     socket.broadcast.emit("game-start", game);
+  })
 
-})
+  //sent after a player makes their turn
+  socket.on('turn-played', (...args) => {
+    game = args[0]
+    player = args[1]
+    //needs a check for if were back at the dealer (for next time)
+    
 
+  })
 
 });
 
