@@ -61,75 +61,39 @@ class Lobby {
 
 class Player {
   constructor(id,displayName) {
-    this.displayName = displayName
-    this.playerId = id
-    this.chips = 0
-    this.cards = []
-    this.activeCard = "" //the card they have played for the round
+    this.displayName = displayName;
+    this.playerId = id;                //same as socket?
+    this.socketId = id;
+    this.lobbyId = lobbyId;            //the lobby they are connected to
 
-    //set the played card as active and subtract the bet amount from chips
-    this.playCard = function (card,bet) {
-      this.activeCard = card
-      this.chips -= bet
-    }
   }
 }
-
-class Game {
-  constructor(id,players) {
-    this.id = id
-    this.players = players
-    this.cards = []
-    this.dealer = players[Math.floor(Math.random() * this.players.length)]
-    this.potValue = 0
-    this.activePlayerIndex = players.indexOf(this.dealer)
-  }
-}
-
-
 
 //just one game lobby for now
 const gameLobby = new Lobby(1)
 
 // socket.io server
 io.on('connection', (socket) => {
-  var player = new Player(socket.id,"Default name")  
 
-  gameLobby.joinLobby(player)
-  socket.emit("client-connection", gameLobby);
-  socket.broadcast.emit("client-connection", gameLobby);
+  socket.on('join-lobby', (...args) => {
+
+    var player = new Player(socket.id,"" + args[0])  
+    gameLobby.joinLobby(player)
+    socket.emit("client-connection", gameLobby);
+    socket.broadcast.emit("client-connection", gameLobby);
+
+  })
 
   socket.on('disconnect', () => {
       console.log(socket.id + ' disconnected');
       if(gameLobby.isConnected(socket.id)) {
-        gameLobby.leaveLobby(socket.id)
+        gameLobby.leaveLobby(socket.id);
         socket.broadcast.emit("client-disconnect", gameLobby);
       }
   })
 
-  //host sends this to signal start of the game
-  socket.on('request-start-game', (...args) => {
-    if(args[0] != gameLobby.lobbyId) {
-      console.log('error, no lobby given');
-      return
-    }
+  
 
-    console.log('Starting game for lobby ' + args[0]);
-    game = new Game(args[0],gameLobby.players)
-
-    //tell everyone the game is starting
-    socket.emit("game-start", game);
-    socket.broadcast.emit("game-start", game);
-  })
-
-  //sent after a player makes their turn
-  socket.on('turn-played', (...args) => {
-    game = args[0]
-    player = args[1]
-    //needs a check for if were back at the dealer (for next time)
-    
-
-  })
 
 });
 
@@ -137,11 +101,11 @@ io.on('connection', (socket) => {
 nextApp.prepare().then(() => {
 
   app.get('*', (req, res) => {
-    return nextHandler(req, res)
+    return nextHandler(req, res);
   })
 
   server.listen(port, err => {
     if (err) throw err
-    console.log(`> Ready on http://localhost:${port}`)
+    console.log(`> Ready on http://localhost:${port}`);
   })
 })
