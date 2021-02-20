@@ -27,6 +27,11 @@ socket.on("client-disconnect", (...args) => {
   console.log("Client disconnected. New lobby: " + list); 
 });
 
+const handleClick = param => (e) =>  {
+  console.log(param);
+}
+
+
 
 export default function Home() {
   return (
@@ -41,8 +46,10 @@ export default function Home() {
         
         <p className={styles.description}>By: Team n, n ∈ ℤ<sup>+</sup> </p>
         <h2 className={styles.lobby}>Lobby</h2>
-              <script></script>
-              <div className={styles.playerInLobby}>
+              <script>
+              </script>
+              <div className={styles.playerInLobby} onClick={handleClick("hello")}>
+                  
                   <p>Player Name</p>
               </div>
               <div className={styles.playerInLobby}>

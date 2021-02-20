@@ -9,12 +9,13 @@ const dev = process.env.NODE_ENV !== 'production'
 const nextApp = next({ dev })
 const nextHandler = nextApp.getRequestHandler()
 
+
 // game objects/stuff
 
 class Lobby {
   constructor(id) {
     this.players = []
-    this.lobbyId = id //0 if not made yet?
+    this.lobbyId = id 
     this.host = "" //blank if no host is set yet
 
     //add player to this lobby
@@ -45,6 +46,7 @@ class Lobby {
       }
       if(this.players.length == 0) {
         this.host = ""
+        //needs code to shutdown lobby
       }
 
     }
@@ -60,41 +62,112 @@ class Lobby {
 }
 
 class Player {
-  constructor(id,displayName) {
+  constructor(id,displayName,socketId) {
     this.displayName = displayName;
     this.playerId = id;                //same as socket?
-    this.socketId = id;
+    this.socketId = socketId;
     this.lobbyId = lobbyId;            //the lobby they are connected to
 
   }
 }
 
-//just one game lobby for now
-const gameLobby = new Lobby(1)
+//list of active lobbies
+var activeGameLobbies = [];
 
-// socket.io server
+//next free lobby id
+var nextLobbyId = 1;
+
+// socket.io server-side
 io.on('connection', (socket) => {
 
+  console.log(socket.id + ' connected');
+
+  /*
+  args[0]: playerId
+  args[1]: display name
+
+  sends a join-lobby signal to the client who sent this
+  */
+  socket.on('host-lobby', (...args) => {
+    lobbyCode = "";
+    for(var i=0;i<6;i++) {
+      r1 = Math.floor(Math.random() * 2);
+      if(r1 == 0) {
+        r2 = Math.floor(Math.random() * 10);
+      }
+      else {
+        r2 = String.fromCharCode(Math.floor(Math.random() * 25) + 66);
+      }
+      lobbyCode += r2
+    }
+
+    player = new Player(args[0],args[1],socket.id);
+    lobby = new Lobby(lobbyCode);
+    lobby.joinLobby(player);
+    activeGameLobbies.push(lobby);
+
+    socket.emit("join-lobby", lobby);
+
+  })
+
+  /*
+  args[0]: playerId
+  args[1]: display name
+  args[2]: lobby code
+
+  */
   socket.on('join-lobby', (...args) => {
 
-    var player = new Player(socket.id,"" + args[0])  
-    gameLobby.joinLobby(player)
-    socket.emit("client-connection", gameLobby);
-    socket.broadcast.emit("client-connection", gameLobby);
+    lobby = null
+
+    for(var i=0;i<activeGameLobbies.length;i++) {
+      if(activeGameLobbies[i].lobbyId == args[2]) {
+        lobby = activeGameLobbies[i];
+      }
+    }
+
+    if(lobby == null) {
+      console.log('Error, user' + args[0] + 'tried to join a non-existent lobby');
+      socket.emit("lobby-not-found");
+    }
+
+    player = new Player(args[0],"" + args[1],socket.id)  
+    lobby.joinLobby(player)
+
+    socket.emit("join-lobby", lobby);
+
+    for(var i=0;i<lobby.players.length;i++) {
+      if(lobby.players[i].playerId != args[0]) {
+        io.sockets.socket(lobby.players[i].socketId).emit("lobby-player-joined", lobby);
+      }
+    }
 
   })
 
   socket.on('disconnect', () => {
       console.log(socket.id + ' disconnected');
-      if(gameLobby.isConnected(socket.id)) {
-        gameLobby.leaveLobby(socket.id);
-        socket.broadcast.emit("client-disconnect", gameLobby);
+      
+      //find the lobby they were in
+      for(var i=0;i<activeGameLobbies.length;i++) {
+        for(var j=0;j<activeGameLobbies[i].players.length;j++) {
+          if(activeGameLobbies[i].players[j].socketId == socket.io) {
+            player = activeGameLobbies[i].players[j]
+            lobby = activeGameLobbies[i]
+
+            lobby.leaveLobby(player)
+
+            for(var k=0;k<lobby.players.length;k++) {
+              if(lobby.players[k].playerId != player.playerId) {
+                io.sockets.socket(lobby.players[i].socketId).emit("lobby-player-left", lobby);
+              }
+            }
+
+          }
+        } 
       }
   })
 
-  
-
-
+    
 });
 
 
