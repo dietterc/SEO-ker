@@ -29,6 +29,7 @@ socket.on("client-disconnect", (...args) => {
   console.log("Client disconnected. New lobby: " + list); 
 });
 
+<<<<<<< HEAD
 export default class Home extends React.Component{
   
   constructor(props){
@@ -38,9 +39,17 @@ export default class Home extends React.Component{
     };
     this.getLobbyCode = this.getLobbyCode.bind(this);
   }
+=======
+const handleClick = param => (e) =>  {
+  console.log(param);
+}
+
+
+>>>>>>> e18f7e303fb9336e713ce0ff5a49b8f1700fb70b
 
   
 
+<<<<<<< HEAD
   hostLobby(){
     socket.emit('host-lobby');
     console.log("host clicked");
@@ -49,6 +58,41 @@ export default class Home extends React.Component{
     //const code = lobbyCodeInput.value;
     socket.emit('join-lobby', this.state.lobbyCode);
   }
+=======
+      <main className={styles.main}>
+        <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
+        
+        <p className={styles.description}>By: Team n, n ∈ ℤ<sup>+</sup> </p>
+        <h2 className={styles.lobby}>Lobby</h2>
+              <script>
+              </script>
+              <div className={styles.playerInLobby} onClick={handleClick("hello")}>
+                  
+                  <p>Player Name</p>
+              </div>
+              <div className={styles.playerInLobby}>
+                  <p>Player Name</p>
+              </div>
+              <div className={styles.playerInLobby}>
+                  <p>Player Name</p>
+              </div>
+              <div className={styles.playerInLobby}>
+                  <p>Player Name</p>
+              </div>
+              <div className={styles.playerInLobby}>
+                  <p>Player Name</p>
+              </div>
+              <div className={styles.playerInLobby}>
+                  <p>Player Name</p>
+              </div>
+              <div className={styles.playerInLobby}>
+                  <p>Player Name</p>
+              </div>
+              <Link href = "/game">
+                  <button className={styles.card}>Start Game</button>
+              </Link>
+      </main>
+>>>>>>> e18f7e303fb9336e713ce0ff5a49b8f1700fb70b
 
   getLobbyCode = event =>{
     this.setState({lobbyCode: event.target.value});
