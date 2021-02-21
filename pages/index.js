@@ -26,48 +26,63 @@ socket.on("client-disconnect", (...args) => {
   for(var i = 0; i<lobby.players.length;i++){
     list += " " + lobby.players[i].playerId
   }
-  //console.log("Client disconnected. New lobby: " + list); 
-  displayNames(lobby);
+  console.log("Client disconnected. New lobby: " + list); 
 });
 
-function displayNames(lobby){
-  console.log("number of clients: " + lobby.length+" Clients connected: ");
-  for(var player in lobby){
-    console.log(player.playerId);
+export default class Home extends React.Component{
+  
+  constructor(props){
+    super(props);
+    this.state = {
+      lobbyCode: ""
+    };
+    this.getLobbyCode = this.getLobbyCode.bind(this);
   }
-}
 
-export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>COMP4350 Group Project</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+  
 
-      <main className={styles.main}>
-        <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
-        
-        <p className={styles.description}>By: Team n, n ∈ ℤ<sup>+</sup> </p>
-        <h2 className={styles.lobby}>Lobby</h2>
-        <div className="form-group">
-          <input type="text" 
-          placeholder="Display name" 
-          id="displayNameInput"></input>
-        </div>
-        <Link href = "/game">
-            <button className={styles.card}id="hostGameButton">Host Game</button>
-        </Link>
-        <div>OR</div>
-        <div class="form-group">
-          <input type="text" 
-          placeholder="Enter Game code" 
-          id="gameCodeInput"></input>
-        </div>
-        <Link href = "/game">
-            <button className={styles.card} id="joinGameButton">Join Game</button>
-        </Link>
-      </main>
+  hostLobby(){
+    socket.emit('host-lobby');
+    console.log("host clicked");
+  }
+  joinLobby(){
+    //const code = lobbyCodeInput.value;
+    socket.emit('join-lobby', this.state.lobbyCode);
+  }
+
+  getLobbyCode = event =>{
+    this.setState({lobbyCode: event.target.value});
+    console.log("lobby code: "+this.state.lobbyCode);
+  }
+
+  render(){
+    return(
+      <div className={styles.container}>
+        <Head>
+          <title>COMP4350 Group Project</title>
+          <link rel="icon" href="/favicon.ico" /> 
+        </Head>
+
+        <main className={styles.main}>
+          <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
+          
+          <p className={styles.description}>By: Team n, n ∈ ℤ<sup>+</sup> </p>
+          <h2 className={styles.lobby}>Lobby</h2>
+          <Link href = "/game">
+              <button className={styles.card} id="host-lobbyButton" onClick={this.hostLobby} >Host Game</button>
+          </Link>
+          <div>OR</div>
+          <form>
+            <input type="text" 
+            placeholder="Enter lobby code" 
+            id="lobbyCodeInput"
+            onChange={this.getLobbyCode}>
+            </input>
+          </form>
+          <Link href = "/game">
+              <button className={styles.card} id="join-lobbyButton" onClick={this.joinLobby} >Join Game</button>
+          </Link>
+        </main>
         <style jsx>{`
           .seoker{
               width:80vw;
@@ -88,9 +103,11 @@ export default function Home() {
               color: #000000;
               border-color: #000000;
           }
-          `
-        }</style>
+          `}
+        </style>
       </div>
-  )
+    )
+  }
 }
+
 
