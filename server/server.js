@@ -9,13 +9,12 @@ const dev = process.env.NODE_ENV !== 'production'
 const nextApp = next({ dev })
 const nextHandler = nextApp.getRequestHandler()
 
-
 // game objects/stuff
 
 class Lobby {
   constructor(id) {
     this.players = []
-    this.lobbyId = id 
+    this.lobbyId = id //0 if not made yet?
     this.host = "" //blank if no host is set yet
 
     //add player to this lobby
@@ -46,7 +45,6 @@ class Lobby {
       }
       if(this.players.length == 0) {
         this.host = ""
-        //needs code to shutdown lobby
       }
 
     }
@@ -62,127 +60,88 @@ class Lobby {
 }
 
 class Player {
-  constructor(id,displayName,socketId) {
-    this.displayName = displayName;
-    this.playerId = id;                //same as socket?
-    this.socketId = socketId;
-    this.lobbyId = lobbyId;            //the lobby they are connected to
+  constructor(id,displayName) {
+    this.displayName = displayName
+    this.playerId = id
+    this.chips = 0
+    this.cards = []
+    this.activeCard = "" //the card they have played for the round
 
+    //set the played card as active and subtract the bet amount from chips
+    this.playCard = function (card,bet) {
+      this.activeCard = card
+      this.chips -= bet
+    }
   }
 }
 
-//list of active lobbies
-var activeGameLobbies = [];
+class Game {
+  constructor(id,players) {
+    this.id = id
+    this.players = players
+    this.cards = []
+    this.dealer = players[Math.floor(Math.random() * this.players.length)]
+    this.potValue = 0
+    this.activePlayerIndex = players.indexOf(this.dealer)
+  }
+}
 
-//next free lobby id
-var nextLobbyId = 1;
 
-// socket.io server-side
+
+//just one game lobby for now
+const gameLobby = new Lobby(1)
+
+// socket.io server
 io.on('connection', (socket) => {
-<<<<<<< HEAD
   var player = new Player(socket.id,"Default name")
-=======
->>>>>>> e18f7e303fb9336e713ce0ff5a49b8f1700fb70b
 
-  console.log(socket.id + ' connected');
-
-  /*
-  args[0]: playerId
-  args[1]: display name
-
-  sends a join-lobby signal to the client who sent this
-  */
-  socket.on('host-lobby', (...args) => {
-    lobbyCode = "";
-    for(var i=0;i<6;i++) {
-      r1 = Math.floor(Math.random() * 2);
-      if(r1 == 0) {
-        r2 = Math.floor(Math.random() * 10);
-      }
-      else {
-        r2 = String.fromCharCode(Math.floor(Math.random() * 25) + 66);
-      }
-      lobbyCode += r2
-    }
-
-    player = new Player(args[0],args[1],socket.id);
-    lobby = new Lobby(lobbyCode);
-    lobby.joinLobby(player);
-    activeGameLobbies.push(lobby);
-
-    socket.emit("join-lobby", lobby);
-
-  })
-
-  /*
-  args[0]: playerId
-  args[1]: display name
-  args[2]: lobby code
-
-  */
-  socket.on('join-lobby', (...args) => {
-
-    lobby = null
-
-    for(var i=0;i<activeGameLobbies.length;i++) {
-      if(activeGameLobbies[i].lobbyId == args[2]) {
-        lobby = activeGameLobbies[i];
-      }
-    }
-
-    if(lobby == null) {
-      console.log('Error, user' + args[0] + 'tried to join a non-existent lobby');
-      socket.emit("lobby-not-found");
-    }
-
-    player = new Player(args[0],"" + args[1],socket.id)  
-    lobby.joinLobby(player)
-
-    socket.emit("join-lobby", lobby);
-
-    for(var i=0;i<lobby.players.length;i++) {
-      if(lobby.players[i].playerId != args[0]) {
-        io.sockets.socket(lobby.players[i].socketId).emit("lobby-player-joined", lobby);
-      }
-    }
-
-  })
+  gameLobby.joinLobby(player)
+  socket.emit("client-connection", gameLobby);
+  socket.broadcast.emit("client-connection", gameLobby);
 
   socket.on('disconnect', () => {
       console.log(socket.id + ' disconnected');
-      
-      //find the lobby they were in
-      for(var i=0;i<activeGameLobbies.length;i++) {
-        for(var j=0;j<activeGameLobbies[i].players.length;j++) {
-          if(activeGameLobbies[i].players[j].socketId == socket.io) {
-            player = activeGameLobbies[i].players[j]
-            lobby = activeGameLobbies[i]
-
-            lobby.leaveLobby(player)
-
-            for(var k=0;k<lobby.players.length;k++) {
-              if(lobby.players[k].playerId != player.playerId) {
-                io.sockets.socket(lobby.players[i].socketId).emit("lobby-player-left", lobby);
-              }
-            }
-
-          }
-        } 
+      if(gameLobby.isConnected(socket.id)) {
+        gameLobby.leaveLobby(socket.id)
+        socket.broadcast.emit("client-disconnect", gameLobby);
       }
   })
 
+  //host sends this to signal start of the game
+  socket.on('request-start-game', (...args) => {
+    if(args[0] != gameLobby.lobbyId) {
+      console.log('error, no lobby given');
+      return
+    }
+
+    console.log('Starting game for lobby ' + args[0]);
+    game = new Game(args[0],gameLobby.players)
+
+    //tell everyone the game is starting
+    socket.emit("game-start", game);
+    socket.broadcast.emit("game-start", game);
+  })
+
+  //sent after a player makes their turn
+  socket.on('turn-played', (...args) => {
+    game = args[0]
+    player = args[1]
+    //needs a check for if were back at the dealer (for next time)
     
+
+  })
+
 });
 
 
 nextApp.prepare().then(() => {
 
   app.get('*', (req, res) => {
-    return nextHandler(req, res);
+    return nextHandler(req, res)
   })
 
   server.listen(port, err => {
     if (err) throw err
-    console.log(`> Ready on http://localhost:${port}`);
+    console.log(`> Ready on http://localhost:${port}`)
   })
 })
