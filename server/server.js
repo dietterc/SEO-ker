@@ -22,9 +22,13 @@ class Lobby {
     this.joinLobby = function (player) {
       if(this.players.length <= 8) {
         this.players.push(player)
-        player.lobbyId = lobbyId
-        console.log(player.displayName + ' joined the lobby (' + player.playerId + ')')
-        
+        player.lobbyId = this.lobbyId
+        console.log(player.displayName + ' joined lobby ' + this.lobbyId + ' (' + player.playerId + ')')
+        console.log("Players now in lobby:")
+        for(var i=0;i<this.players.length;i++) {
+          console.log(this.players[i])
+        }
+
         //if they are the first to join set them as the host
         if(this.players.length == 1){
           this.host = player
@@ -39,7 +43,14 @@ class Lobby {
     this.leaveLobby = function (player) {
       var index = this.players.indexOf(player)
       this.players.splice(index, 1)
-      console.log(player.displayName + ' left the lobby (' + player.playerId + ')')
+      console.log(player.displayName + ' left lobby ' + this.lobbyId + ' (' + player.playerId + ')')
+
+      if(this.players.length != 0) {
+        console.log("Players now in lobby:")
+        for(var i=0;i<this.players.length;i++) {
+          console.log(this.players[i])
+        }
+      }
 
       //if only one player remains set them to be the host
       if(this.players.length == 1) {
@@ -47,7 +58,9 @@ class Lobby {
       }
       if(this.players.length == 0) {
         this.host = ""
-        //needs code to shutdown lobby
+        //code to shutdown lobby
+        console.log("lobby " + + " deleted")
+        this.activeGameLobbies.splice(this, 1)
       }
 
     }
@@ -106,8 +119,11 @@ io.on('connection', (socket) => {
     lobby.joinLobby(player);
     activeGameLobbies.push(lobby);
 
-    socket.emit("host-lobby", lobby);
-    console.log("recieved host-lobby signal");
+    socket.emit("join-lobby", lobby);
+    console.log("recieved host-lobby signal\nActive lobbies:");
+    for(var i=0;i<activeGameLobbies.length;i++) {
+      console.log(activeGameLobbies[i].lobbyId);
+    }
 
   })
 
@@ -127,8 +143,9 @@ io.on('connection', (socket) => {
     }
 
     if(lobby == null) {
-      console.log('Error, user' + args[0] + 'tried to join a non-existent lobby');
+      console.log('Error, user' + args[0] + ' tried to join a non-existent lobby');
       socket.emit("lobby-not-found");
+      return
     }
 
     player = new Player(args[0],"" + args[1],socket.id)  
@@ -138,11 +155,11 @@ io.on('connection', (socket) => {
 
     for(var i=0;i<lobby.players.length;i++) {
       if(lobby.players[i].playerId != args[0]) {
-        io.sockets.socket(lobby.players[i].socketId).emit("lobby-player-joined", lobby);
+        io.to(lobby.players[i].socketId).emit("lobby-player-joined", lobby);
       }
     }
 
-    console.log("recieved join-lobby signal");
+    console.log("received join-lobby signal");
 
   })
 
@@ -152,17 +169,16 @@ io.on('connection', (socket) => {
       //find the lobby they were in
       for(var i=0;i<activeGameLobbies.length;i++) {
         for(var j=0;j<activeGameLobbies[i].players.length;j++) {
-          if(activeGameLobbies[i].players[j].socketId == socket.io) {
+          if(activeGameLobbies[i].players[j].socketId == socket.id) {
             player = activeGameLobbies[i].players[j]
             lobby = activeGameLobbies[i]
 
-            lobby.leaveLobby(player)
-
             for(var k=0;k<lobby.players.length;k++) {
               if(lobby.players[k].playerId != player.playerId) {
-                io.sockets.socket(lobby.players[i].socketId).emit("lobby-player-left", lobby);
+                io.to(lobby.players[i].socketId).emit("lobby-player-left", lobby);
               }
             }
+            lobby.leaveLobby(player)
 
           }
         } 

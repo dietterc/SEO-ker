@@ -10,24 +10,6 @@ socket.on("connect", () => {
   console.log("Client " + socket.id); 
 });
 
-socket.on("client-connection", (...args) => {
-  var lobby = args[0]
-
-  var list = ""
-  for(var i = 0; i<lobby.players.length;i++){
-      list += " " + lobby.players[i];
-  }
-    console.log("Clients connected: " + list); 
-});
-
-socket.on("client-disconnect", (...args) => {
-  var lobby = args[0]
-  var list = ""
-  for(var i = 0; i<lobby.players.length;i++){
-    list += " " + lobby.players[i].playerId
-  }
-  console.log("Client disconnected. New lobby: " + list); 
-});
 
 export default class Home extends React.Component{
   
@@ -42,7 +24,7 @@ export default class Home extends React.Component{
   }
 
   hostLobby(){
-    socket.emit('host-lobby');
+    socket.emit('host-lobby',"playerId2","Display Name");
   }
 
   joinLobby(){
@@ -50,7 +32,7 @@ export default class Home extends React.Component{
       console.log("no code");
       return;
     }
-    socket.emit('join-lobby', this.state.lobbyCode);
+    socket.emit('join-lobby', "testId","Players Name" ,this.state.lobbyCode);
     console.log("join clicked")
   }
 
