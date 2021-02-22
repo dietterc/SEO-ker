@@ -17,26 +17,6 @@ export default function Game() {
                     <div className={styles.card}></div>
             </div>
         </main>
-        <footer className={styles.footer}>
-            <p>
-                <a
-                    href="https://github.com/dietterc/SEO-ker/wiki/Rules"
-                    target="_blank"
-                >
-                    Rules: {'\t'}
-                    <img src="/Rule_Book.png" alt="Rule Book" className={styles.logo} />
-                </a>
-
-                <a
-                    href="https://github.com/dietterc/SEO-ker"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Repo: {' '}
-                    <img src="/GitHub_Logo.png" alt="Repo" className={styles.logo} />
-                </a>
-            </p>
-        </footer>
             <style jsx>{
                 `
                 .hand{

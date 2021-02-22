@@ -6,30 +6,7 @@ const io = require("socket.io-client");
 const socket = io();
 
 
-socket.on("connect", () => {
-  console.log("Client " + socket.id); 
-});
-
-socket.on("client-connection", (...args) => {
-  var lobby = args[0]
-
-  var list = ""
-  for(var i = 0; i<lobby.players.length;i++){
-      list += " " + lobby.players[i];
-  }
-    console.log("Clients connected: " + list); 
-});
-
-socket.on("client-disconnect", (...args) => {
-  var lobby = args[0]
-  var list = ""
-  for(var i = 0; i<lobby.players.length;i++){
-    list += " " + lobby.players[i].playerId
-  }
-  console.log("Client disconnected. New lobby: " + list); 
-});
-
-export default class Home extends React.Component{
+class LobbyScreen extends React.Component{
   
   constructor(props){
     super(props);
@@ -121,4 +98,151 @@ export default class Home extends React.Component{
   }
 }
 
+class LoginScreen extends React.Component{
+  constructor(){
+      super();
+      this.state = {
+          name: "Login"
+      };
+  }
 
+  render(){
+      return(
+          <div className={styles.container}>
+              <Head>
+              <title>SEO-ker - Login</title>
+              <link rel="icon" href="/favicon.ico" />
+              </Head>
+      
+              <main className={styles.main}>
+              <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
+              
+              <p className={styles.description}>By: Team n, n ∈ ℤ<sup>+</sup> </p>
+              <div>
+              <label htmlFor="username"><b>Username:</b></label>
+              <input type="text" placeholder="Enter Username" name="username" required/>
+              </div>
+              <div>
+              <button type="submit" className="login">Login</button>
+              <button className="register">Register</button>
+              </div>    
+              </main>
+      
+              <footer className={styles.footer}>
+              <p>
+              <a
+                  href="https://github.com/dietterc/SEO-ker/wiki/Rules"
+                  target="_blank"
+              >
+                  Rules: {'\t'}
+                  <img src="/Rule_Book.png" alt="Rule Book" className={styles.logo} />
+              </a>
+              
+              <a
+                  href="https://github.com/dietterc/SEO-ker"
+                  target="_blank"
+                  rel="noopener noreferrer"
+              >
+                  Repo: {' '}
+                  <img src="/GitHub_Logo.png" alt="Repo" className={styles.logo} />
+              </a>
+              </p>
+              </footer>
+      
+              <style jsx>{`
+              input[type=text]{
+                  width: 100%;
+                  padding: 12px 20px;
+                  margin: 8px 0;
+                  display: inline-block;
+                  border: 1px solid #ddd;
+                  box-sizing: border-box;
+              }
+              .register,.login {
+                  margin: 1rem;
+                  padding: 1.5rem;
+                  text-align: left;
+                  border-radius: 10px;
+                  cursor: pointer;
+                  transition: color 0.15s ease, border-color 0.15s ease;
+              }
+              .register {
+                  background-color: lightblue; /*light blue*/
+                  color: #1d62d1;
+              }
+              
+              .register:hover {
+                  background-color: #2d9acc;
+                  color: lightblue;
+              }
+              
+              .login{
+                  color: #8e8e8e;
+              }
+              .login:hover{
+                  color:black;
+                  background-color:lightgrey;
+              }
+              
+              `
+              }</style>
+        </div>
+      );
+  }
+}
+
+socket.on("connect", () => {
+  console.log("Client " + socket.id); 
+});
+
+socket.on("client-connection", (...args) => {
+  var lobby = args[0]
+
+  var list = ""
+  for(var i = 0; i<lobby.players.length;i++){
+      list += " " + lobby.players[i];
+  }
+    console.log("Clients connected: " + list); 
+});
+
+socket.on("client-disconnect", (...args) => {
+  var lobby = args[0]
+  var list = ""
+  for(var i = 0; i<lobby.players.length;i++){
+    list += " " + lobby.players[i].playerId
+  }
+  console.log("Client disconnected. New lobby: " + list); 
+});
+
+export default class Home extends React.Component{
+  constructor(){
+    super();
+
+    this.state = {
+      name: "Home",
+      loggedIn: false,
+      showLogin: false,
+      showLobby: false
+    };
+
+    this.hideComponent = this.hideComponent.bind(this);
+  }
+
+  hideComponent(name){
+    switch(name){
+      case "showLogin":
+        this.setState({showLogin: !this.showLogin});
+        break;
+      case "showLobby":
+        this.setState({showLogin: !this.showLogin});
+        break;
+      default: 
+        null;
+    }
+  }
+
+  render(){
+    const { showLogin, showLobby } = this.state;
+    
+  }
+}
