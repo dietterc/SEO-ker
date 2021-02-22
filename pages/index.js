@@ -19,7 +19,7 @@ class LobbyScreen extends React.Component{
   }
 
   hostLobby(){
-    socket.emit('host-lobby');
+    socket.emit('host-lobby',"playerId2","Display Name");
   }
 
   joinLobby(){
@@ -27,7 +27,7 @@ class LobbyScreen extends React.Component{
       console.log("no code");
       return;
     }
-    socket.emit('join-lobby', this.state.lobbyCode);
+    socket.emit('join-lobby', "testId","Players Name" ,this.state.lobbyCode);
     console.log("join clicked")
   }
 
