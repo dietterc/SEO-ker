@@ -70,10 +70,14 @@ export default class Home extends React.Component{
         <main className={styles.main}>
           <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
           
-          <p className={styles.description}>By: Team n, n ∈ ℤ<sup>+</sup> </p>
+          <p className={styles.description} >By: Team n, n ∈ ℤ<sup>+</sup> </p>
+          
           <h2 className={styles.lobby}>Lobby</h2>
           <Link href = "/game">
-              <button className={styles.card} id="host-lobbyButton" onClick={this.hostLobby} >Host Game</button>
+              <button className={styles.card} 
+              id="host-lobbyButton" 
+              onClick={this.hostLobby} 
+              >Host Game</button>
           </Link>
           <div>OR</div>
           <form>
@@ -84,7 +88,10 @@ export default class Home extends React.Component{
             </input>
           </form>
           <Link href = "/game">
-              <button className={styles.card} id="join-lobbyButton" onClick={this.joinLobby} >Join Game</button>
+              <button className={styles.card} 
+              id="join-lobbyButton" 
+              onClick={this.joinLobby} 
+              >Join Game</button>
           </Link>
         </main>
         <style jsx>{`
