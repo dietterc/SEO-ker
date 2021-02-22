@@ -37,17 +37,21 @@ export default class Home extends React.Component{
       lobbyCode: ""
     };
     this.getLobbyCode = this.getLobbyCode.bind(this);
+    this.hostLobby = this.hostLobby.bind(this);
+    this.joinLobby = this.joinLobby.bind(this);
   }
-
-  
 
   hostLobby(){
     socket.emit('host-lobby');
-    console.log("host clicked");
   }
+
   joinLobby(){
-    //const code = lobbyCodeInput.value;
+    if(this.state.lobbyCode == null){
+      console.log("no code");
+      return;
+    }
     socket.emit('join-lobby', this.state.lobbyCode);
+    console.log("join clicked")
   }
 
   getLobbyCode = event =>{
