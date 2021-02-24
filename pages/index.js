@@ -4,7 +4,6 @@ import styles from '../styles/Home.module.css';
 import LoginInput from "../components/login-input.js";
 import LobbyInput from "../components/lobby-input.js"
 import Link from 'react';
-import Login from '../components/login-input.js';
 const io = require("socket.io-client");
 const socket = io();
 
@@ -13,19 +12,20 @@ socket.on("connect", () => {
 });
 
 
-export default class LoginScreen extends React.Component{
+export default class Home extends React.Component{
 
   constructor(props){
     super(props);
     this.state = {
       username: "",
       loggedIn: false,
+      inLobby: false,
       lobbyCode: "",
       lobbyPlayerList: ""   //temp- for testing 
     };
     this.updateUsername = this.updateUsername.bind(this);
     this.onJoin = this.onJoin.bind(this);
-    this.hostLobby = this.hostLobby.bind(this);
+    this.onHost = this.onHost.bind(this);
     
     //this.socket = socket;
   }
@@ -45,7 +45,6 @@ export default class LoginScreen extends React.Component{
 
 
     socket.on("lobby-player-joined", (lobby) => {
-      this.setState({lobbyCode: lobby.lobbyId})
       let lobbyList = "Players connected: (temp)\n"
   
       for(var i=0;i<lobby.players.length;i++) {
@@ -56,7 +55,6 @@ export default class LoginScreen extends React.Component{
     });
 
     socket.on("lobby-player-left", (lobby) => {
-      this.setState({lobbyCode: lobby.lobbyId})
       let lobbyList = "Players connected: (temp)\n"
   
       for(var i=0;i<lobby.players.length;i++) {
@@ -82,12 +80,34 @@ export default class LoginScreen extends React.Component{
       console.log("no code");
       return;
     }
-    this.setState({lobbyCode: str})
-    socket.emit('join-lobby', "testId",this.state.username ,str);
+    this.setState({lobbyCode: str, inLobby: true})
+    socket.emit('join-lobby', "testId",this.state.username ,this.state.lobbyCode);
   }
 
-  hostLobby(){
+  onHost(){
     socket.emit('host-lobby',"playerId2",this.state.username);
+    this.setState({inLobby: true});
+  }
+
+  //handles which react component is to be loaded under the logo
+  activeScreen(){
+    if(!(this.state.loggedIn || this.state.inLobby)){
+      return <LoginInput onSubmit={this.updateUsername}/>
+    }
+    else if(this.state.loggedIn && !this.state.inLobby){
+      return <LobbyInput username={this.state.username} onJoin={this.onJoin} onHost={this.onHost}/>
+    }
+    else if(this.state.loggedIn && this.state.inLobby){
+      
+      return (
+        <div>
+          <h2>Lobby Code: {this.state.lobbyCode}</h2>
+          <h2>{this.state.lobbyPlayerList}</h2>
+        </div>
+      );
+      
+    }
+    return null;
   }
     
 
@@ -102,11 +122,7 @@ export default class LoginScreen extends React.Component{
         <main className={styles.main}>
           <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
           <p className={styles.description}>by n ∈ ℤ<sup>+</sup> </p>
-
-          <h2>Lobby Code: {this.state.lobbyCode}</h2>
-          <h2>{this.state.lobbyPlayerList}</h2>
-
-          {!this.state.loggedIn ? <LoginInput onSubmit={this.updateUsername}/> : <LobbyInput username={this.state.username} onJoin={this.onJoin} onHost={this.hostLobby}/>}
+          {this.activeScreen()}
         </main>
   
         <footer className={styles.footer}>
