@@ -81,7 +81,7 @@ export default class Home extends React.Component{
       return;
     }
     this.setState({lobbyCode: str, inLobby: true})
-    socket.emit('join-lobby', "testId",this.state.username ,this.state.lobbyCode);
+    socket.emit('join-lobby', "testId", this.state.username, this.state.lobbyCode);
   }
 
   onHost(){

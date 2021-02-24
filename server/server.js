@@ -160,7 +160,7 @@ io.on('connection', (socket) => {
     }
 
     if(lobby == null) {
-      console.log('Error, user' + args[0] + ' tried to join a non-existent lobby');
+      console.log('Error, user' + args[1] + ' tried to join a non-existent lobby');
       socket.emit("lobby-not-found");
       return
     }
