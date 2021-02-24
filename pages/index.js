@@ -27,14 +27,13 @@ export default class LoginScreen extends React.Component{
     this.onJoin = this.onJoin.bind(this);
     this.hostLobby = this.hostLobby.bind(this);
     
-    this.socket = socket;
+    //this.socket = socket;
   }
 
   componentDidMount() {
-    //PUT INCOMING MESSAGES HERE!!1!
+    //PUT INCOMING MESSAGES HERE
 
     socket.on("join-lobby", (lobby) => {
-      lobby.lobbyId
       this.setState({lobbyCode: lobby.lobbyId})
       let lobbyList = "Players connected: (temp)\n"
 
@@ -46,7 +45,6 @@ export default class LoginScreen extends React.Component{
 
 
     socket.on("lobby-player-joined", (lobby) => {
-      lobby.lobbyId
       this.setState({lobbyCode: lobby.lobbyId})
       let lobbyList = "Players connected: (temp)\n"
   
@@ -58,7 +56,6 @@ export default class LoginScreen extends React.Component{
     });
 
     socket.on("lobby-player-left", (lobby) => {
-      lobby.lobbyId
       this.setState({lobbyCode: lobby.lobbyId})
       let lobbyList = "Players connected: (temp)\n"
   
