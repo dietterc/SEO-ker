@@ -12,24 +12,6 @@ socket.on("connect", () => {
   console.log("Client " + socket.id); 
 });
 
-socket.on("client-connection", (...args) => {
-  var lobby = args[0]
-
-  var list = ""
-  for(var i = 0; i<lobby.players.length;i++){
-      list += " " + lobby.players[i];
-  }
-    console.log("Clients connected: " + list); 
-});
-
-socket.on("client-disconnect", (...args) => {
-  var lobby = args[0]
-  var list = ""
-  for(var i = 0; i<lobby.players.length;i++){
-    list += " " + lobby.players[i].playerId
-  }
-  console.log("Client disconnected. New lobby: " + list); 
-});
 
 export default class LoginScreen extends React.Component{
 
@@ -43,7 +25,20 @@ export default class LoginScreen extends React.Component{
     this.updateUsername = this.updateUsername.bind(this);
     this.onJoin = this.onJoin.bind(this);
     this.hostLobby = this.hostLobby.bind(this);
+    
+    this.socket = socket;
   }
+
+  componentDidMount() {
+    //PUT INCOMING MESSAGES HERE!!1!
+
+    socket.on("join-lobby", (lobby) => {
+      lobby.lobbyId
+      this.setState({lobbyCode: lobby.lobbyId})
+
+    });
+  }
+  
 
   updateUsername(str){
     this.setState({username: str}, function(){
@@ -78,6 +73,9 @@ export default class LoginScreen extends React.Component{
         <main className={styles.main}>
           <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
           <p className={styles.description}>by n ∈ ℤ<sup>+</sup> </p>
+
+          <h2>Lobby Code: {this.state.lobbyCode}</h2>
+
           {!this.state.loggedIn ? <LoginInput onSubmit={this.updateUsername}/> : <LobbyInput username={this.state.username} onJoin={this.onJoin} onHost={this.hostLobby}/>}
         </main>
   
@@ -102,7 +100,8 @@ export default class LoginScreen extends React.Component{
           </p>
         </footer>
   
-      </div>
-    );
-  }
+        </div>
+      );
+    }
+  
 }

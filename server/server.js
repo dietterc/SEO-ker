@@ -58,9 +58,6 @@ class Lobby {
       }
       if(this.players.length == 0) {
         this.host = ""
-        //code to shutdown lobby
-        console.log("lobby " + + " deleted")
-        this.activeGameLobbies.splice(this, 1)
       }
 
     }
@@ -180,6 +177,11 @@ io.on('connection', (socket) => {
             }
             lobby.leaveLobby(player)
 
+            if(lobby.players.length == 0) {
+              //code to shutdown lobby (remove any pointers to it, js should handle the rest)
+              console.log("lobby " + lobby.lobbyId + " deleted")
+              this.activeGameLobbies.splice(lobby, 1)
+            }
           }
         } 
       }
