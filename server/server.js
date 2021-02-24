@@ -194,11 +194,10 @@ io.on('connection', (socket) => {
 
             for(var k=0;k<lobby.players.length;k++) {
               if(lobby.players[k].playerId != player.playerId) {
-                if(lobby.players[i].socketId != null) {
-                  io.to(lobby.players[i].socketId).emit("lobby-player-left", lobby);
+                if(lobby.players[k] != null && lobby.players[k].socketId != null) {
+                  io.to(lobby.players[k].socketId).emit("lobby-player-left", lobby);
                 }
               }
-              return
             }
 
             if(lobby.players.length == 0) {

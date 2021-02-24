@@ -24,8 +24,10 @@ export default class Home extends React.Component{
       lobbyPlayerList: ""   //temp- for testing 
     };
     this.updateUsername = this.updateUsername.bind(this);
+    this.updateLobbyCode = this.updateLobbyCode.bind(this);
     this.onJoin = this.onJoin.bind(this);
     this.onHost = this.onHost.bind(this);
+    
     
     //this.socket = socket;
   }
@@ -34,7 +36,7 @@ export default class Home extends React.Component{
     //PUT INCOMING MESSAGES HERE
 
     socket.on("join-lobby", (lobby) => {
-      this.setState({lobbyCode: lobby.lobbyId})
+      this.setState({lobbyCode: lobby.lobbyId, inLobby: true})
       let lobbyList = "Players connected: (temp)\n"
 
       for(var i=0;i<lobby.players.length;i++) {
@@ -43,8 +45,13 @@ export default class Home extends React.Component{
       this.setState({lobbyPlayerList: lobbyList.split('\n').map(str => <p>{str}</p>)});
     });
 
+    socket.on("lobby-not-found", () => {
+      this.setState({inLobby: false});
+    });
+
 
     socket.on("lobby-player-joined", (lobby) => {
+      this.setState({lobbyCode: lobby.lobbyId})
       let lobbyList = "Players connected: (temp)\n"
   
       for(var i=0;i<lobby.players.length;i++) {
@@ -55,6 +62,7 @@ export default class Home extends React.Component{
     });
 
     socket.on("lobby-player-left", (lobby) => {
+      this.setState({lobbyCode: lobby.lobbyId})
       let lobbyList = "Players connected: (temp)\n"
   
       for(var i=0;i<lobby.players.length;i++) {
@@ -75,13 +83,17 @@ export default class Home extends React.Component{
     });
   }
 
-  onJoin(str){
-    if(str == null){
-      console.log("no code");
-      return;
-    }
-    this.setState({lobbyCode: str, inLobby: true})
-    socket.emit('join-lobby', "testId", this.state.username, this.state.lobbyCode);
+  updateLobbyCode(str){
+    this.setState({lobbyCode: str}, function(){
+      if(this.state.lobbyCode.replace(/\s+/g, "") !== ""){
+        this.onJoin();
+      }
+    });
+  }
+
+
+  onJoin(){
+    socket.emit('join-lobby', "testId",this.state.username ,this.state.lobbyCode);
   }
 
   onHost(){
@@ -95,7 +107,7 @@ export default class Home extends React.Component{
       return <LoginInput onSubmit={this.updateUsername}/>
     }
     else if(this.state.loggedIn && !this.state.inLobby){
-      return <LobbyInput username={this.state.username} onJoin={this.onJoin} onHost={this.onHost}/>
+      return <LobbyInput username={this.state.username} onJoin={this.updateLobbyCode} onHost={this.onHost}/>
     }
     else if(this.state.loggedIn && this.state.inLobby){
       
