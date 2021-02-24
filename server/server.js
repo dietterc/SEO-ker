@@ -10,8 +10,13 @@ const nextApp = next({ dev })
 const nextHandler = nextApp.getRequestHandler()
 
 
-// game objects/stuff
+//list of active lobbies
+var activeGameLobbies = [];
+//assign player ID's based on an incrementing variable for now, will change to usernames later
+var nextPlayerId = 0;
 
+
+//----------objects----------
 class Lobby {
   constructor(id) {
     this.players = []
@@ -81,13 +86,37 @@ class Player {
   }
 }
 
-//list of active lobbies
-var activeGameLobbies = [];
+function generateCode() {
+  var codeFound = false
+  var code = "";
 
-//next free lobby id
-var nextLobbyId = 1;
+  while(!codeFound) {
+    code = "";
+    for(var i=0;i<6;i++) {
+      r1 = Math.floor(Math.random() * 2);
+      if(r1 == 0) {
+        r2 = Math.floor(Math.random() * 10);
+      }
+      else {
+        r2 = String.fromCharCode(Math.floor(Math.random() * 25) + 66);
+      }
+      code += r2
+    }
+    codeFound = true;
+    for(var i=0;i<activeGameLobbies.length;i++) {
+      if(activeGameLobbies[i].lobbyId == code) {
+        codeFound = false;
+      }
+    }
+  }
 
-// socket.io server-side
+  return code;
+
+}
+
+
+
+//----------socket.io server-side----------
 io.on('connection', (socket) => {
 
   console.log(socket.id + ' connected');
@@ -99,25 +128,15 @@ io.on('connection', (socket) => {
   sends a join-lobby signal to the client who sent this
   */
   socket.on('host-lobby', (...args) => {
-    var lobbyId = "";
-    for(var i=0;i<6;i++) {
-      r1 = Math.floor(Math.random() * 2);
-      if(r1 == 0) {
-        r2 = Math.floor(Math.random() * 10);
-      }
-      else {
-        r2 = String.fromCharCode(Math.floor(Math.random() * 25) + 66);
-      }
-      lobbyId += r2
-    }
-
-    player = new Player(args[0],args[1],socket.id);
+    var lobbyId = generateCode();
+    
+    player = new Player(nextPlayerId++,args[1],socket.id);
     lobby = new Lobby(lobbyId);
     lobby.joinLobby(player);
     activeGameLobbies.push(lobby);
 
     socket.emit("join-lobby", lobby);
-    console.log("recieved host-lobby signal\nActive lobbies:");
+    console.log("received host-lobby signal\nActive lobbies:");
     for(var i=0;i<activeGameLobbies.length;i++) {
       console.log(activeGameLobbies[i].lobbyId);
     }
@@ -132,9 +151,10 @@ io.on('connection', (socket) => {
   socket.on('join-lobby', (...args) => {
 
     lobby = null
+    let code = args[2].toUpperCase().trim();
 
     for(var i=0;i<activeGameLobbies.length;i++) {
-      if(activeGameLobbies[i].lobbyId == args[2]) {
+      if(activeGameLobbies[i].lobbyId == code) {
         lobby = activeGameLobbies[i];
       }
     }
@@ -145,7 +165,7 @@ io.on('connection', (socket) => {
       return
     }
 
-    player = new Player(args[0],"" + args[1],socket.id)  
+    player = new Player(nextPlayerId++,"" + args[1],socket.id)  
     lobby.joinLobby(player)
 
     socket.emit("join-lobby", lobby);
@@ -174,20 +194,20 @@ io.on('connection', (socket) => {
 
             for(var k=0;k<lobby.players.length;k++) {
               if(lobby.players[k].playerId != player.playerId) {
-                //bug here >:(
                 if(lobby.players[i].socketId != null) {
                   io.to(lobby.players[i].socketId).emit("lobby-player-left", lobby);
                 }
               }
+              return
             }
 
             if(lobby.players.length == 0) {
               //code to shutdown lobby (remove any pointers to it, js should handle the rest)
               console.log("lobby " + lobby.lobbyId + " deleted")
 
-              //bug here too :'(
-              this.activeGameLobbies.splice(lobby, 1)
+              activeGameLobbies.splice(lobby, 1)
             }
+            return
           }
         } 
       }

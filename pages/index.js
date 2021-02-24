@@ -27,11 +27,11 @@ export default class Home extends React.Component{
     this.onJoin = this.onJoin.bind(this);
     this.onHost = this.onHost.bind(this);
     
-    this.socket = socket;
+    //this.socket = socket;
   }
 
   componentDidMount() {
-    //PUT INCOMING MESSAGES HERE!!1!
+    //PUT INCOMING MESSAGES HERE
 
     socket.on("join-lobby", (lobby) => {
       this.setState({lobbyCode: lobby.lobbyId})
@@ -45,6 +45,7 @@ export default class Home extends React.Component{
 
 
     socket.on("lobby-player-joined", (lobby) => {
+      this.setState({lobbyCode: lobby.lobbyId})
       let lobbyList = "Players connected: (temp)\n"
   
       for(var i=0;i<lobby.players.length;i++) {
@@ -55,6 +56,7 @@ export default class Home extends React.Component{
     });
 
     socket.on("lobby-player-left", (lobby) => {
+      this.setState({lobbyCode: lobby.lobbyId})
       let lobbyList = "Players connected: (temp)\n"
   
       for(var i=0;i<lobby.players.length;i++) {
