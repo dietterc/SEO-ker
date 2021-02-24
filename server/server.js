@@ -12,6 +12,8 @@ const nextHandler = nextApp.getRequestHandler()
 
 //list of active lobbies
 var activeGameLobbies = [];
+//assign player ID's based on an incrementing variable for now, will change to usernames later
+var nextPlayerId = 0;
 
 
 //----------objects----------
@@ -128,7 +130,7 @@ io.on('connection', (socket) => {
   socket.on('host-lobby', (...args) => {
     var lobbyId = generateCode();
     
-    player = new Player(args[0],args[1],socket.id);
+    player = new Player(nextPlayerId++,args[1],socket.id);
     lobby = new Lobby(lobbyId);
     lobby.joinLobby(player);
     activeGameLobbies.push(lobby);
@@ -163,7 +165,7 @@ io.on('connection', (socket) => {
       return
     }
 
-    player = new Player(args[0],"" + args[1],socket.id)  
+    player = new Player(nextPlayerId++,"" + args[1],socket.id)  
     lobby.joinLobby(player)
 
     socket.emit("join-lobby", lobby);
