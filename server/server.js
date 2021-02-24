@@ -170,16 +170,22 @@ io.on('connection', (socket) => {
             player = activeGameLobbies[i].players[j]
             lobby = activeGameLobbies[i]
 
+            lobby.leaveLobby(player)
+
             for(var k=0;k<lobby.players.length;k++) {
               if(lobby.players[k].playerId != player.playerId) {
-                io.to(lobby.players[i].socketId).emit("lobby-player-left", lobby);
+                //bug here >:(
+                if(lobby.players[i].socketId != null) {
+                  io.to(lobby.players[i].socketId).emit("lobby-player-left", lobby);
+                }
               }
             }
-            lobby.leaveLobby(player)
 
             if(lobby.players.length == 0) {
               //code to shutdown lobby (remove any pointers to it, js should handle the rest)
               console.log("lobby " + lobby.lobbyId + " deleted")
+
+              //bug here too :'(
               this.activeGameLobbies.splice(lobby, 1)
             }
           }

@@ -20,7 +20,8 @@ export default class LoginScreen extends React.Component{
     this.state = {
       username: "",
       loggedIn: false,
-      lobbyCode: ""
+      lobbyCode: "",
+      lobbyPlayerList: ""   //temp- for testing 
     };
     this.updateUsername = this.updateUsername.bind(this);
     this.onJoin = this.onJoin.bind(this);
@@ -35,8 +36,39 @@ export default class LoginScreen extends React.Component{
     socket.on("join-lobby", (lobby) => {
       lobby.lobbyId
       this.setState({lobbyCode: lobby.lobbyId})
+      let lobbyList = "Players connected: (temp)\n"
 
+      for(var i=0;i<lobby.players.length;i++) {
+        lobbyList += lobby.players[i].displayName + "\n"
+      }
+      this.setState({lobbyPlayerList: lobbyList.split('\n').map(str => <p>{str}</p>)});
     });
+
+
+    socket.on("lobby-player-joined", (lobby) => {
+      lobby.lobbyId
+      this.setState({lobbyCode: lobby.lobbyId})
+      let lobbyList = "Players connected: (temp)\n"
+  
+      for(var i=0;i<lobby.players.length;i++) {
+        lobbyList += lobby.players[i].displayName + "\n"
+      }
+      this.setState({lobbyPlayerList: lobbyList.split('\n').map(str => <p>{str}</p>)});
+  
+    });
+
+    socket.on("lobby-player-left", (lobby) => {
+      lobby.lobbyId
+      this.setState({lobbyCode: lobby.lobbyId})
+      let lobbyList = "Players connected: (temp)\n"
+  
+      for(var i=0;i<lobby.players.length;i++) {
+        lobbyList += lobby.players[i].displayName + "\n"
+      }
+      this.setState({lobbyPlayerList: lobbyList.split('\n').map(str => <p>{str}</p>)});
+  
+    });
+
   }
   
 
@@ -75,6 +107,7 @@ export default class LoginScreen extends React.Component{
           <p className={styles.description}>by n ∈ ℤ<sup>+</sup> </p>
 
           <h2>Lobby Code: {this.state.lobbyCode}</h2>
+          <h2>{this.state.lobbyPlayerList}</h2>
 
           {!this.state.loggedIn ? <LoginInput onSubmit={this.updateUsername}/> : <LobbyInput username={this.state.username} onJoin={this.onJoin} onHost={this.hostLobby}/>}
         </main>
