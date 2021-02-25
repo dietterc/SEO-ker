@@ -21,7 +21,7 @@ export default class Home extends React.Component{
       loggedIn: false,
       inLobby: false,
       lobbyCode: "",
-      lobbyPlayerList: ""   //temp- for testing 
+      lobbyPlayerList: ""   
     };
     this.updateUsername = this.updateUsername.bind(this);
     this.updateLobbyCode = this.updateLobbyCode.bind(this);
@@ -37,12 +37,21 @@ export default class Home extends React.Component{
 
     socket.on("join-lobby", (lobby) => {
       this.setState({lobbyCode: lobby.lobbyId, inLobby: true})
-      let lobbyList = "Players connected: (temp)\n"
-
+      let lobbyList = ""
       for(var i=0;i<lobby.players.length;i++) {
-        lobbyList += lobby.players[i].displayName + "\n"
+        
+        lobbyList += lobby.players[i].displayName
+
+        if(lobby.host.playerId == lobby.players[i].playerId) {
+          lobbyList += " (host)"
+        }
+        
+        if(i != lobby.players.length - 1) {
+          lobbyList += "\n"
+        }
       }
-      this.setState({lobbyPlayerList: lobbyList.split('\n').map(str => <p>{str}</p>)});
+      
+      this.setState({lobbyPlayerList: lobbyList.split('\n').map(str => <div className={styles.playerName}>{str}</div>)});
     });
 
     socket.on("lobby-not-found", () => {
@@ -52,23 +61,41 @@ export default class Home extends React.Component{
 
     socket.on("lobby-player-joined", (lobby) => {
       this.setState({lobbyCode: lobby.lobbyId})
-      let lobbyList = "Players connected: (temp)\n"
+      let lobbyList = ""
   
       for(var i=0;i<lobby.players.length;i++) {
-        lobbyList += lobby.players[i].displayName + "\n"
+        
+        lobbyList += lobby.players[i].displayName
+
+        if(lobby.host.playerId == lobby.players[i].playerId) {
+          lobbyList += " (host)"
+        }
+        
+        if(i != lobby.players.length - 1) {
+          lobbyList += "\n"
+        }
       }
-      this.setState({lobbyPlayerList: lobbyList.split('\n').map(str => <p>{str}</p>)});
+      this.setState({lobbyPlayerList: lobbyList.split('\n').map(str => <div className={styles.playerName}>{str}</div>)});
   
     });
 
     socket.on("lobby-player-left", (lobby) => {
       this.setState({lobbyCode: lobby.lobbyId})
-      let lobbyList = "Players connected: (temp)\n"
+      let lobbyList = ""
   
       for(var i=0;i<lobby.players.length;i++) {
-        lobbyList += lobby.players[i].displayName + "\n"
+        
+        lobbyList += lobby.players[i].displayName
+
+        if(lobby.host.playerId == lobby.players[i].playerId) {
+          lobbyList += " (host)"
+        }
+        
+        if(i != lobby.players.length - 1) {
+          lobbyList += "\n"
+        }
       }
-      this.setState({lobbyPlayerList: lobbyList.split('\n').map(str => <p>{str}</p>)});
+      this.setState({lobbyPlayerList: lobbyList.split('\n').map(str => <div className={styles.playerName}>{str}</div>)});
   
     });
 
@@ -112,9 +139,9 @@ export default class Home extends React.Component{
     else if(this.state.loggedIn && this.state.inLobby){
       
       return (
-        <div>
-          <h2>Lobby Code: {this.state.lobbyCode}</h2>
-          <h2>{this.state.lobbyPlayerList}</h2>
+        <div >
+          <div className={styles.codeBox}> <h2>Lobby Code: <p className={styles.lobbyCode}>{this.state.lobbyCode}</p></h2> </div>
+          <div className={styles.playerList}> <h2>Players connected:</h2> <h2 className={styles.hostandjoin}> <p>{this.state.lobbyPlayerList}</p></h2> </div>
         </div>
       );
       

@@ -30,46 +30,30 @@ export default class LobbyInput extends React.Component{
   
     render(){
       return(
-        <div>
-            <h2 className={styles.lobby}>{this.state.username}</h2>
+        <div >
+            <h2 className={styles.hostandjoin}>Welcome, {this.state.username}.</h2>
+            <div className={styles.hostandjoin}>
+            <div>
             <button className={styles.card} 
               id="host-lobbyButton" 
               onClick={this.hostLobby} 
               >Host Game</button>
-            <div>OR</div>
-            <form>
+            <div><h2>OR</h2></div>
+            
+            <form >
               <input type="text" 
               placeholder="Enter lobby code" 
               id="lobbyCodeInput"
-              onChange={this.updateLobbyCode}>
+              onChange={this.updateLobbyCode}
+              className={styles.lobbyCodeBox}>
               </input>
             </form>
             <button className={styles.card} 
               id="join-lobbyButton" 
               onClick={this.joinLobby} 
               >Join Game</button>
-            <style jsx>{`
-            .seoker{
-                width:80vw;
-                max-width:800px;
-                object-fit:contain;
-            }
-            .playerInLobby{
-                width: 100%;
-                text-align: center;
-                color: #8c8c8c;
-                text-decoration: none;
-                border: 1px solid #8c8c8c;
-                transition: color 0.15s ease, border-color 0.15s ease;
-            }
-            .playerInLobby:hover,
-            .playerInLobby:focus,
-            .playerInLobby:active {
-                color: #000000;
-                border-color: #000000;
-            }
-            `}
-          </style>
+            </div>
+            </div>
         </div>
       )
     }

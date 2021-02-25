@@ -90,10 +90,11 @@
   margin: 1rem;
   flex-basis: 45%;
   padding: 1.5rem;
+  font-size: 25px;
   text-align: center;
-  color: #8e8e8e;
+  color: #000000;
   text-decoration: none;
-  border: 1px solid #eaeaea;
+  border: 2px solid #000000;
   border-radius: 10px;
   transition: color 0.15s ease, border-color 0.15s ease;
 }
@@ -105,14 +106,12 @@
     border: 1px solid #8c8c8c;
     transition: color 0.15s ease, border-color 0.15s ease;
 }
+
 .card:hover,
 .card:focus,
-.card:active,
-.playerInLobby:hover,
-.playerInLobby:focus,
-.playerInLobby:active{
-  color: #000000;
-  border-color: #000000;
+.card:active {
+  color: #0d2cb6;
+  border-color: #0d2cb6;
 }
 
 .card h3 {
@@ -126,9 +125,70 @@
   line-height: 1.5;
 }
 
+.hostandjoin {
+  text-align: center;
+}
+
+.lobbyCodeBox {
+  border: 2px solid black;
+  border-radius: 5px;
+  padding: .5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  width: 190px;
+  text-align: center;
+}
+
+.playerName {
+  margin: 1rem;
+  flex-basis: 45%;
+  padding: .5rem;
+  text-align: center;
+  color: #000000;
+  text-decoration: none;
+  border: 1px solid #000000;
+  border-radius: 10px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.playerName:hover,
+.playerName:focus,
+.playerName:active,
+.playerInLobby:hover,
+.playerInLobby:focus,
+.playerInLobby:active{
+  color: #0d2cb6;
+  border-color: #0d2cb6;
+}
+
+
 .logo {
   height: 1em;
+}
 
+.codeBox {
+  float:left;
+  margin: 50px;
+}
+
+.lobbyCode {
+  text-align: center;
+}
+
+.displayNameBox {
+  border: 2px solid black;
+  border-radius: 5px;
+  padding: .5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  width: 50%;
+  text-align: center;
+}
+
+.playerList {
+  float:right;
+  margin: 50px;
+  text-align: center;
 }
 
 @media (max-width: 600px) {
