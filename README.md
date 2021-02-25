@@ -19,3 +19,13 @@ Meeting Minutes can be found in the [Meetings](https://github.com/dietterc/SEO-k
 
 ### Rules
 Comprehensive rules for SEO-ker can be found [here](https://github.com/dietterc/SEO-ker/wiki/Rules).
+
+
+### Starting the app
+
+run this: (node, express, socket.io, and npm are required)
+
+```bash
+npm run dev
+```
+Runs on [http://localhost:3000](http://localhost:3000) 
