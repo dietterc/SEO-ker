@@ -26,5 +26,3 @@ jobs:
     - name: npm install
       run: npm install --production
     - run: npm ci
-    - run: npm run dev
-    - run: npm test
