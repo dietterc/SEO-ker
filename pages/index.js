@@ -28,8 +28,6 @@ export default class Home extends React.Component{
     this.onJoin = this.onJoin.bind(this);
     this.onHost = this.onHost.bind(this);
     
-    
-    //this.socket = socket;
   }
 
   componentDidMount() {

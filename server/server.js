@@ -19,24 +19,24 @@ var nextPlayerId = 0;
 //----------objects----------
 class Lobby {
   constructor(id) {
-    this.players = []
-    this.lobbyId = id 
-    this.host = "" //blank if no host is set yet
+    this.players = [];
+    this.lobbyId = id;
+    this.host = ""; //blank if no host is set yet
 
     //add player to this lobby
     this.joinLobby = function (player) {
       if(this.players.length <= 8) {
-        this.players.push(player)
-        player.lobbyId = this.lobbyId
-        console.log(player.displayName + ' joined lobby ' + this.lobbyId + ' (' + player.playerId + ')')
-        console.log("Players now in lobby:")
+        this.players.push(player);
+        player.lobbyId = this.lobbyId;
+        console.log(player.displayName + ' joined lobby ' + this.lobbyId + ' (' + player.playerId + ')');
+        console.log("Players now in lobby:");
         for(var i=0;i<this.players.length;i++) {
-          console.log(this.players[i])
+          console.log(this.players[i]);
         }
 
         //if they are the first to join set them as the host
         if(this.players.length == 1){
-          this.host = player
+          this.host = player;
         }
       }
       else {
