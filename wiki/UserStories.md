@@ -8,7 +8,7 @@
 * I am able to enter the site with a username I choose
 * High priority
 * Short
-![UML Sequence Diagram for 1.1.1](https://github.com/dietterc/SEO-ker/images/1-1-1_sequence_diagram)
+![UML Sequence Diagram for 1.1.1](https://github.com/dietterc/SEO-ker/images/1_1_1_sequence_diagram)
 ## [1.2]As a user, I want the application to remember me so I can get into a game quickly.
 * I am able to join a game quickly
 * Low priority
