@@ -184,7 +184,30 @@
   width: 50%;
   text-align: center;
 }
+.userNamePasswordBox{
+  border: 2px solid black;
+  border-radius: 5px;
+  padding: .5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  width: 50%;
+  text-align: center;
+  display: block;
+  margin: 5px;
+}
+.viewBtn{
+  margin: 1rem;
+  flex-basis: 45%;
+  padding: 1.5rem;
+  font-size: 25px;
+  text-align: center;
+  color: #000000;
+  text-decoration: none;
+  border: 2px solid #000000;
+  border-radius: 10px;
+  transition: color 0.15s ease, border-color 0.15s ease;
 
+}
 .playerList {
   float:right;
   margin: 50px;
