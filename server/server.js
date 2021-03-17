@@ -25,7 +25,7 @@ class Lobby {
 
     //add player to this lobby
     this.joinLobby = function (player) {
-      if(this.players.length <= 8) {
+      if(this.players.length <= 30) { //changed to 30 for live demo
         this.players.push(player);
         player.lobbyId = this.lobbyId;
         console.log(player.displayName + ' joined lobby ' + this.lobbyId + ' (' + player.playerId + ')');
@@ -165,7 +165,7 @@ io.on('connection', (socket) => {
       return
     }
 
-    player = new Player(nextPlayerId++,"" + args[1],socket.id)  
+    player = new Player(args[0],"" + args[1],socket.id)  
     lobby.joinLobby(player)
 
     socket.emit("join-lobby", lobby);
@@ -175,8 +175,6 @@ io.on('connection', (socket) => {
         io.to(lobby.players[i].socketId).emit("lobby-player-joined", lobby);
       }
     }
-
-    console.log("received join-lobby signal");
 
   })
 
