@@ -165,7 +165,7 @@ io.on('connection', (socket) => {
       return
     }
 
-    player = new Player(args[0],"" + args[1],socket.id)  
+    player = new Player(nextPlayerId++,"" + args[1],socket.id)  
     lobby.joinLobby(player)
 
     socket.emit("join-lobby", lobby);
@@ -175,6 +175,8 @@ io.on('connection', (socket) => {
         io.to(lobby.players[i].socketId).emit("lobby-player-joined", lobby);
       }
     }
+
+    console.log("received join-lobby signal");
 
   })
 
