@@ -212,8 +212,55 @@ io.on('connection', (socket) => {
       }
   })
 
+  /*
+  args[0] lobbyID
+  */
+  socket.on('host-started-game', (...args) => {
+    lobby = null
+    let code = args[0].toUpperCase().trim();
+
+    for(var i=0;i<activeGameLobbies.length;i++) {
+      if(activeGameLobbies[i].lobbyId == code) {
+        lobby = activeGameLobbies[i];
+      }
+    }
+
+    for(var i=0;i<lobby.players.length;i++) {
+      io.to(lobby.players[i].socketId).emit("host-started-game", lobby.lobbyId);
+    }
+
+  });
+
+  /*
+  args[0] lobbyID
+  args[1] socketID
+  */
+  socket.on('player-joined-game', (...args) => {
+    lobby = null
+    let code = args[0].toUpperCase().trim();
+
+    for(var i=0;i<activeGameLobbies.length;i++) {
+      if(activeGameLobbies[i].lobbyId == code) {
+        lobby = activeGameLobbies[i];
+      }
+    }
+
+    for(var i=0;i<lobby.players.length;i++) {
+      if(lobby.players[i].socketId === args[1]){
+        io.to(lobby.players[i].socketId).emit("start-game", lobby.players ); //send GameInfo here
+      }
+    }
+
+
+
+  });
+
+
+
     
 });
+
+
 
 
 nextApp.prepare().then(() => {

@@ -3,7 +3,7 @@ import React from 'react';
 import styles from '../styles/Home.module.css';
 import LoginInput from "../components/login-input.js";
 import LobbyInput from "../components/lobby-input.js"
-import Link from 'react';
+import {withRouter} from 'next/router';
 const io = require("socket.io-client");
 const socket = io();
 
@@ -12,7 +12,7 @@ socket.on("connect", () => {
 });
 
 
-export default class Home extends React.Component{
+class Home extends React.Component{
 
   constructor(props){
     super(props);
@@ -21,22 +21,27 @@ export default class Home extends React.Component{
       loggedIn: false,
       inLobby: false,
       lobbyCode: "",
-      lobbyPlayerList: ""   
+      lobbyPlayerList: "",
+      isHost: false
     };
+    
+    //these allow you to call this.state.whatever in each of the functions. 
+    //needed for all new functions 
     this.updateUsername = this.updateUsername.bind(this);
     this.updateLobbyCode = this.updateLobbyCode.bind(this);
     this.onJoin = this.onJoin.bind(this);
     this.onHost = this.onHost.bind(this);
-    
+    this.readyUp = this.readyUp.bind(this);
+    this.hostStartGame = this.hostStartGame.bind(this);
   }
 
-  componentDidMount() {
+  componentDidMount(){
     //PUT INCOMING MESSAGES HERE
-
+    //any message incoming to the client must be dealt with in a socket.on function
     socket.on("join-lobby", (lobby) => {
       this.setState({lobbyCode: lobby.lobbyId, inLobby: true})
       let lobbyList = ""
-      for(var i=0;i<lobby.players.length;i++) {
+      for(let i=0;i<lobby.players.length;i++) {
         
         lobbyList += lobby.players[i].displayName
 
@@ -54,6 +59,7 @@ export default class Home extends React.Component{
 
     socket.on("lobby-not-found", () => {
       this.setState({inLobby: false});
+      //implement error !
     });
 
 
@@ -61,7 +67,7 @@ export default class Home extends React.Component{
       this.setState({lobbyCode: lobby.lobbyId})
       let lobbyList = ""
   
-      for(var i=0;i<lobby.players.length;i++) {
+      for(let i=0;i<lobby.players.length;i++) {
         
         lobbyList += lobby.players[i].displayName
 
@@ -81,7 +87,7 @@ export default class Home extends React.Component{
       this.setState({lobbyCode: lobby.lobbyId})
       let lobbyList = ""
   
-      for(var i=0;i<lobby.players.length;i++) {
+      for(let i=0;i<lobby.players.length;i++) {
         
         lobbyList += lobby.players[i].displayName
 
@@ -97,9 +103,17 @@ export default class Home extends React.Component{
   
     });
 
-  }
-  
+    socket.on("host-started-game", (lobbyId) => {
+      this.setState({inLobby: false});
+      if(lobbyId === this.state.lobbyCode){ //only change the page if its the correct ID. probably does nothing
+        this.props.router.push({pathname: `/game`, query: {code: this.state.lobbyCode}}); //changes the page
+      }
+    });    
 
+  }
+ 
+
+  //these update methods update the state according to user input. 
   updateUsername(str){
     this.setState({username: str}, function(){
       if(this.state.username.replace(/\s+/g, "") !== ""){
@@ -118,12 +132,21 @@ export default class Home extends React.Component{
 
 
   onJoin(){
-    socket.emit('join-lobby', "testId",this.state.username ,this.state.lobbyCode);
+    socket.emit('join-lobby', 'joinID', this.state.username ,this.state.lobbyCode);
   }
 
   onHost(){
-    socket.emit('host-lobby',"playerId2",this.state.username);
-    this.setState({inLobby: true});
+    socket.emit('host-lobby', 'hostID', this.state.username);
+    this.setState({inLobby: true, isHost: true});
+  }
+
+  readyUp(){
+
+  }
+
+
+  hostStartGame(){
+    socket.emit("host-started-game", this.state.lobbyCode);
   }
 
   //handles which react component is to be loaded under the logo
@@ -138,6 +161,19 @@ export default class Home extends React.Component{
       
       return (
         <div >
+          {this.state.isHost ? 
+              <button className={styles.card} 
+                id="host-lobbyButton" 
+                onClick={this.hostStartGame}>
+                  Start Game
+              </button> 
+            : 
+            <button className={styles.card} 
+              id="ready-lobbyButton" 
+              onClick={this.readyUp}>
+                Ready Up
+            </button>
+          }
           <div className={styles.codeBox}> <h2>Lobby Code: <p className={styles.lobbyCode}>{this.state.lobbyCode}</p></h2> </div>
           <div className={styles.playerList}> <h2>Players connected:</h2> <h2 className={styles.hostandjoin}> <p>{this.state.lobbyPlayerList}</p></h2> </div>
         </div>
@@ -149,6 +185,7 @@ export default class Home extends React.Component{
     
 
   render(){
+
       return(
         <div className={styles.container}>
         <Head>
@@ -188,3 +225,5 @@ export default class Home extends React.Component{
     }
   
 }
+
+export default withRouter(Home)
