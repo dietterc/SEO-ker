@@ -22,10 +22,11 @@ class Lobby {
     this.players = [];
     this.lobbyId = id;
     this.host = ""; //blank if no host is set yet
+    this.isInGame = false;
 
     //add player to this lobby
     this.joinLobby = function (player) {
-      if(this.players.length <= 8) {
+      if(this.isJoinable()) {
         this.players.push(player);
         player.lobbyId = this.lobbyId;
         console.log(player.displayName + ' joined lobby ' + this.lobbyId + ' (' + player.playerId + ')');
@@ -38,9 +39,11 @@ class Lobby {
         if(this.players.length == 1){
           this.host = player;
         }
+        return true;
       }
       else {
         console.log(player + ' cannot join the lobby, lobby is full')
+        return false;
       }
     }
 
@@ -66,6 +69,12 @@ class Lobby {
       }
 
     }
+
+    
+    this.isJoinable = function() {
+      return this.players.length <= 8 && !this.isInGame; 
+    }
+    
 
     this.isConnected = function (playerId) {
       for(var i;i<this.players.length;i++) {
@@ -136,6 +145,7 @@ io.on('connection', (socket) => {
     activeGameLobbies.push(lobby);
 
     socket.emit("join-lobby", lobby);
+    socket.join(lobbyId)
     console.log("received host-lobby signal\nActive lobbies:");
     for(var i=0;i<activeGameLobbies.length;i++) {
       console.log(activeGameLobbies[i].lobbyId);
@@ -166,17 +176,16 @@ io.on('connection', (socket) => {
     }
 
     player = new Player(nextPlayerId++,"" + args[1],socket.id)  
-    lobby.joinLobby(player)
-
-    socket.emit("join-lobby", lobby);
-
-    for(var i=0;i<lobby.players.length;i++) {
-      if(lobby.players[i].playerId != args[0]) {
-        io.to(lobby.players[i].socketId).emit("lobby-player-joined", lobby);
-      }
+    if(lobby.joinLobby(player)){
+      socket.emit("join-lobby", lobby);
+    
+      socket.join(lobby.lobbyId) 
+      io.to(lobby.lobbyId).emit("lobby-player-joined", lobby);
     }
-
-    console.log("received join-lobby signal");
+    else{
+      socket.emit("lobby-full");
+    }
+   
 
   })
 
@@ -191,7 +200,9 @@ io.on('connection', (socket) => {
             lobby = activeGameLobbies[i]
 
             lobby.leaveLobby(player)
+            socket.to(lobby.lobbyId).emit("lobby-player-left", lobby)
 
+            /*
             for(var k=0;k<lobby.players.length;k++) {
               if(lobby.players[k].playerId != player.playerId) {
                 if(lobby.players[k] != null && lobby.players[k].socketId != null) {
@@ -199,6 +210,7 @@ io.on('connection', (socket) => {
                 }
               }
             }
+            */
 
             if(lobby.players.length == 0) {
               //code to shutdown lobby (remove any pointers to it, js should handle the rest)
@@ -210,14 +222,17 @@ io.on('connection', (socket) => {
           }
         } 
       }
+      
+
+      
   })
 
   /*
   args[0] lobbyID
   */
-  socket.on('host-started-game', (...args) => {
+  socket.on('host-started-game', (lobbyId) => {
     lobby = null
-    let code = args[0].toUpperCase().trim();
+    let code = lobbyId.toUpperCase().trim();
 
     for(var i=0;i<activeGameLobbies.length;i++) {
       if(activeGameLobbies[i].lobbyId == code) {
@@ -225,9 +240,10 @@ io.on('connection', (socket) => {
       }
     }
 
-    for(var i=0;i<lobby.players.length;i++) {
-      io.to(lobby.players[i].socketId).emit("host-started-game", lobby.lobbyId);
-    }
+    io.to(lobby.lobbyId).emit("host-started-game", lobby.lobbyId);
+
+    lobby.isInGame = true;
+
 
   });
 
@@ -235,9 +251,9 @@ io.on('connection', (socket) => {
   args[0] lobbyID
   args[1] socketID
   */
-  socket.on('player-joined-game', (...args) => {
+  socket.on('player-joined-game', (lobbyId, username) => {
     lobby = null
-    let code = args[0].toUpperCase().trim();
+    let code = lobbyId.toUpperCase().trim();
 
     for(var i=0;i<activeGameLobbies.length;i++) {
       if(activeGameLobbies[i].lobbyId == code) {
@@ -245,18 +261,16 @@ io.on('connection', (socket) => {
       }
     }
 
+    
     for(var i=0;i<lobby.players.length;i++) {
-      if(lobby.players[i].socketId === args[1]){
-        io.to(lobby.players[i].socketId).emit("start-game", lobby.players ); //send GameInfo here
+      if(lobby.players[i].username == username){
+        lobby.players[i].socketId = socket.id
       }
     }
-
-
+    
+    io.to(lobby.lobbyId).emit("update-players", lobby.players );
 
   });
-
-
-
     
 });
 

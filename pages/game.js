@@ -51,9 +51,6 @@ class PlayerView extends React.Component{
     }
 }
 
-socket.on("connect", () => {
-    
-});
 
 class Game extends React.Component {
 
@@ -61,6 +58,7 @@ class Game extends React.Component {
         super(props);
         console.log("query: "+props.router.query.code)
         this.state = {
+          username: props.router.query.user,  
           lobbyId: props.router.query.code, //this is taken as [lobbyCode] in the URL .
           gameInfo: null, 
           dealerIndex: null,
@@ -68,7 +66,7 @@ class Game extends React.Component {
           hand: null,
           chips: 0 
         };
-        socket.emit("player-joined-game", props.router.query.code, socket.id)
+        socket.emit("player-joined-game", this.state.lobbyId, this.state.username)
         
     }
 
@@ -81,7 +79,7 @@ class Game extends React.Component {
         });
         */
 
-        socket.on("start-game", (playerList) =>{
+        socket.on("update-players", (playerList) =>{
             this.setState({players: playerList})
         });
         

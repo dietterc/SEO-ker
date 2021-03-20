@@ -28,7 +28,6 @@ class Home extends React.Component{
     //these allow you to call this.state.whatever in each of the functions. 
     //needed for all new functions 
     this.updateUsername = this.updateUsername.bind(this);
-    this.updateLobbyCode = this.updateLobbyCode.bind(this);
     this.onJoin = this.onJoin.bind(this);
     this.onHost = this.onHost.bind(this);
     this.readyUp = this.readyUp.bind(this);
@@ -39,7 +38,7 @@ class Home extends React.Component{
     //PUT INCOMING MESSAGES HERE
     //any message incoming to the client must be dealt with in a socket.on function
     socket.on("join-lobby", (lobby) => {
-      this.setState({lobbyCode: lobby.lobbyId, inLobby: true})
+      this.setState({lobbyCode: lobby.lobbyId,inLobby: true})
       let lobbyList = ""
       for(let i=0;i<lobby.players.length;i++) {
         
@@ -61,6 +60,11 @@ class Home extends React.Component{
       this.setState({inLobby: false});
       //implement error !
     });
+
+    socket.on("lobby-full", () => {
+      this.setState({inLobby: false});
+      //implement error !
+    })
 
 
     socket.on("lobby-player-joined", (lobby) => {
@@ -106,7 +110,7 @@ class Home extends React.Component{
     socket.on("host-started-game", (lobbyId) => {
       this.setState({inLobby: false});
       if(lobbyId === this.state.lobbyCode){ //only change the page if its the correct ID. probably does nothing
-        this.props.router.push({pathname: `/game`, query: {code: this.state.lobbyCode}}); //changes the page
+        this.props.router.push({pathname: `/game`, query: {code: this.state.lobbyCode, user: this.state.username}}); //changes the page
       }
     });    
 
@@ -122,17 +126,14 @@ class Home extends React.Component{
     });
   }
 
-  updateLobbyCode(str){
+
+  onJoin(str){
     this.setState({lobbyCode: str}, function(){
       if(this.state.lobbyCode.replace(/\s+/g, "") !== ""){
-        this.onJoin();
+        socket.emit('join-lobby', 'joinID', this.state.username ,this.state.lobbyCode);
       }
     });
-  }
-
-
-  onJoin(){
-    socket.emit('join-lobby', 'joinID', this.state.username ,this.state.lobbyCode);
+  
   }
 
   onHost(){
@@ -155,7 +156,7 @@ class Home extends React.Component{
       return <LoginInput onSubmit={this.updateUsername}/>
     }
     else if(this.state.loggedIn && !this.state.inLobby){
-      return <LobbyInput username={this.state.username} onJoin={this.updateLobbyCode} onHost={this.onHost}/>
+      return <LobbyInput username={this.state.username} onJoin={this.onJoin} onHost={this.onHost}/>
     }
     else if(this.state.loggedIn && this.state.inLobby){
       
