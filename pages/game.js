@@ -44,7 +44,7 @@ class PlayerView extends React.Component{
 
     render(){
         return(
-            <div className="player"> 
+            <div> 
                 <p> {this.state.name} has {this.state.chips} chips </p>
             </div>
         );
@@ -56,14 +56,25 @@ class Game extends React.Component {
 
     constructor(props){
         super(props);
-        console.log("query: "+props.router.query.code)
         this.state = {
           username: props.router.query.user,  
           lobbyId: props.router.query.code, //this is taken as [lobbyCode] in the URL .
           gameInfo: null, 
           dealerIndex: null,
           players: [], 
-          hand: null,
+          hand: [{
+                searchString: 'donal',
+                searchValue: '100'
+            },  
+            {
+                searchString: 'diet coke button',
+                searchValue: '12222'
+            },  
+            {
+                searchString: 'aoc feet pics',
+                searchValue: '1000000000000'
+            }  
+          ],
           chips: 0 
         };
         socket.emit("player-joined-game", this.state.lobbyId, this.state.username)
@@ -81,6 +92,7 @@ class Game extends React.Component {
 
         socket.on("update-players", (playerList) =>{
             this.setState({players: playerList})
+            console.log(playerList)
         });
         
         //sent to all players in the game, every turn
@@ -113,17 +125,16 @@ class Game extends React.Component {
                     <link rel="icon" href="/favicon.ico"/>
                 </Head>   
                 <main className={gameSty.main}>
-                    <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
                     <ol>
                         {this.state.players.map((player, index) =>(
-                            <li key={index}> <PlayerView name={player}/> </li>
+                            <li key={index}> <PlayerView name={player.displayName}/> </li>
                         ))}
                     </ol>
-                    <div className="hand">
-                            <div className={styles.card}></div>
-                            <div className={styles.card}></div>
-                            <div className={styles.card}></div>
-                    </div>
+                    <ol>
+                        {this.state.hand.map((card, index) =>(
+                            <li key={index}> <CardView searchString={card.searchString} searchValue={card.searchValue}/> </li>
+                        ))}
+                    </ol>
                 </main>
                     <style jsx>{
                         `

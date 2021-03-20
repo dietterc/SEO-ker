@@ -267,7 +267,7 @@ io.on('connection', (socket) => {
         lobby.players[i].socketId = socket.id
       }
     }
-    
+    socket.join(lobbyId)
     io.to(lobby.lobbyId).emit("update-players", lobby.players );
 
   });
