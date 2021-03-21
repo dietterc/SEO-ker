@@ -20,20 +20,23 @@ class CardView extends React.Component{
     constructor(props){
         super(props)
         this.state = {
-            searchString: props.card.searchString,
-            searchValue: props.card.searchValue
+            card: {
+                searchString: props.card.searchString,
+                searchValue: props.card.searchValue
+            }
+
         }
 
         this.handleClick = this.handleClick.bind(this)
     }
 
     handleClick(){
-        this.props.onClick(this);
+        this.props.onClick(this.state.card);
     }
 
     render(){
         return(
-            <div onClick = {this.handleClick} className={styles.card}> {this.state.searchString} </div>
+            <div onClick = {this.handleClick} className={styles.card}> {this.state.card.searchString} </div>
         );
     }
 }
@@ -68,7 +71,8 @@ class Game extends React.Component {
           gameInfo: null, 
           dealerIndex: null,
           players: [], 
-          hand: [{
+          hand: [
+            {
                 searchString: 'donal turpm',
                 searchValue: '100'
             },  
@@ -81,8 +85,13 @@ class Game extends React.Component {
                 searchValue: '1000000000000'
             }  
           ],
-          chips: 0 
+          chips: 0, 
+          currentCard: null,
+          currentBet: 0
         };
+        this.selectCard = this.selectCard.bind(this)
+        this.updateBet = this.updateBet.bind(this)
+        this.confirmTurn = this.confirmTurn.bind(this)
         socket.emit("player-joined-game", this.state.lobbyId, this.state.username)
         
     }
@@ -98,7 +107,6 @@ class Game extends React.Component {
 
         socket.on("update-players", (playerList) =>{
             this.setState({players: playerList})
-            console.log(playerList)
         });
         
         //sent to all players in the game, every turn
@@ -122,8 +130,29 @@ class Game extends React.Component {
         });    
     }
 
-    selectCard(card){
+    selectCard(newCard){
+        this.setState({
+            currentCard: newCard
+        })
+    }
 
+    //returns false on invalid bet
+    updateBet = event => {
+        if(event.target.value >= 0){ // TODO: bet must be above minimum amount
+            this.setState({
+                currentBet: event.target.value
+            })
+            return true
+        }
+        return false
+
+    }
+
+    confirmTurn(){
+        if(this.state.currentCard && this.state.currentBet >= 0){
+            console.log(this.state.currentCard.searchString+" "+this.state.currentBet);
+        }
+        
     }
     
 
@@ -145,6 +174,20 @@ class Game extends React.Component {
                             <li key={index}> <CardView onClick = {this.selectCard} card={card}/> </li>
                         ))}
                     </ol>
+                    
+                    <input type="number" 
+                    placeholder="Bet" 
+                    id="betInput"
+                    onChange={this.updateBet}
+                    className={gameSty.betInputBox}/>
+                    
+                    
+                    <button className={gameSty.card} 
+                    id="confirmTurn"
+                    onClick={this.confirmTurn}>
+                        Confirm Turn
+                    </button>
+
                 </main>
                     <style jsx>{
                         `
