@@ -21,3 +21,10 @@
     justify-content: center;
     align-items: center;
 }
+
+.player{
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    color: rgb(58, 58, 58)
+}
