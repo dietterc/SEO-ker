@@ -168,12 +168,9 @@ class Home extends React.Component{
                 onClick={this.hostStartGame}>
                   Start Game
               </button> 
-            : 
-            <button className={styles.card} 
-              id="ready-lobbyButton" 
-              onClick={this.readyUp}>
-                Ready Up
-            </button>
+            :
+            <div> </div> 
+            
           }
           <div className={styles.codeBox}> <h2>Lobby Code: <p className={styles.lobbyCode}>{this.state.lobbyCode}</p></h2> </div>
           <div className={styles.playerList}> <h2>Players connected:</h2> <h2 className={styles.hostandjoin}> <p>{this.state.lobbyPlayerList}</p></h2> </div>
