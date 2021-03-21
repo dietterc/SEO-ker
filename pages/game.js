@@ -23,10 +23,12 @@ class CardView extends React.Component{
             searchString: props.card.searchString,
             searchValue: props.card.searchValue
         }
+
+        this.handleClick = this.handleClick.bind(this)
     }
 
     handleClick(){
-        props.onClick(this);
+        this.props.onClick(this);
     }
 
     render(){
