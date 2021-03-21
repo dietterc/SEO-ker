@@ -53,7 +53,7 @@ class Home extends React.Component{
         }
       }
       
-      this.setState({lobbyPlayerList: lobbyList.split('\n').map(str => <div className={styles.playerName}>{str}</div>)});
+      this.setState({lobbyPlayerList: lobbyList.split('\n').map((str, index) => <div className={styles.playerName} key={index}>{str}</div>)});
     });
 
     socket.on("lobby-not-found", () => {
@@ -83,7 +83,7 @@ class Home extends React.Component{
           lobbyList += "\n"
         }
       }
-      this.setState({lobbyPlayerList: lobbyList.split('\n').map(str => <div className={styles.playerName}>{str}</div>)});
+      this.setState({lobbyPlayerList: lobbyList.split('\n').map((str, index) => <div className={styles.playerName} key={index}>{str}</div>)});
   
     });
 
@@ -103,7 +103,8 @@ class Home extends React.Component{
           lobbyList += "\n"
         }
       }
-      this.setState({lobbyPlayerList: lobbyList.split('\n').map(str => <div className={styles.playerName}>{str}</div>)});
+        this.setState({
+            lobbyPlayerList: lobbyList.split('\n').map((str, index) => <div className={styles.playerName} key={index}>{str}</div>)});
   
     });
 
@@ -172,8 +173,11 @@ class Home extends React.Component{
             <div> </div> 
             
           }
-          <div className={styles.codeBox}> <h2>Lobby Code: <p className={styles.lobbyCode}>{this.state.lobbyCode}</p></h2> </div>
-          <div className={styles.playerList}> <h2>Players connected:</h2> <h2 className={styles.hostandjoin}> <p>{this.state.lobbyPlayerList}</p></h2> </div>
+         <div className={styles.codeBox}> 
+             <h2 className={styles.lobbyCode}>Lobby Code: {this.state.lobbyCode}</h2>
+         </div>
+         <div className={styles.playerList}>
+                  <h2>Players connected:</h2> <h2 > <div className={styles.hostandjoin}>{this.state.lobbyPlayerList}</div></h2> </div>
         </div>
       );
       
