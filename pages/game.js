@@ -20,14 +20,18 @@ class CardView extends React.Component{
     constructor(props){
         super(props)
         this.state = {
-            searchString: props.searchString,
-            searchValue: props.searchValue
+            searchString: props.card.searchString,
+            searchValue: props.card.searchValue
         }
+    }
+
+    handleClick(){
+        props.onClick(this);
     }
 
     render(){
         return(
-            <div className={styles.card}> {this.state.searchString} </div>
+            <div onClick = {this.handleClick} className={styles.card}> {this.state.searchString} </div>
         );
     }
 }
@@ -63,7 +67,7 @@ class Game extends React.Component {
           dealerIndex: null,
           players: [], 
           hand: [{
-                searchString: 'donal',
+                searchString: 'donal turpm',
                 searchValue: '100'
             },  
             {
@@ -115,6 +119,10 @@ class Game extends React.Component {
             this.setState({ });
         });    
     }
+
+    selectCard(card){
+
+    }
     
 
     render(){
@@ -132,7 +140,7 @@ class Game extends React.Component {
                     </ol>
                     <ol>
                         {this.state.hand.map((card, index) =>(
-                            <li key={index}> <CardView searchString={card.searchString} searchValue={card.searchValue}/> </li>
+                            <li key={index}> <CardView onClick = {this.selectCard} card={card}/> </li>
                         ))}
                     </ol>
                 </main>
