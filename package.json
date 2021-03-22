@@ -10,11 +10,13 @@
   },
   "dependencies": {
     "express": "^4.17.1",
-    "mongodb": "^3.6.5",
     "next": "10.0.5",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "socket.io": "^3.1.1",
     "socket.io-client": "^3.1.1"
+  },
+  "devDependencies": {
+    "mongodb": "^3.6.5"
   }
 }

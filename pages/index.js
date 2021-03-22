@@ -6,7 +6,6 @@ import LobbyInput from "../components/lobby-input.js"
 import Link from 'react';
 import Register from './register';
 import Movies from './movies';
-import {connectToDatabase} from '../util/mongodb';
 
 const io = require("socket.io-client");
 const socket = io();
