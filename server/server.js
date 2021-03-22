@@ -12,6 +12,9 @@ const nextHandler = nextApp.getRequestHandler()
 
 //list of active lobbies
 var activeGameLobbies = [];
+//List of active games
+var activeGames = [];
+
 //assign player ID's based on an incrementing variable for now, will change to usernames later
 var nextPlayerId = 0;
 
@@ -20,6 +23,7 @@ var nextPlayerId = 0;
 class Lobby {
   constructor(id) {
     this.players = [];
+    this.readyPlayers = 0;
     this.lobbyId = id;
     this.host = ""; //blank if no host is set yet
     this.isInGame = false;
@@ -27,9 +31,11 @@ class Lobby {
     //add player to this lobby
     this.joinLobby = function (player) {
       if(this.isJoinable()) {
+
         this.players.push(player);
         player.lobbyId = this.lobbyId;
         console.log(player.displayName + ' joined lobby ' + this.lobbyId + ' (' + player.playerId + ')');
+
         console.log("Players now in lobby:");
         for(var i=0;i<this.players.length;i++) {
           console.log(this.players[i]);
@@ -69,8 +75,7 @@ class Lobby {
       }
 
     }
-
-    
+  
     this.isJoinable = function() {
       return this.players.length <= 8 && !this.isInGame; 
     }
@@ -92,6 +97,95 @@ class Player {
     this.playerId = id;                //same as socket?
     this.socketId = socketId;
     this.lobbyId = ""          //the lobby they are connected to
+    this.cards = []
+  }
+}
+
+class Card {
+  constructor(searchString,searchValue) {
+    this.searchString = searchString;
+    this.searchValue = searchValue;
+  }
+}
+
+class GameInfo {
+  constructor(id, activePlayer, potAmount, dealer) {
+    this.id = id;
+    this.activePlayer = activePlayer;
+    this.betAmount = 0;
+    this.activeCard = null;
+    this.potAmount = potAmount;
+    this.dealer = dealer;
+  }
+}
+
+class Game {
+  constructor(id,players) {
+    this.id = id;
+    this.players = players;
+    this.dealerIndex = Math.floor(Math.random() * this.players.length)
+    this.dealer = players[this.dealerIndex];
+    this.activePlayerIndex = (this.dealerIndex + 1) % this.players.length; //player to the "left" ..or right?
+    this.activePlayer = this.players[this.activePlayerIndex];
+    this.potAmount = 0;
+    this.activeCards = []; //the cards currently played
+    
+    //for giving out cards
+    this.playersCards = [];
+    this.cardsIndex = 0;
+
+    for(let i=0;i<this.players.length;i++) {
+      let cards = []
+      cards.push(new Card("card " + i + "-1", 100))
+      cards.push(new Card("card " + i + "-2", 200))
+      cards.push(new Card("card " + i + "-3", 300))
+      this.playersCards.push(cards)
+    }
+
+    //-----functions-----
+    //Returns the highest card in activeCards
+    //needs to check for dupes
+    this.chooseWinningCard = function() {
+      let highestCard = new Card("null",-1);
+
+      for(let i=0;i<this.activeCards.length;i++) {
+        if(this.activeCards[i].searchValue > highestCard.searchValue) {
+          highestCard = this.activeCards[i]
+        }
+      }
+      return highestCard;
+    }
+
+    this.startGame = function() {
+      let gameInfo = new GameInfo(this.id,this.activePlayer,this.potAmount,this.dealer)
+      io.to(this.id).emit("start-turn", gameInfo);
+    }
+
+    this.removePlayer = function(player) {
+      var index = this.players.indexOf(player)
+      this.players.splice(index, 1)
+
+      if(index == this.dealerIndex) {
+        this.dealerIndex = (this.dealerIndex + 1) % this.players.length
+        this.dealer = this.players[this.dealerIndex];
+      }
+
+      if(index == this.activePlayerIndex) {
+        this.activePlayerIndex = (this.activePlayerIndex + 1) % this.players.length
+        this.activePlayer = this.players[this.activePlayerIndex];
+      }
+      io.to(this.id).emit("game-player-left", this.players, this.dealer, this.activePlayer);
+    }
+
+    this.getCards = function() {
+      if(this.cardsIndex < this.playersCards.length) {
+        this.players[this.cardsIndex].cards = this.playersCards[this.cardsIndex];
+        return this.playersCards[this.cardsIndex++];
+      }
+      else {
+        return null;
+      }
+    }
   }
 }
 
@@ -192,6 +286,21 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
       console.log(socket.id + ' disconnected');
       
+      //first check if they were in an active game:
+      for(var i=0;i<activeGames.length;i++) {
+        for(var j=0;j<activeGames[i].players.length;j++) {
+          if(activeGames[i].players[j].socketId == socket.id) {
+
+            player = activeGames[i].players[j]
+            game = activeGames[i]
+            game.removePlayer(player)
+            //message 'game-player-left' sent in above method
+
+          }
+        }
+      }
+
+      //if not in an active game, 
       //find the lobby they were in
       for(var i=0;i<activeGameLobbies.length;i++) {
         for(var j=0;j<activeGameLobbies[i].players.length;j++) {
@@ -223,8 +332,6 @@ io.on('connection', (socket) => {
         } 
       }
       
-
-      
   })
 
   /*
@@ -244,7 +351,9 @@ io.on('connection', (socket) => {
 
     lobby.isInGame = true;
 
+    var game = new Game(lobby.lobbyId,lobby.players)
 
+    activeGames.push(game)
   });
 
   /*
@@ -260,7 +369,6 @@ io.on('connection', (socket) => {
         lobby = activeGameLobbies[i];
       }
     }
-
     
     for(var i=0;i<lobby.players.length;i++) {
       if(lobby.players[i].username == username){
@@ -270,8 +378,77 @@ io.on('connection', (socket) => {
     socket.join(lobbyId)
     io.to(lobby.lobbyId).emit("update-players", lobby.players );
 
+    var game = null
+    for(let i=0;i<activeGames.length;i++) {
+      if(activeGames[i].id == lobby.lobbyId) {
+        game = activeGames[i]
+      }
+    }
+
+    //send them their cards
+    socket.emit("set-cards", game.getCards());
+
+
+    lobby.readyPlayers += 1;
+    if(lobby.players.length == lobby.readyPlayers) {
+      //all players have joined, start the game for this lobby.
+      game.startGame()
+    }
   });
-    
+
+  socket.on('turn-played', (gameInfo) => {
+
+    game = null;
+    for(let i=0;i<activeGames.length;i++) {
+      if(gameInfo.id == activeGames[i].id) {
+        game = activeGames[i]
+      }
+    }
+
+    if(game == null) {
+      console.log("turn played for non existing game " + gameInfo.id);
+      return
+    }
+
+    console.log(game.info.activePlayer.displayName + " played a turn for game " + gameInfo.id);
+
+    //update active cards and the pot
+    game.activeCards.push(gameInfo.activeCard);
+    game.potAmount += gameInfo.betAmount;
+
+    //check if it was the dealers turn
+    if(game.activePlayerIndex == game.dealerIndex) {
+      winningCard = game.chooseWinningCard();
+      if(winningCard.searchValue != -1) {
+        //find out who's card it was 
+        winningPlayer = null
+        for(let i=0;i<game.players.length && winningPlayer == null;i++) {
+          for(let j=0;j<game.players[i].cards.length;j++) {
+            if(game.players[i].cards[j] == winningCard) {
+              winningPlayer = game.players[i];
+            }
+          }
+        }
+        if(winningPlayer == null) {
+          //no winning player was found, did they leave the game?
+        }
+        else {
+          io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard);
+        }
+      }
+    }
+    else {
+      game.activePlayerIndex = (game.activePlayerIndex + 1) % game.players.length
+      game.activePlayer = game.players[game.activePlayerIndex];
+      
+      gameInfo.activePlayer = game.activePlayer;
+      gameInfo.betAmount = 0;
+      gameInfo.activeCard = null;
+      gameInfo.potAmount = game.potAmount;
+
+      io.to(game.id).emit("start-turn", gameInfo);
+    }
+  });
 });
 
 
