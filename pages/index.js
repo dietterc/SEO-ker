@@ -4,6 +4,10 @@ import styles from '../styles/Home.module.css';
 import LoginInput from "../components/login-input.js";
 import LobbyInput from "../components/lobby-input.js"
 import Link from 'react';
+import Register from './register';
+import Movies from './movies';
+import {connectToDatabase} from '../util/mongodb';
+
 const io = require("socket.io-client");
 const socket = io();
 
@@ -21,13 +25,14 @@ export default class Home extends React.Component{
       loggedIn: false,
       inLobby: false,
       lobbyCode: "",
-      lobbyPlayerList: ""   
+      lobbyPlayerList: "",
+      registerView: false   
     };
     this.updateUsername = this.updateUsername.bind(this);
     this.updateLobbyCode = this.updateLobbyCode.bind(this);
     this.onJoin = this.onJoin.bind(this);
     this.onHost = this.onHost.bind(this);
-    
+    this.registerBtnClick = this.registerBtnClick.bind(this);
   }
 
   componentDidMount() {
@@ -128,6 +133,11 @@ export default class Home extends React.Component{
 
   //handles which react component is to be loaded under the logo
   activeScreen(){
+    if(this.state.registerView){
+      return( 
+         <Movies/>
+      )
+    }
     if(!(this.state.loggedIn || this.state.inLobby)){
       return <LoginInput onSubmit={this.updateUsername}/>
     }
@@ -143,10 +153,13 @@ export default class Home extends React.Component{
         </div>
       );
       
-    }
+    } 
+    
     return null;
   }
-    
+    registerBtnClick(){
+      this.setState({registerView: true})
+    }
 
   render(){
       return(
@@ -155,7 +168,7 @@ export default class Home extends React.Component{
           <title>SEO-ker - Login</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-
+        <RegisterBtn onClick = {this.registerBtnClick}/>
         <main className={styles.main}>
           <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
           <p className={styles.description}>by n ∈ ℤ<sup>+</sup> </p>
@@ -187,4 +200,12 @@ export default class Home extends React.Component{
       );
     }
   
+}
+
+function RegisterBtn(props){
+  return (
+  <button className ={styles.viewBtn} onClick = {props.onClick}>
+      Register
+  </button>
+  );
 }

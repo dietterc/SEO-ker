@@ -13,6 +13,7 @@ TODO:
 import React from 'react'
 import styles from '../styles/Home.module.css';
 
+
 export default class UserView extends React.Component{   
     constructor(props){
         super(props)
@@ -53,4 +54,21 @@ export default class UserView extends React.Component{
                 </form> 
         );
     }
+}
+export async function getServerSideProps(){
+
+    const db = await connectionToDatabase();
+    const movies = await db
+        .collection("movies")
+         .find({})
+         .sort({metacritic: -1})
+         .limit(1)
+         .toArray();
+
+        return{
+            props: { 
+            
+                movies: JSON.parse(JSON.stringify(movies)),
+            },
+        };
 }

@@ -1,21 +1,12 @@
 import React from 'react';
 import styles from '../styles/Home.module.css';
 
-export default class Register extends React.Component {
-    constructor(props){
-        super(props)
-    }
-
-
+export default function Register({movies}){
 //temporary render
-    render(){
-
-
         return(
-        <Div>
+        <div>
             Register Page
-        </Div>
-
-        );
-    }
+        </div>
+        )
 }
+
