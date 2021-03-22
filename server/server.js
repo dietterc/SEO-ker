@@ -11,7 +11,7 @@ const nextHandler = nextApp.getRequestHandler()
 
 
 //list of active lobbies
-var activeGameLobbies = [];
+var activeLobbies = [];
 //List of active games
 var activeGames = [];
 
@@ -206,8 +206,8 @@ function generateCode() {
       code += r2
     }
     codeFound = true;
-    for(var i=0;i<activeGameLobbies.length;i++) {
-      if(activeGameLobbies[i].lobbyId == code) {
+    for(var i=0;i<activeLobbies.length;i++) {
+      if(activeLobbies[i].lobbyId == code) {
         codeFound = false;
       }
     }
@@ -215,6 +215,24 @@ function generateCode() {
 
   return code;
 
+}
+
+function findGame(code, activeGames){
+  for(var i=0;i<activeGames.length;i++) {
+    if(activeGames[i].id == code) {
+      return activeGames[i];
+    }
+  }
+  return null
+}
+
+function findLobby(code, activeLobbies){
+  for(var i=0;i<activeLobbies.length;i++) {
+    if(activeLobbies[i].lobbyId == code) {
+      return activeLobbies[i];
+    }
+  }
+  return null
 }
 
 
@@ -236,13 +254,13 @@ io.on('connection', (socket) => {
     player = new Player(nextPlayerId++,args[1],socket.id);
     lobby = new Lobby(lobbyId);
     lobby.joinLobby(player);
-    activeGameLobbies.push(lobby);
+    activeLobbies.push(lobby);
 
     socket.emit("join-lobby", lobby);
     socket.join(lobbyId)
     console.log("received host-lobby signal\nActive lobbies:");
-    for(var i=0;i<activeGameLobbies.length;i++) {
-      console.log(activeGameLobbies[i].lobbyId);
+    for(var i=0;i<activeLobbies.length;i++) {
+      console.log(activeLobbies[i].lobbyId);
     }
 
   })
@@ -254,14 +272,8 @@ io.on('connection', (socket) => {
   */
   socket.on('join-lobby', (...args) => {
 
-    lobby = null
     let code = args[2].toUpperCase().trim();
-
-    for(var i=0;i<activeGameLobbies.length;i++) {
-      if(activeGameLobbies[i].lobbyId == code) {
-        lobby = activeGameLobbies[i];
-      }
-    }
+    lobby = findLobby(code, activeLobbies)
 
     if(lobby == null) {
       console.log('Error, user' + args[1] + ' tried to join a non-existent lobby');
@@ -302,30 +314,20 @@ io.on('connection', (socket) => {
 
       //if not in an active game, 
       //find the lobby they were in
-      for(var i=0;i<activeGameLobbies.length;i++) {
-        for(var j=0;j<activeGameLobbies[i].players.length;j++) {
-          if(activeGameLobbies[i].players[j].socketId == socket.id) {
-            player = activeGameLobbies[i].players[j]
-            lobby = activeGameLobbies[i]
+      for(var i=0;i<activeLobbies.length;i++) {
+        for(var j=0;j<activeLobbies[i].players.length;j++) {
+          if(activeLobbies[i].players[j].socketId == socket.id) {
+            player = activeLobbies[i].players[j]
+            lobby = activeLobbies[i]
 
             lobby.leaveLobby(player)
             socket.to(lobby.lobbyId).emit("lobby-player-left", lobby)
-
-            /*
-            for(var k=0;k<lobby.players.length;k++) {
-              if(lobby.players[k].playerId != player.playerId) {
-                if(lobby.players[k] != null && lobby.players[k].socketId != null) {
-                  io.to(lobby.players[k].socketId).emit("lobby-player-left", lobby);
-                }
-              }
-            }
-            */
 
             if(lobby.players.length == 0) {
               //code to shutdown lobby (remove any pointers to it, js should handle the rest)
               console.log("lobby " + lobby.lobbyId + " deleted")
 
-              activeGameLobbies.splice(lobby, 1)
+              activeLobbies.splice(lobby, 1)
             }
             return
           }
@@ -338,14 +340,8 @@ io.on('connection', (socket) => {
   args[0] lobbyID
   */
   socket.on('host-started-game', (lobbyId) => {
-    lobby = null
     let code = lobbyId.toUpperCase().trim();
-
-    for(var i=0;i<activeGameLobbies.length;i++) {
-      if(activeGameLobbies[i].lobbyId == code) {
-        lobby = activeGameLobbies[i];
-      }
-    }
+    lobby = findLobby(code, activeLobbies)
 
     io.to(lobby.lobbyId).emit("host-started-game", lobby.lobbyId);
 
@@ -361,29 +357,23 @@ io.on('connection', (socket) => {
   args[1] socketID
   */
   socket.on('player-joined-game', (lobbyId, username) => {
-    lobby = null
+    //var game = null
     let code = lobbyId.toUpperCase().trim();
 
-    for(var i=0;i<activeGameLobbies.length;i++) {
-      if(activeGameLobbies[i].lobbyId == code) {
-        lobby = activeGameLobbies[i];
+    var game = findGame(code, activeGames)
+    
+    //socket refreshes on page change, so assign that player his new socket.id 
+    for(var i=0;i<game.players.length;i++) {
+      if(game.players[i].username == username){
+        game.players[i].socketId = socket.id
+        console.log("new socket id for player: "+game.players[i].socketId)
       }
     }
     
-    for(var i=0;i<lobby.players.length;i++) {
-      if(lobby.players[i].username == username){
-        lobby.players[i].socketId = socket.id
-      }
-    }
+    //subscribe the socket to the room called lobbyId
     socket.join(lobbyId)
-    io.to(lobby.lobbyId).emit("update-players", lobby.players );
-
-    var game = null
-    for(let i=0;i<activeGames.length;i++) {
-      if(activeGames[i].id == lobby.lobbyId) {
-        game = activeGames[i]
-      }
-    }
+    //send everyone in the room an updated list of players
+    io.to(lobby.lobbyId).emit("update-players", game.players );
 
     //send them their cards
     socket.emit("set-cards", game.getCards());
@@ -398,12 +388,7 @@ io.on('connection', (socket) => {
 
   socket.on('turn-played', (gameInfo) => {
 
-    game = null;
-    for(let i=0;i<activeGames.length;i++) {
-      if(gameInfo.id == activeGames[i].id) {
-        game = activeGames[i]
-      }
-    }
+    game = findGame(gameInfo.id, activeGames);
 
     if(game == null) {
       console.log("turn played for non existing game " + gameInfo.id);

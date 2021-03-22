@@ -72,22 +72,12 @@ class Game extends React.Component {
           dealerIndex: null,
           players: [], 
           hand: [
-            {
-                searchString: 'donal turpm',
-                searchValue: '100'
-            },  
-            {
-                searchString: 'diet coke button',
-                searchValue: '12222'
-            },  
-            {
-                searchString: 'aoc feet pics',
-                searchValue: '1000000000000'
-            }  
+
           ],
           chips: 0, 
           currentCard: null,
-          currentBet: 0
+          currentBet: 0, 
+          hasPlayedCard: false
         };
         this.selectCard = this.selectCard.bind(this)
         this.updateBet = this.updateBet.bind(this)
@@ -99,19 +89,13 @@ class Game extends React.Component {
 
     componentDidMount(){
 
-        /*sent when the host starts the game. should come right when this page is loaded
-        socket.on("start-game", (newGameInfo, newDealerIndex) => {
-            this.setState({gameInfo: newGameInfo, dealerIndex: newDealerIndex});
-        });
-        */
-
         socket.on("update-players", (playerList) =>{
             this.setState({players: playerList})
         });
         
         //sent to all players in the game, every turn
-        socket.on("start-turn", (gameInfo) => {
-            this.setState({ });
+        socket.on("start-turn", (newGameInfo) => {
+            this.setState({ gameInfo: newGameInfo});
         });
         
         //sent when the round is over someone won the round
@@ -128,12 +112,18 @@ class Game extends React.Component {
         socket.on("end-game", (lobby) => {
             this.setState({ });
         });    
+
+        socket.on("set-cards", (newCards) => {
+            this.setState({hand: newCards})
+        })
     }
 
     selectCard(newCard){
-        this.setState({
-            currentCard: newCard
-        })
+        if(!this.state.hasPlayedCard){ // dont set new card if one has been played
+            this.setState({
+                currentCard: newCard
+            })
+        }
     }
 
     //returns false on invalid bet
@@ -144,12 +134,14 @@ class Game extends React.Component {
             })
             return true
         }
-        return false
+        else return false
 
     }
 
     confirmTurn(){
-        if(this.state.currentCard && this.state.currentBet >= 0){
+        if(this.state.currentCard && this.state.currentBet >= 0 && !this.state.hasPlayedCard ){
+            this.setState({ hasPlayedCard: true
+            })
             console.log(this.state.currentCard.searchString+" "+this.state.currentBet);
         }
         
