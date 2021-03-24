@@ -46,8 +46,7 @@ class PlayerView extends React.Component{
         super(props)
         this.state = {
             name: props.name,
-            hand: props.hand,
-            chips: 0
+            chips: props.chips
         }
     }
 
@@ -77,7 +76,10 @@ class Game extends React.Component {
           chips: 0, 
           currentCard: null,
           currentBet: 0, 
-          hasPlayedCard: false
+          hasPlayedCard: false,
+          roundOver: false,
+          roundWinner: null,
+          roundWinCard: null
         };
         this.selectCard = this.selectCard.bind(this)
         this.updateBet = this.updateBet.bind(this)
@@ -90,7 +92,7 @@ class Game extends React.Component {
     componentDidMount(){
 
         socket.on("update-players", (playerList) =>{
-            this.setState({players: playerList})
+            this.setState({ players: playerList })
         });
         
         //sent to all players in the game, every turn
@@ -99,8 +101,14 @@ class Game extends React.Component {
         });
         
         //sent when the round is over someone won the round
-        socket.on("round-over", (listCards, winner) => {
-            this.setState({ });
+        socket.on("round-over", (listCards, winner, winningCard) => {
+            winner.chips = this.gameInfo.potAmount + winner.chips;
+            this.setState({
+                roundOver: true,
+                roundWinner: winner,
+                roundWinCard: winningCard
+            });
+            
         });
         
         //sent when a player leaves the lobby. contains a new list of players
@@ -156,29 +164,42 @@ class Game extends React.Component {
                     <link rel="icon" href="/favicon.ico"/>
                 </Head>   
                 <main className={gameSty.main}>
-                    <ol>
+                    {this.state.roundOver ?
+                        <div>
+                            <h1>
+                                Winner: {this.state.roundWinner.displayName}
+                                <br />
+                                Winning card: {this.state.roundWinCard.searchString} with {this.state.roundWinCard.searchValue} search counts!
+                            </h1>
+                        </div> :
+                    <div>
+                        <ol>
                         {this.state.players.map((player, index) =>(
-                            <li key={index}> <PlayerView name={player.displayName}/> </li>
+                            <li key={index}> <PlayerView name={player.displayName} chips={player.chips}/> </li>
                         ))}
-                    </ol>
-                    <ol>
+                        </ol>
+                        <ol>
                         {this.state.hand.map((card, index) =>(
                             <li key={index}> <CardView onClick = {this.selectCard} card={card}/> </li>
                         ))}
-                    </ol>
-                    
-                    <input type="number" 
-                    placeholder="Bet" 
-                    id="betInput"
-                    onChange={this.updateBet}
-                    className={gameSty.betInputBox}/>
-                    
-                    
-                    <button className={gameSty.card} 
-                    id="confirmTurn"
-                    onClick={this.confirmTurn}>
-                        Confirm Turn
+                        </ol>
+
+                            <input type="number"
+                                placeholder="Bet"
+                                id="betInput"
+                                onChange={this.updateBet}
+                                className={gameSty.betInputBox} />
+
+
+                            <button className={gameSty.card}
+                                id="confirmTurn"
+                                onClick={this.confirmTurn}>
+                                Confirm Turn
                     </button>
+                    </div>
+
+                    }
+                    
 
                 </main>
                     <style jsx>{

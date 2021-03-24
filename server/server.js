@@ -97,7 +97,8 @@ class Player {
     this.playerId = id;                //same as socket?
     this.socketId = socketId;
     this.lobbyId = ""          //the lobby they are connected to
-    this.cards = []
+    this.cards = [];
+    this.chips = 0;
   }
 }
 
