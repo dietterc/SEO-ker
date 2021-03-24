@@ -366,6 +366,9 @@ io.on('connection', (socket) => {
   args[1] socketID
   */
   socket.on('player-joined-game', (lobbyId, username) => {
+    if(lobbyId == null || username == null) {
+      return
+    }
     //var game = null
     let code = lobbyId.toUpperCase().trim();
 
