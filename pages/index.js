@@ -4,6 +4,10 @@ import styles from '../styles/Home.module.css';
 import LoginInput from "../components/login-input.js";
 import LobbyInput from "../components/lobby-input.js"
 import {withRouter} from 'next/router';
+import Link from 'react';
+import Register from './register';
+import Movies from './movies';
+
 const io = require("socket.io-client");
 const socket = io();
 
@@ -22,7 +26,8 @@ class Home extends React.Component{
       inLobby: false,
       lobbyCode: "",
       lobbyPlayerList: "",
-      isHost: false
+      isHost: false,
+      registerView: false   
     };
     
     //these allow you to call this.state.whatever in each of the functions. 
@@ -32,6 +37,7 @@ class Home extends React.Component{
     this.onHost = this.onHost.bind(this);
     this.readyUp = this.readyUp.bind(this);
     this.hostStartGame = this.hostStartGame.bind(this);
+    this.registerBtnClick = this.registerBtnClick.bind(this);
   }
 
   componentDidMount(){
@@ -153,6 +159,11 @@ class Home extends React.Component{
 
   //handles which react component is to be loaded under the logo
   activeScreen(){
+    if(this.state.registerView){
+      return( 
+         <Movies/>
+      )
+    }
     if(!(this.state.loggedIn || this.state.inLobby)){
       return <LoginInput onSubmit={this.updateUsername}/>
     }
@@ -181,10 +192,13 @@ class Home extends React.Component{
         </div>
       );
       
-    }
+    } 
+    
     return null;
   }
-    
+    registerBtnClick(){
+      this.setState({registerView: true})
+    }
 
   render(){
 
@@ -194,7 +208,7 @@ class Home extends React.Component{
           <title>SEO-ker - Login</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-
+        <RegisterBtn onClick = {this.registerBtnClick}/>
         <main className={styles.main}>
           <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
           <p className={styles.description}>by n ∈ ℤ<sup>+</sup> </p>
@@ -229,3 +243,11 @@ class Home extends React.Component{
 }
 
 export default withRouter(Home)
+
+function RegisterBtn(props){
+  return (
+  <button className ={styles.viewBtn} onClick = {props.onClick}>
+      Register
+  </button>
+  );
+}
