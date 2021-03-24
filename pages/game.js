@@ -28,7 +28,7 @@ class CardView extends React.Component{
 
     render(){
         return(
-            <div onClick = {this.cardsleClick} className={styles.card}> {this.state.card.searchString} </div>
+            <div onClick = {this.cardsleClick} className={gameSty.gameCard}> {this.state.card.searchString} </div>
         );
     }
 }
@@ -165,7 +165,14 @@ class GameScreen extends React.Component {
         var list = []
         for(let i=0;i<this.state.players.length;i++) {
             var jsx = (<div></div>);
-            if(this.state.players[i].playerId == this.state.gameInfo.dealer.playerId) {
+            if(this.state.players[i].playerId == this.state.gameInfo.activePlayer.playerId && this.state.players[i].playerId == this.state.gameInfo.dealer.playerId) {
+                jsx = (
+                    <div>
+                        {this.state.players[i].displayName} has {this.state.players[i].chips} chips. <b>(Dealer)</b> *
+                    </div>
+                )
+            }    
+            else if(this.state.players[i].playerId == this.state.gameInfo.dealer.playerId) {
                 jsx = (
                     <div>
                         {this.state.players[i].displayName} has {this.state.players[i].chips} chips. <b>(Dealer)</b>
@@ -175,7 +182,7 @@ class GameScreen extends React.Component {
             else if(this.state.players[i].playerId == this.state.gameInfo.activePlayer.playerId) {
                 jsx = (
                     <div>
-                        * {this.state.players[i].displayName} has {this.state.players[i].chips} chips.
+                        {this.state.players[i].displayName} has {this.state.players[i].chips} chips. *
                     </div>
                 )
             }
@@ -191,6 +198,21 @@ class GameScreen extends React.Component {
         return list
     }
 
+    printCards() {
+        var list = []
+        for(let i=0;i<this.state.cards.length;i++) {
+            let card = this.state.cards[i]
+            var jsx = (
+                <div>
+                    <CardView onClick = {this.selectCard} card={card}/>
+                </div>
+            )
+            list.push(jsx)
+        }
+        return list
+    } 
+
+
     render(){
         return (
             <div className={gameSty.container}>
@@ -204,21 +226,22 @@ class GameScreen extends React.Component {
                     <h3>Pot amount: {this.state.gameInfo.potAmount}</h3> 
                     
                     {this.printPlayers()}
-                    
-                    </div>
 
-
-                    <div className={gameSty.gameroomR}>
                     {this.state.currentCard ? 
-                    <CardView card={this.state.currentCard} onClick={this.selectCard}/>
+                    <div>
+                    <br/><br/>
+                    <b>Selected Card:</b>
+                    <div className={styles.card}>{this.state.currentCard.searchString}</div>
+                    </div>
                     :
                     <div/>
                     }
-                    <ol>
-                        {this.state.cards.map((card) =>(
-                            <li key={card.searchString}> <CardView onClick = {this.selectCard} card={card}/> </li>
-                        ))}
-                    </ol>
+                    
+                </div>
+
+
+                <div className={gameSty.gameroomR}>
+                    {this.printCards()}
                     
                     
                     {this.state.isMyTurn ?
@@ -240,7 +263,7 @@ class GameScreen extends React.Component {
                     <div/> 
                     }
 
-                    </div>
+                </div>
 
                 </main>
                     <style jsx>{

@@ -439,7 +439,6 @@ io.on('connection', (socket) => {
         else {
           io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard, game.potAmount);
           game.potAmount = 0 //reset the pot for next round
-          console.log("HELLO")
         }
       }
       //have to do this to update the chips on the client side
