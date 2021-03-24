@@ -244,7 +244,7 @@ class GameScreen extends React.Component {
                     <div>
                     <br/><br/>
                     <b>Selected Card:</b>
-                    <div className={styles.card}>{this.state.currentCard.searchString}</div>
+                    <CardView card = {this.state.currentCard} />
                     </div>
                     :
                     <div/>
@@ -254,7 +254,11 @@ class GameScreen extends React.Component {
 
 
                 <div className={gameSty.gameroomR}>
-                    {this.printCards()}
+                    <ul className = "ul"> 
+                        {this.state.cards.map(card =>(
+                        <li key={card.searchString}> <CardView card={card} onClick = {this.selectCard}/> </li>
+                        ))}
+                    </ul>
                     
                     
                     {this.state.isMyTurn ?
@@ -286,6 +290,9 @@ class GameScreen extends React.Component {
                         .cards{
                             bottom:0;
                             background: lightgrey;
+                        }
+                        .ul{
+                            list-style-type: none;
                         }
                     `}
                 </style>
