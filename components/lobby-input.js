@@ -1,6 +1,5 @@
 import React from 'react';
 import styles from '../styles/Home.module.css';
-import Link from 'react';
 
 export default class LobbyInput extends React.Component{
   
@@ -8,7 +7,7 @@ export default class LobbyInput extends React.Component{
       super(props);
       this.state = {
         username: this.props.username,
-        lobbyCode: ""
+        lobbyId: ""
       };
       this.updateLobbyCode = this.updateLobbyCode.bind(this);
       this.hostLobby = this.hostLobby.bind(this);
@@ -20,12 +19,11 @@ export default class LobbyInput extends React.Component{
     }
   
     joinLobby(){
-      this.props.onJoin(this.state.lobbyCode)
+      this.props.onJoin(this.state.lobbyId)
     }
   
     updateLobbyCode = event =>{
-      this.setState({lobbyCode: event.target.value});
-      console.log("lobby code: "+this.state.lobbyCode);
+      this.setState({lobbyId: event.target.value});
     }
   
     render(){
