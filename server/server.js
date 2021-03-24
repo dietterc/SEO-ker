@@ -100,6 +100,7 @@ class Player {
     this.socketId = socketId;
     this.lobbyId = ""          //the lobby they are connected to
     this.cards = []
+    this.originalCards = []
     this.chips = startingChips 
   }
 }
@@ -184,6 +185,10 @@ class Game {
     this.getCards = function() {
       if(this.cardsIndex < this.playersCards.length) {
         this.players[this.cardsIndex].cards = this.playersCards[this.cardsIndex];
+        for(let i=0;i<this.playersCards[this.cardsIndex].length;i++) {
+          this.players[this.cardsIndex].originalCards.push(this.playersCards[this.cardsIndex][i].searchString)
+          console.log(this.playersCards[this.cardsIndex][i].searchString)
+        }
         return this.playersCards[this.cardsIndex++];
       }
       else {
@@ -361,6 +366,9 @@ io.on('connection', (socket) => {
   args[1] socketID
   */
   socket.on('player-joined-game', (lobbyId, username) => {
+    if(lobbyId == null || username == null) {
+      return
+    }
     //var game = null
     let code = lobbyId.toUpperCase().trim();
 
@@ -420,11 +428,11 @@ io.on('connection', (socket) => {
       if(winningCard.searchValue != -1) {
         //find out who's card it was 
         winningPlayer = null
-        for(let i=0;i<game.players.length && winningPlayer == null;i++) {
-          for(let j=0;j<game.players[i].cards.length;j++) {
-            if(game.players[i].cards[j] == winningCard) {
+        for(let i=0;i<game.players.length;i++) {
+          for(let j=0;j<game.players[i].originalCards.length;j++) {
+            if(game.players[i].originalCards[j] == winningCard.searchString) {
               winningPlayer = game.players[i];
-              winnipegPlayer.chips += game.potAmount // give the winner their earnings
+              winningPlayer.chips += game.potAmount // give the winner their earnings
             }
           }
         }

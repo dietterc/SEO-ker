@@ -53,8 +53,39 @@
 
 .gameroomL {
     color: #000000;
+    float: left;
+    padding-right: 5rem;
 }
 
 .gameroomR {
     color: #000000;
+    float: right;
 }
+
+.gameCard {
+    margin: 1rem;
+    flex-basis: 45%;
+    padding: 1.5rem;
+    font-size: 25px;
+    text-align: center;
+    color: #000000;
+    text-decoration: none;
+    border: 2px solid #000000;
+    border-radius: 10px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    width: 400px;
+  
+    }
+
+  .gameCard:hover,
+  .gameCard:focus,
+  .gameCard:active {
+    color: #0d2cb6;
+    border-color: #0d2cb6;
+  }
+  
+  .gameCard p {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
