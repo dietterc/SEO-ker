@@ -41,6 +41,8 @@ class PlayerView extends React.Component{
             name: props.player.displayName,
             chips: props.player.chips
         }
+        this.name = props.player.displayName
+        this.chips = props.player.chips
     }
 
     render(){
@@ -71,7 +73,9 @@ class GameScreen extends React.Component {
           currentCard: null,
           currentBet: 0, 
           hasPlayedCard: false,
-          isMyTurn: false
+          isMyTurn: false,
+          dealer: "",
+          activePlayer: ""
         };
         this.selectCard = this.selectCard.bind(this)
         this.updateBet = this.updateBet.bind(this)
@@ -103,8 +107,9 @@ class GameScreen extends React.Component {
         });
         
         //sent when a player leaves the lobby. contains a new list of players
-        socket.on("game-player-left", (newPlayers) => {
+        socket.on("game-player-left", (newPlayers, dealer, activePlayer) => {
             this.setState({ players: newPlayers});
+
         });
 
         //sent when the game is over. contains a lobby object with the same code. 
@@ -117,7 +122,7 @@ class GameScreen extends React.Component {
         })
         socket.on("set-chips", (newChips) =>{
             this.setState({chips: newChips})
-            console.log("set chips to "+newChips)
+            console.log("set chips to " + newChips)
         })
     }
 
@@ -170,6 +175,18 @@ class GameScreen extends React.Component {
         }
     }
     
+    printPlayers() {
+        var list = []
+        for(let i=0;i<this.state.players.length;i++) {
+            let jsx = (
+                <div>
+                    {this.state.players[i].displayName} has {this.state.players[i].chips} chips.
+                </div>
+            )
+            list.push(jsx)
+        }
+        return list
+    }
 
     render(){
         return (
@@ -180,13 +197,15 @@ class GameScreen extends React.Component {
                 </Head>   
                 <main className={gameSty.main}>
 
-                    <div> <p>{this.state.gameInfo.potAmount} chips in the pot</p> </div>
-   
-                    <ol>
-                        {this.state.players.map((player) =>(
-                            <li key={player.displayName}> <PlayerView player = {player}/> </li>
-                        ))}
-                    </ol>
+                <div className={gameSty.gameroomL}> 
+                    <h3>Pot amount: {this.state.gameInfo.potAmount}</h3> 
+                    
+                    {this.printPlayers()}
+                    
+                    </div>
+
+
+                    <div className={gameSty.gameroomR}>
                     {this.state.currentCard ? 
                     <CardView card={this.state.currentCard} onClick={this.selectCard}/>
                     :
@@ -216,9 +235,9 @@ class GameScreen extends React.Component {
 
                     : 
                     <div/> 
-
                     }
-                    
+
+                    </div>
 
                 </main>
                     <style jsx>{
