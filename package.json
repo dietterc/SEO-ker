@@ -4,9 +4,11 @@
   "private": true,
   "main": "./pages/index.html",
   "scripts": {
-    "dev": "node ./server/server.js --http-server-default-timeout=0",
+    "dev": "node ./server/server.js --http-server-default-timeout=0 -p $PORT",
     "build": "next build",
-    "start": "NODE_ENV=production node ./server/server.js"
+    "start": "NODE_ENV=production node ./server/server.js",
+    "heroku-postbuild": "npm run build",
+    "test": "node ./tests/test.js"
   },
   "dependencies": {
     "express": "^4.17.1",
