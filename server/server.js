@@ -18,6 +18,8 @@ var activeGames = [];
 //assign player ID's based on an incrementing variable for now, will change to usernames later
 var nextPlayerId = 0;
 
+const startingChips = 1000;
+
 
 //----------objects----------
 class Lobby {
@@ -98,6 +100,7 @@ class Player {
     this.socketId = socketId;
     this.lobbyId = ""          //the lobby they are connected to
     this.cards = []
+    this.chips = startingChips 
   }
 }
 
@@ -116,6 +119,7 @@ class GameInfo {
     this.activeCard = null;
     this.potAmount = potAmount;
     this.dealer = dealer;
+
   }
 }
 
@@ -258,7 +262,7 @@ io.on('connection', (socket) => {
 
     socket.emit("join-lobby", lobby);
     socket.join(lobbyId)
-    console.log("received host-lobby signal\nActive lobbies:");
+    console.log("Active lobbies:");
     for(var i=0;i<activeLobbies.length;i++) {
       console.log(activeLobbies[i].lobbyId);
     }
@@ -362,11 +366,10 @@ io.on('connection', (socket) => {
 
     var game = findGame(code, activeGames)
     
-    //socket refreshes on page change, so assign that player his new socket.id 
+    //socket refreshes on page change, so assign that player their new socket.id 
     for(var i=0;i<game.players.length;i++) {
       if(game.players[i].username == username){
         game.players[i].socketId = socket.id
-        console.log("new socket id for player: "+game.players[i].socketId)
       }
     }
     
@@ -375,8 +378,9 @@ io.on('connection', (socket) => {
     //send everyone in the room an updated list of players
     io.to(lobby.lobbyId).emit("update-players", game.players );
 
-    //send them their cards
+    //send them their cards and chips
     socket.emit("set-cards", game.getCards());
+    socket.emit("set-chips", startingChips);
 
 
     lobby.readyPlayers += 1;
@@ -395,7 +399,16 @@ io.on('connection', (socket) => {
       return
     }
 
-    console.log(game.info.activePlayer.displayName + " played a turn for game " + gameInfo.id);
+    console.log(game.activePlayer.displayName + " played "+ gameInfo.activeCard.searchString+" for game " + gameInfo.id);
+
+    let index = game.activePlayer.cards.indexOf(gameInfo.activeCard)
+    if(index > -1){
+      game.activePlayer.cards.splice(index, 1) //remove card they played from hand
+    }
+
+    //subtract their bet from their chips
+    game.activePlayer.chips -= gameInfo.betAmount
+    socket.emit("set-chips", game.activePlayer.chips) //tell the client to update chip amount
 
     //update active cards and the pot
     game.activeCards.push(gameInfo.activeCard);
@@ -411,6 +424,7 @@ io.on('connection', (socket) => {
           for(let j=0;j<game.players[i].cards.length;j++) {
             if(game.players[i].cards[j] == winningCard) {
               winningPlayer = game.players[i];
+              winnipegPlayer.chips += game.potAmount // give the winner their earnings
             }
           }
         }
@@ -418,9 +432,12 @@ io.on('connection', (socket) => {
           //no winning player was found, did they leave the game?
         }
         else {
-          io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard);
+          io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard, game.potAmount);
+          game.potAmount = 0 //reset the pot for next round
         }
       }
+      //have to do this to update the chips on the client side
+      io.to(game.id).emit("update-players", game.players);
     }
     else {
       game.activePlayerIndex = (game.activePlayerIndex + 1) % game.players.length
@@ -430,9 +447,11 @@ io.on('connection', (socket) => {
       gameInfo.betAmount = 0;
       gameInfo.activeCard = null;
       gameInfo.potAmount = game.potAmount;
-
+      //have to do this to update the chips on the client side
+      io.to(game.id).emit("update-players", game.players);
       io.to(game.id).emit("start-turn", gameInfo);
     }
+
   });
 });
 
