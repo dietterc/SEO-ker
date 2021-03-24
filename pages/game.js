@@ -55,9 +55,13 @@ class GameScreen extends React.Component {
           currentCard: null,
           currentBet: 0, 
           hasPlayedCard: false,
-          isMyTurn: false,
           dealer: "",
-          activePlayer: ""
+          activePlayer: "",
+          roundOver: false,
+          roundWinner: null,
+          roundWinCard: null,
+          hasPlayedCard: false,
+          isMyTurn: false
         };
         this.selectCard = this.selectCard.bind(this)
         this.updateBet = this.updateBet.bind(this)
@@ -70,7 +74,7 @@ class GameScreen extends React.Component {
     componentDidMount(){
 
         socket.on("update-players", (playerList) =>{
-            this.setState({players: playerList})
+            this.setState({ players: playerList })
         });
         
         //sent to all players in the game, every turn
@@ -81,13 +85,14 @@ class GameScreen extends React.Component {
         });
         
         //sent when the round is over someone won the round
-        socket.on("round-over", (listCards, winner, winningCard, pot) => {
-            this.setState({ hasPlayedCard: false, currentBet: 0});
-            if(winner.displayName == this.state.username){
-                let newChips = this.state.chips + pot
-                this.setState({chips: newChips})
-            }
-            console.log(winner.displayName+" won "+pot+" chips")
+        socket.on("round-over", (listCards, winner, winningCard) => {
+            winner.chips = this.gameInfo.potAmount + winner.chips;
+            this.setState({
+                roundOver: true,
+                roundWinner: winner,
+                roundWinCard: winningCard
+            });
+            
         });
         
         //sent when a player leaves the lobby. contains a new list of players
