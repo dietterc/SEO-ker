@@ -73,7 +73,7 @@ class GameScreen extends React.Component {
           hasPlayedCard: false,
           roundOver: false,
           roundWinner: null,
-          roundWinCard: null
+          roundWinCard: null,
           hasPlayedCard: false,
           isMyTurn: false
         };
