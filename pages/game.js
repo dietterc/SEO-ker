@@ -86,12 +86,12 @@ class GameScreen extends React.Component {
         
         //sent when the round is over someone won the round
         socket.on("round-over", (listCards, winner, winningCard) => {
-            winner.chips = this.gameInfo.potAmount + winner.chips;
             this.setState({
                 roundOver: true,
                 roundWinner: winner,
                 roundWinCard: winningCard
             });
+            console.log("caught");
             
         });
         
@@ -204,7 +204,15 @@ class GameScreen extends React.Component {
                     <link rel="icon" href="/favicon.ico"/>
                 </Head>   
                 <main className={gameSty.main}>
-
+                    {this.state.roundOver ?
+                        <div>
+                            <h1>
+                                Winner: {this.state.roundWinner.displayName}
+                                <br />
+                                Winning card: {this.state.roundWinCard.searchString} with {this.state.roundWinCard.searchValue} search counts!
+                            </h1>
+                        </div> :
+                        <div>
                 <div className={gameSty.gameroomL}> 
                     <h3>Pot amount: {this.state.gameInfo.potAmount}</h3> 
                     
@@ -237,7 +245,7 @@ class GameScreen extends React.Component {
                         <button className={gameSty.card} 
                         id="confirmTurn"
                         onClick={this.confirmTurn}>
-                            Confirm Turn
+                                        Confirm Turn
                         </button>
                     </div> 
 
@@ -246,7 +254,8 @@ class GameScreen extends React.Component {
                     }
 
                     </div>
-
+                            </div>
+                    }
                 </main>
                     <style jsx>{
                         `
