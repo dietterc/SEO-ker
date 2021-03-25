@@ -27,5 +27,5 @@ jobs:
       run: npm install --production
     - name: mocha and chai
       run: npm install mocha chai
-    - run: npm test
     - run: npm ci
+    - run: npm test
