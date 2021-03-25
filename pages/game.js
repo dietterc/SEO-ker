@@ -75,7 +75,8 @@ class GameScreen extends React.Component {
             searchString: "Play next round",
             searchValue: -1,
             gameId: 0
-        }, 
+          },
+          hasLost: false, 
         };
         this.selectCard = this.selectCard.bind(this)
         this.updateBet = this.updateBet.bind(this)
@@ -93,6 +94,13 @@ class GameScreen extends React.Component {
         
         //sent to all players in the game, every turn
         socket.on("start-turn", (newGameInfo) => {
+
+            //If this player is out, skip their turn.
+            if(this.state.hasLost == true) {
+                socket.emit("turn-played", newGameInfo)
+                return
+            }
+
             this.setState({ gameInfo: newGameInfo, 
                 isMyTurn:  newGameInfo.activePlayer.displayName == this.state.username
             });
@@ -113,6 +121,10 @@ class GameScreen extends React.Component {
                 winningPot: winningPot
             });
             console.log("caught");
+
+            if(this.state.chips == 0) {
+                this.setState({hasLost: true});
+            }
             
         });
         

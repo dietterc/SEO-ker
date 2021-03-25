@@ -428,8 +428,10 @@ io.on('connection', (socket) => {
     socket.emit("set-chips", game.activePlayer.chips) //tell the client to update chip amount
 
     //update active cards and the pot
-    game.activeCards.push(gameInfo.activeCard);
-    game.potAmount += parseInt(gameInfo.betAmount);
+    if(gameInfo.activeCard != null) {
+      game.activeCards.push(gameInfo.activeCard);
+      game.potAmount += parseInt(gameInfo.betAmount);
+    }
 
     //check if it was the dealers turn
     if(game.activePlayerIndex == game.dealerIndex) {
