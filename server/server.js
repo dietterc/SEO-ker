@@ -476,12 +476,15 @@ async function asyncGetCards(numCards){
   const response = await fetch(`http://localhost:${port}/api/cards`)
   const json = await response.json()
 
-  console.log(json);
   let cards = []
-    for(var i=0; i< numCards;i++){
-      cards.push(new Card(json[i].searchString, json[i].searchValue));
+    for(var i=0; i < numCards;i++){
+      var randomCard = Math.floor(Math.random()*json.length)
+      console.log("randomIndex: " + randomCard)
+      cards.push(new Card(json[randomCard].searchString, json[randomCard].searchValue));
     }
-  return cards
+    console.log("cards\n" + cards.entries);
+ 
+    return cards
 }
 
 

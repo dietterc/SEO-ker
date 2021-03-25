@@ -4,8 +4,7 @@ export default async (req, res) => {
 
   const { db } = await connectToDatabase();
 
-  
-  console.log("connected!!")
+  console.log("Connected to database via api/cards")
   const cards = await db
 
     .collection("cards")
