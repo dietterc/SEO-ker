@@ -141,16 +141,16 @@ class Game {
     this.activeCards = []; //the cards currently played
     
     //for giving out cards
-    this.playersCards = [];
-    this.cardsIndex = 0;
+    this.allCards = [];
+    this.cardsIndex = 0; //our current index in the above list
     
-    for(let i=0;i<this.players.length;i++) {
+    //Populate the list of all cards 
 
-        
-        this.playersCards.push(this.players[i].cards)
-    }
+    //this.allCards = SOMETHING
+    // maybe shuffle at the end?
 
     //-----functions-----
+
     //Returns the highest card in activeCards
     //needs to check for dupes
     this.chooseWinningCard = function() {
@@ -185,14 +185,19 @@ class Game {
       io.to(this.id).emit("game-player-left", this.players, this.dealer, this.activePlayer);
     }
 
+    //get three unique cards from allCards
     this.getCards = function() {
-      if(this.cardsIndex < this.playersCards.length) {
-        this.players[this.cardsIndex].cards = this.playersCards[this.cardsIndex];
-        for(let i=0;i<this.playersCards[this.cardsIndex].length;i++) {
-          this.players[this.cardsIndex].originalCards.push(this.playersCards[this.cardsIndex][i].searchString)
-          console.log(this.playersCards[this.cardsIndex][i].searchString)
-        }
-        return this.playersCards[this.cardsIndex++];
+      let hand = [] //the 'hand' of cards to give out
+
+      //check if there are enough cards to give out
+      if(this.cardsIndex + 3 <= this.allCards.length) {
+        hand.push(this.allCards[this.cardsIndex]);
+        hand.push(this.allCards[this.cardsIndex]);
+        hand.push(this.allCards[this.cardsIndex]);
+        this.cardsIndex += 3;
+      }
+      if(hand.length != 0) {
+        return hand;
       }
       else {
         return null;
@@ -415,7 +420,7 @@ io.on('connection', (socket) => {
 
     let index = game.activePlayer.cards.indexOf(gameInfo.activeCard)
     if(index > -1){
-      game.activePlayer.cards.splice(index, 1) //remove card they played from hand
+      //game.activePlayer.cards.splice(index, 1) //remove card they played from hand
     }
 
     //subtract their bet from their chips
@@ -433,8 +438,8 @@ io.on('connection', (socket) => {
         //find out who's card it was 
         winningPlayer = null
         for(let i=0;i<game.players.length;i++) {
-          for(let j=0;j<game.players[i].originalCards.length;j++) {
-            if(game.players[i].originalCards[j] == winningCard.searchString) {
+          for(let j=0;j<game.players[i].cards.length;j++) {
+            if(game.players[i].cards[j] == winningCard.searchString) {
               winningPlayer = game.players[i];
               winningPlayer.chips += game.potAmount // give the winner their earnings
             }
