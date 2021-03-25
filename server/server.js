@@ -1,4 +1,6 @@
-  
+//import { connectToDatabase } from "../../util/mongodb"
+
+//const connectToDatabase = require("../util/mongodb").connectToDatabase
 const app = require('express')()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
@@ -102,6 +104,9 @@ class Player {
     this.cards = []
     this.originalCards = []
     this.chips = startingChips 
+
+    asyncGetCards(3).then(data => {this.cards = data})
+
   }
 }
 
@@ -138,13 +143,11 @@ class Game {
     //for giving out cards
     this.playersCards = [];
     this.cardsIndex = 0;
-
+    
     for(let i=0;i<this.players.length;i++) {
-      let cards = []
-      cards.push(new Card("card " + i + "-1", 100))
-      cards.push(new Card("card " + i + "-2", 200))
-      cards.push(new Card("card " + i + "-3", 300))
-      this.playersCards.push(cards)
+
+        
+        this.playersCards.push(this.players[i].cards)
     }
 
     //-----functions-----
@@ -243,6 +246,7 @@ function findLobby(code, activeLobbies){
   }
   return null
 }
+
 
 
 
@@ -464,6 +468,21 @@ io.on('connection', (socket) => {
 });
 
 
+// database connection methods by john
+
+
+
+async function asyncGetCards(numCards){
+  const response = await fetch('http://localhost:3000/api/cards')
+  const json = await response.json()
+
+  console.log(json);
+  let cards = []
+    for(var i=0; i< numCards;i++){
+      cards.push(new Card(json[i].searchString, json[i].searchValue));
+    }
+  return cards
+}
 
 
 nextApp.prepare().then(() => {
@@ -477,3 +496,4 @@ nextApp.prepare().then(() => {
     console.log(`> Ready on http://localhost:${port}`);
   })
 })
+
