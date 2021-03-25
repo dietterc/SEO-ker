@@ -15,7 +15,8 @@ class CardView extends React.Component{
             card: {
                 searchString: props.card.searchString,
                 searchValue: props.card.searchValue
-            }
+            },
+            gameId: props.card.gameId
 
         }
 
@@ -23,7 +24,13 @@ class CardView extends React.Component{
     }
 
     cardsleClick(){
-        this.props.onClick(this.state.card);
+        if(this.state.card.searchValue == -1) {
+            this.props.onClick(this.state.gameId);
+        }
+        else {
+            this.props.onClick(this.state.card);
+        }
+
     }
 
     render(){
@@ -32,6 +39,7 @@ class CardView extends React.Component{
         );
     }
 }
+
 
 
 
@@ -60,8 +68,14 @@ class GameScreen extends React.Component {
           roundOver: false,
           roundWinner: null,
           roundWinCard: null,
-          hasPlayedCard: false,
-          isMyTurn: false
+          isMyTurn: false,
+          roundCards: [],
+          winningPot: 0,
+          fakeCard: {
+            searchString: "Play next round",
+            searchValue: -1,
+            gameId: 0
+        }, 
         };
         this.selectCard = this.selectCard.bind(this)
         this.updateBet = this.updateBet.bind(this)
@@ -82,14 +96,21 @@ class GameScreen extends React.Component {
             this.setState({ gameInfo: newGameInfo, 
                 isMyTurn:  newGameInfo.activePlayer.displayName == this.state.username
             });
-        });
+            this.setState({ fakeCard: {
+                searchString: "Play next round",
+                searchValue: -1,
+                gameId: this.state.gameInfo.id 
+                }})
+            });
         
         //sent when the round is over someone won the round
-        socket.on("round-over", (listCards, winner, winningCard) => {
+        socket.on("round-over", (listCards, winner, winningCard, winningPot) => {
             this.setState({
                 roundOver: true,
                 roundWinner: winner,
-                roundWinCard: winningCard
+                roundWinCard: winningCard,
+                roundCards: listCards,
+                winningPot: winningPot
             });
             console.log("caught");
             
@@ -106,7 +127,22 @@ class GameScreen extends React.Component {
         //sent when the game is over. contains a lobby object with the same code. 
         socket.on("end-game", (lobby) => {
             this.setState({ });
-        });    
+        });  
+        
+        socket.on("restart-round", () => {
+
+            this.setState({
+                roundOver: false,
+                currentCard: null,
+                currentBet: 0, 
+                hasPlayedCard: false,
+                roundWinner: null,
+                roundWinCard: null,
+                roundCards: [],
+            });
+            console.log(this.state.roundCards)
+
+        }); 
 
         socket.on("set-cards", (newCards) => {
             this.setState({cards: newCards})
@@ -122,7 +158,7 @@ class GameScreen extends React.Component {
             this.setState({
                 currentCard: newCard
             })
-            console.log(newCard.searchString)
+            console.log(this.state.currentCard)
         }
     }
 
@@ -217,6 +253,28 @@ class GameScreen extends React.Component {
         return list
     } 
 
+    printPlayedCards() {
+        console.log(this.state.roundCards)
+        var list = []
+        let sortedArray = this.state.roundCards
+        sortedArray.sort(function(a, b){return b.searchValue - a.searchValue;});
+        for(let i=0;i<sortedArray.length;i++) {
+            var jsx = (
+                <div>
+                    {sortedArray[i].searchString} ({sortedArray[i].searchValue} searches)
+                </div>
+            )
+            list.push(jsx)
+        }
+        return list
+    }
+
+    nextRound(gameId) {
+        console.log(gameId)
+        socket.emit("next-round", gameId)
+    }
+
+
 
     render(){
         return (
@@ -229,10 +287,21 @@ class GameScreen extends React.Component {
                     {this.state.roundOver ?
                         <div>
                             <h1>
-                                Winner: {this.state.roundWinner.displayName}
+                                {this.state.roundWinner.displayName} won {this.state.winningPot} chips with card:
                                 <br />
-                                Winning card: {this.state.roundWinCard.searchString} with {this.state.roundWinCard.searchValue} search counts!
+                                {this.state.roundWinCard.searchString} ({this.state.roundWinCard.searchValue} searches)
                             </h1>
+                                <h2>
+                                    All cards played:
+                                </h2>
+                                <h3>{this.printPlayedCards()}</h3>   
+                                {this.state.gameInfo.dealer.displayName == this.state.username ?
+                                <div>
+                                    <br/>
+                                    <CardView card={this.state.fakeCard} onClick = {this.nextRound}/>
+                                </div>
+                                :<div/>
+                                }  
                         </div> :
                         <div>
                 <div className={gameSty.gameroomL}> 
@@ -244,7 +313,7 @@ class GameScreen extends React.Component {
                     <div>
                     <br/><br/>
                     <b>Selected Card:</b>
-                    <CardView card = {this.state.currentCard} />
+                        <div className={gameSty.card}>{this.state.currentCard.searchString}</div>
                     </div>
                     :
                     <div/>

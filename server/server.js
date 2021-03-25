@@ -424,7 +424,7 @@ io.on('connection', (socket) => {
 
     //update active cards and the pot
     game.activeCards.push(gameInfo.activeCard);
-    game.potAmount += gameInfo.betAmount;
+    game.potAmount += parseInt(gameInfo.betAmount);
 
     //check if it was the dealers turn
     if(game.activePlayerIndex == game.dealerIndex) {
@@ -446,6 +446,7 @@ io.on('connection', (socket) => {
         else {
           io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard, game.potAmount);
           game.potAmount = 0 //reset the pot for next round
+          game.activeCards = []
         }
       }
       //have to do this to update the chips on the client side
@@ -465,6 +466,26 @@ io.on('connection', (socket) => {
     }
 
   });
+
+  socket.on('next-round', (gameId) => {
+
+    console.log(gameId)
+
+    game = findGame(gameId, activeGames);
+    io.to(gameId).emit("restart-round");
+
+    game.dealerIndex = (game.dealerIndex + 1) % game.players.length;
+    game.dealer = game.players[game.dealerIndex]
+
+    game.activePlayerIndex = (game.dealerIndex + 1) % game.players.length; //player to the "left" ..or right?
+    game.activePlayer = game.players[game.activePlayerIndex];
+      
+    gameInfo = new GameInfo(gameId, game.activePlayer, 0, game.dealer)
+    //have to do this to update the chips on the client side
+    io.to(gameId).emit("update-players", game.players);
+    io.to(gameId).emit("start-turn", gameInfo);
+  });
+
 });
 
 
