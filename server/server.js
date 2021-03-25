@@ -473,7 +473,7 @@ io.on('connection', (socket) => {
 
 
 async function asyncGetCards(numCards){
-  const response = await fetch('http://localhost:3000/api/cards')
+  const response = await fetch(`http://localhost:${port}/api/cards`)
   const json = await response.json()
 
   console.log(json);
