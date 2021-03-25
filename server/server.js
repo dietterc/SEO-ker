@@ -38,13 +38,13 @@ class Lobby {
 
         this.players.push(player);
         player.lobbyId = this.lobbyId;
-        console.log(player.displayName + ' joined lobby ' + this.lobbyId + ' (' + player.playerId + ')');
-
+        //console.log(player.displayName + ' joined lobby ' + this.lobbyId + ' (' + player.playerId + ')');
+        /*
         console.log("Players now in lobby:");
         for(var i=0;i<this.players.length;i++) {
           console.log(this.players[i]);
         }
-
+        */
         //if they are the first to join set them as the host
         if(this.players.length == 1){
           this.host = player;
@@ -52,46 +52,54 @@ class Lobby {
         return true;
       }
       else {
-        console.log(player + ' cannot join the lobby, lobby is full')
+        console.log(player.displayName + ' cannot join the lobby, lobby is full')
         return false;
       }
     }
 
     //remove player from this lobby
     this.leaveLobby = function (player) {
-      var index = this.players.indexOf(player)
+        var index = this.players.indexOf(player)
+        if (this.host == player && this.players.length > 1) {
+            if (index == 0) {
+                this.host = this.players[index + 1];
+            } else {
+                this.host = this.players[0];
+            }
+        }
       this.players.splice(index, 1)
-      console.log(player.displayName + ' left lobby ' + this.lobbyId + ' (' + player.playerId + ')')
-
+      //console.log(player.displayName + ' left lobby ' + this.lobbyId + ' (' + player.playerId + ')')
+        /*
       if(this.players.length != 0) {
         console.log("Players now in lobby:")
         for(var i=0;i<this.players.length;i++) {
           console.log(this.players[i])
         }
       }
-
+      */
       //if only one player remains set them to be the host
-      if(this.players.length == 1) {
-        this.host = this.players[0]
-      }
+      /*  if (this.players.length == 1) {
+            this.host = this.players[0]
+        } */
       if(this.players.length == 0) {
         this.host = ""
       }
 
     }
-  
+
     this.isJoinable = function() {
-      return this.players.length <= 8 && !this.isInGame; 
+      return this.players.length < 8 && !this.isInGame; 
     }
     
 
-    this.isConnected = function (playerId) {
-      for(var i;i<this.players.length;i++) {
-        if(this.players[i].playerId == playerId) {
-          return true
-        }
+      this.isConnected = function (player) {
+          for (let i = 0; i < this.players.length; i++) {
+              if (this.players[i].playerId === player.playerId) {
+                  return true;
+              }
+          }
+          return false;
       }
-    }
   }
 }
 
@@ -150,7 +158,7 @@ class Game {
         this.playersCards.push(this.players[i].cards)
     }
 
-    //-----functions-----
+    //-----Functions-----
     //Returns the highest card in activeCards
     //needs to check for dupes
     this.chooseWinningCard = function() {
@@ -201,7 +209,9 @@ class Game {
   }
 }
 
-function generateCode() {
+// This array is used to expose functions and classes for testing
+let moduleExports = {};
+moduleExports.generateCode = function () {
   var codeFound = false
   var code = "";
 
@@ -247,9 +257,13 @@ function findLobby(code, activeLobbies){
   return null
 }
 
+moduleExports.createLobby = function (id) {
+    return new Lobby(id);
+}
 
-
-
+moduleExports.createPlayer = function (id, displayName, socketId) {
+    return new Player(id, displayName, socketId);
+}
 //----------socket.io server-side----------
 io.on('connection', (socket) => {
 
@@ -262,7 +276,7 @@ io.on('connection', (socket) => {
   sends a join-lobby signal to the client who sent this
   */
   socket.on('host-lobby', (...args) => {
-    var lobbyId = generateCode();
+    var lobbyId = moduleExports.generateCode();
     
     player = new Player(nextPlayerId++,args[1],socket.id);
     lobby = new Lobby(lobbyId);
@@ -466,8 +480,6 @@ io.on('connection', (socket) => {
 
   });
 });
-
-
 // database connection methods by john
 
 
@@ -497,3 +509,4 @@ nextApp.prepare().then(() => {
   })
 })
 
+module.exports = moduleExports;

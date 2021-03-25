@@ -4,7 +4,7 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, unit-test ]
   pull_request:
     branches: [ main ]
 
@@ -24,5 +24,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: npm install
-      run: npm install --production
+      run: npm install
+    - name: mocha and chai
+      run: npm install mocha chai --production
+    
     - run: npm ci
+    - run: npm test
