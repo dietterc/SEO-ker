@@ -4,9 +4,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ main, unit-test ]
+    branches: [ main, unit-test, heroku-test ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, heroku-test ]
 
 jobs:
   build:
