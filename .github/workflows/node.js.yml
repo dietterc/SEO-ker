@@ -24,9 +24,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: npm install
-      run: npm install
+      run: npm install --production
     - name: mocha and chai
-      run: npm install mocha chai --production
-    
-    - run: npm ci
+      run: npm install mocha chai
     - run: npm test
+    - run: npm ci
