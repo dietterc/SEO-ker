@@ -210,7 +210,6 @@ class GameScreen extends React.Component {
                 socket.emit("turn-played", newGameInfo)
             }
             
-            
         }
     }
     
@@ -218,30 +217,34 @@ class GameScreen extends React.Component {
         var list = []
         for(let i=0;i<this.state.players.length;i++) {
             var jsx = (<div></div>);
+            let style = gameSty.nameListBlack
+            if(this.state.players[i].chips == 0) {
+                style = gameSty.nameListGrey
+            }
             if(this.state.players[i].playerId == this.state.gameInfo.activePlayer.playerId && this.state.players[i].playerId == this.state.gameInfo.dealer.playerId) {
                 jsx = (
-                    <div>
+                    <div className={style}>
                         {this.state.players[i].displayName} has {this.state.players[i].chips} chips. <b>(Dealer)</b> *
                     </div>
                 )
             }    
             else if(this.state.players[i].playerId == this.state.gameInfo.dealer.playerId) {
                 jsx = (
-                    <div>
+                    <div className={style}>
                         {this.state.players[i].displayName} has {this.state.players[i].chips} chips. <b>(Dealer)</b>
                     </div>
                 )
             }
             else if(this.state.players[i].playerId == this.state.gameInfo.activePlayer.playerId) {
                 jsx = (
-                    <div>
+                    <div className={style}>
                         {this.state.players[i].displayName} has {this.state.players[i].chips} chips. *
                     </div>
                 )
             }
             else {
                 jsx = (
-                    <div>
+                    <div className={style}>
                         {this.state.players[i].displayName} has {this.state.players[i].chips} chips.
                     </div>
                 )

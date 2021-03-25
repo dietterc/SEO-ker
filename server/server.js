@@ -105,7 +105,7 @@ class Player {
     this.originalCards = []
     this.chips = startingChips 
 
-    asyncGetCards(3).then(data => {this.cards = data})
+    //asyncGetCards(3).then(data => {this.cards = data})
 
   }
 }
@@ -148,6 +148,21 @@ class Game {
 
     //this.allCards = SOMETHING
     // maybe shuffle at the end?
+    var c1 = {
+      searchString: 'Kim Janey',
+      searchValue: 20000
+    }
+    var c2 = {
+      searchString: 'James Harden',
+      searchValue: 50000
+    }
+    var c3 = {
+      searchString: 'Mexico vs USA 2021',
+      searchValue: 50000
+    }
+  
+    this.allCards.push(c1,c2,c3)
+    this.allCards.push(c1,c2,c3)
 
     //-----functions-----
 
@@ -192,8 +207,8 @@ class Game {
       //check if there are enough cards to give out
       if(this.cardsIndex + 3 <= this.allCards.length) {
         hand.push(this.allCards[this.cardsIndex]);
-        hand.push(this.allCards[this.cardsIndex]);
-        hand.push(this.allCards[this.cardsIndex]);
+        hand.push(this.allCards[this.cardsIndex + 1]);
+        hand.push(this.allCards[this.cardsIndex + 2]);
         this.cardsIndex += 3;
       }
       if(hand.length != 0) {
@@ -396,9 +411,15 @@ io.on('connection', (socket) => {
     io.to(lobby.lobbyId).emit("update-players", game.players );
 
     //send them their cards and chips
-    socket.emit("set-cards", game.getCards());
+    var cards = game.getCards()
+    socket.emit("set-cards", cards);
     socket.emit("set-chips", startingChips);
 
+    for(let i=0;i<game.players.length;i++) {
+      if(game.players[i].displayName == username) {
+        game.players[i].cards = cards
+      }
+    }
 
     lobby.readyPlayers += 1;
     if(lobby.players.length == lobby.readyPlayers) {
@@ -415,8 +436,10 @@ io.on('connection', (socket) => {
       console.log("turn played for non existing game " + gameInfo.id);
       return
     }
-
-    console.log(game.activePlayer.displayName + " played "+ gameInfo.activeCard.searchString+" for game " + gameInfo.id);
+    
+    if(gameInfo.activeCard != null) {
+      console.log(game.activePlayer.displayName + " played "+ gameInfo.activeCard.searchString+" for game " + gameInfo.id);
+    }
 
     let index = game.activePlayer.cards.indexOf(gameInfo.activeCard)
     if(index > -1){
@@ -441,7 +464,8 @@ io.on('connection', (socket) => {
         winningPlayer = null
         for(let i=0;i<game.players.length;i++) {
           for(let j=0;j<game.players[i].cards.length;j++) {
-            if(game.players[i].cards[j] == winningCard.searchString) {
+            console.log(game.players[i].cards[j].searchString + ", " + winningCard.searchString)
+            if(game.players[i].cards[j].searchString == winningCard.searchString) {
               winningPlayer = game.players[i];
               winningPlayer.chips += game.potAmount // give the winner their earnings
             }
@@ -449,6 +473,7 @@ io.on('connection', (socket) => {
         }
         if(winningPlayer == null) {
           //no winning player was found, did they leave the game?
+          console.log("Error no winning player found")
         }
         else {
           io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard, game.potAmount);
