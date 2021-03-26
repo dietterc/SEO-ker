@@ -160,11 +160,6 @@ class Home extends React.Component{
 
   //handles which react component is to be loaded under the logo
   activeScreen(){
-    if(this.state.registerView){
-      return( 
-         <Movies/>
-      )
-    }
     if(!(this.state.loggedIn || this.state.inLobby)){
       return <LoginInput onSubmit={this.updateUsername}/>
     }
@@ -209,7 +204,6 @@ class Home extends React.Component{
           <title>SEO-ker - Login</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <RegisterBtn onClick = {this.registerBtnClick}/>
         <main className={styles.main}>
           <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
           <p className={styles.description}>by n ∈ ℤ<sup>+</sup> </p>
