@@ -22,6 +22,7 @@ class Home extends React.Component{
     super(props);
     this.state = {
       username: "",
+      playerId: "",
       loggedIn: false,
       inLobby: false,
       lobbyCode: "",
@@ -43,8 +44,8 @@ class Home extends React.Component{
   componentDidMount(){
     //PUT INCOMING MESSAGES HERE
     //any message incoming to the client must be dealt with in a socket.on function
-    socket.on("join-lobby", (lobby) => {
-      this.setState({lobbyCode: lobby.lobbyId,inLobby: true})
+    socket.on("join-lobby", (lobby, newPlayerId) => {
+      this.setState({lobbyCode: lobby.lobbyId,inLobby: true, playerId: newPlayerId})
       let lobbyList = ""
       for(let i=0;i<lobby.players.length;i++) {
         
@@ -117,7 +118,7 @@ class Home extends React.Component{
     socket.on("host-started-game", (lobbyId) => {
       this.setState({inLobby: false});
       if(lobbyId === this.state.lobbyCode){ //only change the page if its the correct ID. probably does nothing
-        this.props.router.push({pathname: `/game`, query: {code: this.state.lobbyCode, user: this.state.username}}); //changes the page
+        this.props.router.push({pathname: `/game`, query: {code: this.state.lobbyCode, user: this.state.playerId}}); //changes the page
       }
     });    
 

@@ -48,7 +48,7 @@ class GameScreen extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-          username: props.router.query.user,  
+          playerId: props.router.query.user,  
           lobbyId: props.router.query.code, //this is taken as [lobbyCode] in the URL .
           gameInfo: {
               potAmount: 0,
@@ -81,7 +81,7 @@ class GameScreen extends React.Component {
         this.selectCard = this.selectCard.bind(this)
         this.updateBet = this.updateBet.bind(this)
         this.confirmTurn = this.confirmTurn.bind(this)
-        socket.emit("player-joined-game", this.state.lobbyId, this.state.username)
+        socket.emit("player-joined-game", this.state.lobbyId, this.state.playerId)
         
     }
 
@@ -102,14 +102,14 @@ class GameScreen extends React.Component {
             }
 
             this.setState({ gameInfo: newGameInfo, 
-                isMyTurn:  newGameInfo.activePlayer.displayName == this.state.username
+                isMyTurn:  newGameInfo.activePlayer.playerId == this.state.playerId
             });
             this.setState({ fakeCard: {
                 searchString: "Play next round",
                 searchValue: -1,
                 gameId: this.state.gameInfo.id 
-                }})
-            });
+            }})
+        });
         
         //sent when the round is over someone won the round
         socket.on("round-over", (listCards, winner, winningCard, winningPot) => {
@@ -311,7 +311,7 @@ class GameScreen extends React.Component {
                                     All cards played:
                                 </h2>
                                 <h3>{this.printPlayedCards()}</h3>   
-                                {this.state.gameInfo.dealer.displayName == this.state.username ?
+                                {this.state.gameInfo.dealer.playerId == this.state.playerId ?
                                 <div>
                                     <br/>
                                     <CardView card={this.state.fakeCard} onClick = {this.nextRound}/>
