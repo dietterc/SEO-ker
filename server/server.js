@@ -45,7 +45,8 @@ class Lobby {
 
         //if they are the first to join set them as the host
         if(this.players.length == 1){
-          this.host = player;
+            this.host = player;
+            io.to(this.host.socketId).emit('promote-to-host');
         }
         return true;
       }
@@ -64,6 +65,7 @@ class Lobby {
             } else {
                 this.host = this.players[0];
             }
+            io.to(this.host.socketId).emit('promote-to-host');
         }
       this.players.splice(index, 1)
 
@@ -265,7 +267,7 @@ moduleExports.generateCode = function () {
 
 }
 
-function findGame(code, activeGames){
+moduleExports.findGame = function (code, activeGames){
   for(var i=0;i<activeGames.length;i++) {
     if(activeGames[i].id == code) {
       return activeGames[i];
@@ -289,6 +291,14 @@ moduleExports.createLobby = function (id) {
 
 moduleExports.createPlayer = function (id, displayName, socketId) {
     return new Player(id, displayName, socketId);
+}
+
+moduleExports.createGame = function (id, players) {
+    return new Game(id, players);
+}
+
+moduleExports.createCard = function (searchString, searchValue) {
+    return new Card(searchString, searchValue);
 }
 //----------socket.io server-side----------
 io.on('connection', (socket) => {
@@ -400,7 +410,7 @@ io.on('connection', (socket) => {
     //var game = null
     let code = lobbyId.toUpperCase().trim();
 
-    var game = findGame(code, activeGames)
+    var game = moduleExports.findGame(code, activeGames);
 
     var cards = game.getCards()
 
@@ -434,7 +444,7 @@ io.on('connection', (socket) => {
 
   socket.on('turn-played', (gameInfo) => {
 
-    game = findGame(gameInfo.id, activeGames);
+    game = moduleExports.findGame(gameInfo.id, activeGames);
 
     if(game == null) {
       console.log("turn played for non existing game " + gameInfo.id);
@@ -497,7 +507,7 @@ io.on('connection', (socket) => {
 
     console.log(gameId)
 
-    game = findGame(gameId, activeGames);
+    game = moduleExports.findGame(gameId, activeGames);
   
     io.to(gameId).emit("restart-round");
 

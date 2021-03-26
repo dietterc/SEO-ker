@@ -16,6 +16,60 @@ describe('Server', function () {
         });
     });
 
+    describe('#findGame()', function () {
+        let player = server.createPlayer("tester1", "Tester 1", "s1id");
+        let game = server.createGame("TESTID1", [player]);
+        function newGame(id) {
+            return server.createGame(id, [player]);
+        }
+        it('should find nothing when there is no games in the list', function () {
+            let gameList = [];
+            let result = server.findGame("TESTID1", gameList);
+            assert.isNull(result);
+        });
+        it('should find the only game in the list', function () {
+            let gameList = [game];
+            let result = server.findGame("TESTID1", gameList)
+            assert.equal(result, gameList[0]);
+        });
+
+        it('should not find anything if nothing matches (one active game)', function () {
+            let gameList = [game];
+            let result = server.findGame("NotInList", gameList);
+            assert.isNull(result);
+        });
+
+        it('should find a game at the end of the list (two active games)', function () {
+            let gameList = [game, newGame("TESTID2")];
+            let result = server.findGame("TESTID2", gameList);
+            assert.equal(result, gameList[1]);
+        });
+
+        it('should find a game at the start of the list (two active games)', function () {
+            let gameList = [game, newGame("TESTID2")];
+            let result = server.findGame("TESTID1", gameList);
+            assert.equal(result, gameList[0]);
+        })
+
+        it('should find a game in the middle of the list (three active games)', function () {
+            let gameList = [game, newGame("TESTID2"), newGame("TESTID3")];
+            let result = server.findGame("TESTID2", gameList);
+            assert.equal(result, gameList[1]);
+        })
+
+        it('should find a game at the start of the list (three active games)', function () {
+            let gameList = [game, newGame("TESTID2"), newGame("TESTID3")];
+            let result = server.findGame("TESTID1", gameList);
+            assert.equal(result, gameList[0]);
+        });
+
+        it('should not find a game that is not in the list (three active games)', function () {
+            let gameList = [game, newGame("TESTID2"), newGame("TESTID3")];
+            let result = server.findGame("TESTID", gameList);
+            assert.isNull(result);
+        })
+    });
+
     describe("Testing Classes", function () {
         // Lobby Class
         describe("Lobby Class", function () {
@@ -233,7 +287,51 @@ describe('Server', function () {
 
         // Game Class
         describe("Game Class", function () {
+            
+            describe('initial game state', function () {
+                let game = server.createGame("TESTID",
+                    [server.createPlayer("tester1", "Tester 1", "s1id")]);
+                it("should not be null", function () {
+                    assert.isNotNull(game);
+                });
+                it("should have a non-empty array called players", function () {
+                    assert(Array.isArray(game.players));
+                    assert.isNotEmpty(game.players);
+                });
+                it("should have 0 chips in the pot", function () {
+                    assert.equal(game.potAmount, 0);
+                });
+                it("should have the id of TESTID", function () {
+                    assert.equal(game.id, "TESTID");
+                });
+            });
 
+            describe('#chooseWinningCard()', function () {
+                let game = server.createGame("TESTID", []);
+                this.beforeEach(function () {
+                    game.activeCards = [server.createCard("Card 1", 300)];
+                })
+                it("should select the card with 300", function () {
+                    let result = game.chooseWinningCard();
+                    assert.equal(result, game.activeCards[0]);
+                });
+                it("should select the card with 500", function () {
+                    game.activeCards.push(server.createCard("Card 2", 500));
+                    let result = game.chooseWinningCard();
+                    assert.equal(result, game.activeCards[1]);
+                });
+                it("should select the card with 300", function () {
+                    game.activeCards.push(server.createCard("Card 2", 200));
+                    let result = game.chooseWinningCard();
+                    assert.equal(result, game.activeCards[0]);
+                })
+                it("should select the card with 888", function () {
+                    game.activeCards.push(server.createCard("Card 2", 888));
+                    game.activeCards.push(server.createCard("Card 3", 822));
+                    let result = game.chooseWinningCard();
+                    assert.equal(result, game.activeCards[1]);
+                });
+            })
         });
     });
 

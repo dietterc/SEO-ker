@@ -1,11 +1,14 @@
 {
   "ExpandedNodes": [
     "",
+    "\\.github",
+    "\\.github\\workflows",
     "\\components",
     "\\pages",
     "\\server",
-    "\\styles"
+    "\\styles",
+    "\\test"
   ],
-  "SelectedNode": "\\pages\\game.js",
+  "SelectedNode": "\\server\\server.js",
   "PreviewInSolutionExplorer": false
 }
