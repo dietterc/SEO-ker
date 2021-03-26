@@ -31,6 +31,10 @@ class Lobby {
     this.lobbyId = id;
     this.host = ""; //blank if no host is set yet
     this.isInGame = false;
+    this.cardsList = [];
+
+    asyncGetCards(100).then(data => this.cardsList = data).then(() => console.log("...finished returning"))
+    
 
     //add player to this lobby
     this.joinLobby = function (player) {
@@ -104,9 +108,6 @@ class Player {
     this.cards = []
     this.originalCards = []
     this.chips = startingChips 
-
-    //asyncGetCards(3).then(data => {this.cards = data})
-
   }
 }
 
@@ -125,12 +126,11 @@ class GameInfo {
     this.activeCard = null;
     this.potAmount = potAmount;
     this.dealer = dealer;
-
   }
 }
 
 class Game {
-  constructor(id,players) {
+  constructor(id,players,cardsList) {
     this.id = id;
     this.players = players;
     this.dealerIndex = Math.floor(Math.random() * this.players.length)
@@ -141,29 +141,12 @@ class Game {
     this.activeCards = []; //the cards currently played
     
     //for giving out cards
-    this.allCards = [];
-    this.cardsIndex = 0; //our current index in the above list
-    
+    this.allCards=[];
+    this.cardsIndex = 0; 
+    //our current index in the above list
     //Populate the list of all cards 
-
-    //this.allCards = SOMETHING
-    // maybe shuffle at the end?
-    var c1 = {
-      searchString: 'Kim Janey',
-      searchValue: 20000
-    }
-    var c2 = {
-      searchString: 'James Harden',
-      searchValue: 50000
-    }
-    var c3 = {
-      searchString: 'Mexico vs USA 2021',
-      searchValue: 50000
-    }
-  
-    this.allCards.push(c1,c2,c3)
-    this.allCards.push(c1,c2,c3)
-
+    
+    this.allCards = cardsList;  
     //-----functions-----
 
     //Returns the highest card in activeCards
@@ -205,6 +188,7 @@ class Game {
       let hand = [] //the 'hand' of cards to give out
 
       //check if there are enough cards to give out
+      
       if(this.cardsIndex + 3 <= this.allCards.length) {
         hand.push(this.allCards[this.cardsIndex]);
         hand.push(this.allCards[this.cardsIndex + 1]);
@@ -380,8 +364,8 @@ io.on('connection', (socket) => {
 
     lobby.isInGame = true;
 
-    var game = new Game(lobby.lobbyId,lobby.players)
-
+    var game = new Game(lobby.lobbyId,lobby.players, lobby.cardsList)
+    
     activeGames.push(game)
   });
 
@@ -397,21 +381,26 @@ io.on('connection', (socket) => {
     let code = lobbyId.toUpperCase().trim();
 
     var game = findGame(code, activeGames)
-    
+
+    var cards = game.getCards()
+    console.log("getCards returns")
+
     //socket refreshes on page change, so assign that player their new socket.id 
     for(var i=0;i<game.players.length;i++) {
-      if(game.players[i].username == username){
+      if(game.players[i].displayName == username){
         game.players[i].socketId = socket.id
       }
     }
-    
+
+
     //subscribe the socket to the room called lobbyId
     socket.join(lobbyId)
+
     //send everyone in the room an updated list of players
     io.to(lobby.lobbyId).emit("update-players", game.players );
 
     //send them their cards and chips
-    var cards = game.getCards()
+
     socket.emit("set-cards", cards);
     socket.emit("set-chips", startingChips);
 
@@ -473,7 +462,7 @@ io.on('connection', (socket) => {
         }
         if(winningPlayer == null) {
           //no winning player was found, did they leave the game?
-          console.log("Error no winning player found")
+          console.log("Error: No winning player found")
         }
         else {
           io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard, game.potAmount);
@@ -493,17 +482,25 @@ io.on('connection', (socket) => {
       gameInfo.activeCard = null;
       gameInfo.potAmount = game.potAmount;
       //have to do this to update the chips on the client side
+      
       io.to(game.id).emit("update-players", game.players);
       io.to(game.id).emit("start-turn", gameInfo);
     }
 
   });
 
+
+  socket.on('deal-new-hand', () => {
+      
+  })
+
   socket.on('next-round', (gameId) => {
 
     console.log(gameId)
 
     game = findGame(gameId, activeGames);
+
+  
     io.to(gameId).emit("restart-round");
 
     game.dealerIndex = (game.dealerIndex + 1) % game.players.length;
@@ -511,7 +508,16 @@ io.on('connection', (socket) => {
 
     game.activePlayerIndex = (game.dealerIndex + 1) % game.players.length; //player to the "left" ..or right?
     game.activePlayer = game.players[game.activePlayerIndex];
-      
+    
+    for(let i = 0; i< game.players.length; i++){
+      let newHand = []
+      newHand = game.getCards();
+      game.players[i].cards = newHand;
+      var playerSocket = game.players[i].socketId;
+      io.to(playerSocket).emit('set-cards', newHand);
+      console.log("new cards sent:" + newHand);
+    };
+
     gameInfo = new GameInfo(gameId, game.activePlayer, 0, game.dealer)
     //have to do this to update the chips on the client side
     io.to(gameId).emit("update-players", game.players);
@@ -529,11 +535,12 @@ async function asyncGetCards(numCards){
   const response = await fetch('http://localhost:3000/api/cards')
   const json = await response.json()
 
-  console.log(json);
+  
   let cards = []
     for(var i=0; i< numCards;i++){
       cards.push(new Card(json[i].searchString, json[i].searchValue));
     }
+    console.log("asyncGetCardsReturning...")
   return cards
 }
 

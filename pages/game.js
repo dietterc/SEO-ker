@@ -57,7 +57,7 @@ class GameScreen extends React.Component {
           }, 
           players: [], 
           cards: [
-
+           
           ],
           chips: 0, 
           currentCard: null,
@@ -153,11 +153,12 @@ class GameScreen extends React.Component {
                 roundCards: [],
             });
             console.log(this.state.roundCards)
-
+            socket.emit("deal-new-hand")
         }); 
 
         socket.on("set-cards", (newCards) => {
             this.setState({cards: newCards})
+            console.log("new Cards received")
         })
         socket.on("set-chips", (newChips) =>{
             this.setState({chips: newChips})
@@ -339,7 +340,9 @@ class GameScreen extends React.Component {
 
                 <div className={gameSty.gameroomR}>
                     <ul className = "ul"> 
-                        {this.state.cards.map(card =>(
+                        {
+                        
+                        this.state.cards.map(card =>(
                         <li key={card.searchString}> <CardView card={card} onClick = {this.selectCard}/> </li>
                         ))}
                     </ul>
