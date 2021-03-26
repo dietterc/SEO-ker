@@ -6,7 +6,6 @@ import LobbyInput from "../components/lobby-input.js"
 import {withRouter} from 'next/router';
 import Link from 'react';
 import Register from './register';
-import Movies from './movies';
 
 const io = require("socket.io-client");
 const socket = io();
@@ -22,6 +21,7 @@ class Home extends React.Component{
     super(props);
     this.state = {
       username: "",
+      playerId: "",
       loggedIn: false,
       inLobby: false,
       lobbyCode: "",
@@ -43,8 +43,8 @@ class Home extends React.Component{
   componentDidMount(){
     //PUT INCOMING MESSAGES HERE
     //any message incoming to the client must be dealt with in a socket.on function
-    socket.on("join-lobby", (lobby) => {
-      this.setState({lobbyCode: lobby.lobbyId,inLobby: true})
+    socket.on("join-lobby", (lobby, newPlayerId) => {
+      this.setState({lobbyCode: lobby.lobbyId,inLobby: true, playerId: newPlayerId})
       let lobbyList = ""
       for(let i=0;i<lobby.players.length;i++) {
         
@@ -117,7 +117,7 @@ class Home extends React.Component{
     socket.on("host-started-game", (lobbyId) => {
       this.setState({inLobby: false});
       if(lobbyId === this.state.lobbyCode){ //only change the page if its the correct ID. probably does nothing
-        this.props.router.push({pathname: `/game`, query: {code: this.state.lobbyCode, user: this.state.username}}); //changes the page
+        this.props.router.push({pathname: `/game`, query: {code: this.state.lobbyCode, user: this.state.playerId}}); //changes the page
       }
     });    
 
@@ -162,11 +162,6 @@ class Home extends React.Component{
 
   //handles which react component is to be loaded under the logo
   activeScreen(){
-    if(this.state.registerView){
-      return( 
-         <Movies/>
-      )
-    }
     if(!(this.state.loggedIn || this.state.inLobby)){
       return <LoginInput onSubmit={this.updateUsername}/>
     }
@@ -211,7 +206,6 @@ class Home extends React.Component{
           <title>SEO-ker - Login</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <RegisterBtn onClick = {this.registerBtnClick}/>
         <main className={styles.main}>
           <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
           <p className={styles.description}>by n ∈ ℤ<sup>+</sup> </p>
