@@ -316,7 +316,7 @@ io.on('connection', (socket) => {
 
     player = new Player(nextPlayerId++,"" + args[1],socket.id)  
     if(lobby.joinLobby(player)){
-      socket.emit("join-lobby", lobby);
+      socket.emit("join-lobby", lobby, player.playerId);
     
       socket.join(lobby.lobbyId) 
       io.to(lobby.lobbyId).emit("lobby-player-joined", lobby);
@@ -385,12 +385,9 @@ io.on('connection', (socket) => {
     activeGames.push(game)
   });
 
-  /*
-  args[0] lobbyID
-  args[1] socketID
-  */
-  socket.on('player-joined-game', (lobbyId, username) => {
-    if(lobbyId == null || username == null) {
+
+  socket.on('player-joined-game', (lobbyId, playerId) => {
+    if(lobbyId == null || playerId == null) {
       return
     }
     //var game = null
@@ -400,7 +397,7 @@ io.on('connection', (socket) => {
     
     //socket refreshes on page change, so assign that player their new socket.id 
     for(var i=0;i<game.players.length;i++) {
-      if(game.players[i].username == username){
+      if(game.players[i].playerId == playerId){
         game.players[i].socketId = socket.id
       }
     }
@@ -416,7 +413,7 @@ io.on('connection', (socket) => {
     socket.emit("set-chips", startingChips);
 
     for(let i=0;i<game.players.length;i++) {
-      if(game.players[i].displayName == username) {
+      if(game.players[i].playerId == playerId) {
         game.players[i].cards = cards
       }
     }
