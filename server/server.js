@@ -133,13 +133,12 @@ class Game {
     this.activeCards = []; //the cards currently played
     
     //for giving out cards
-    this.allCards=[];
+    this.allCards=cardsList;
     this.cardsIndex = 0; 
     //our current index in the above list
     //Populate the list of all cards 
 
     
-    this.allCards = cardsList;  
     //-----functions-----
 
     //Returns the highest card in activeCards
