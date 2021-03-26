@@ -95,12 +95,6 @@ class GameScreen extends React.Component {
         //sent to all players in the game, every turn
         socket.on("start-turn", (newGameInfo) => {
 
-            //If this player is out, skip their turn.
-            if(this.state.hasLost == true) {
-                socket.emit("turn-played", newGameInfo)
-                return
-            }
-
             this.setState({ gameInfo: newGameInfo, 
                 isMyTurn:  newGameInfo.activePlayer.playerId == this.state.playerId
             });
