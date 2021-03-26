@@ -4,6 +4,9 @@ import styles from '../styles/Home.module.css';
 import LoginInput from "../components/login-input.js";
 import LobbyInput from "../components/lobby-input.js"
 import {withRouter} from 'next/router';
+import Link from 'react';
+import Register from './register';
+
 const io = require("socket.io-client");
 const socket = io();
 
@@ -18,12 +21,22 @@ class Home extends React.Component{
     super(props);
     this.state = {
       username: "",
+      playerId: "",
       loggedIn: false,
       inLobby: false,
       lobbyCode: "",
       lobbyPlayerList: "",
-      isHost: false
+      isHost: false,
+      registerView: false,
+      oldDisplayName: props.router.query.user,  
+      newLobbyId: props.router.query.code,   
     };
+
+    if(this.state.newLobbyId != undefined) {
+      this.setState({username: this.state.oldDisplayName}); 
+      
+      socket.emit('join-lobby', 'joinID', this.state.oldDisplayName ,this.state.newLobbyId);
+    }
     
     //these allow you to call this.state.whatever in each of the functions. 
     //needed for all new functions 
@@ -32,13 +45,18 @@ class Home extends React.Component{
     this.onHost = this.onHost.bind(this);
     this.readyUp = this.readyUp.bind(this);
     this.hostStartGame = this.hostStartGame.bind(this);
+    this.registerBtnClick = this.registerBtnClick.bind(this);
   }
 
   componentDidMount(){
     //PUT INCOMING MESSAGES HERE
     //any message incoming to the client must be dealt with in a socket.on function
-    socket.on("join-lobby", (lobby) => {
-      this.setState({lobbyCode: lobby.lobbyId,inLobby: true})
+    socket.on("join-lobby", (lobby, newPlayerId) => {
+
+      this.setState({loggedIn: true}); 
+      this.setState({inLobby: true}); 
+      
+      this.setState({lobbyCode: lobby.lobbyId,inLobby: true, playerId: Number(newPlayerId)})
       let lobbyList = ""
       for(let i=0;i<lobby.players.length;i++) {
         
@@ -111,14 +129,19 @@ class Home extends React.Component{
     socket.on("host-started-game", (lobbyId) => {
       this.setState({inLobby: false});
       if(lobbyId === this.state.lobbyCode){ //only change the page if its the correct ID. probably does nothing
-        this.props.router.push({pathname: `/game`, query: {code: this.state.lobbyCode, user: this.state.username}}); //changes the page
+        this.props.router.push({pathname: `/game`, query: {code: this.state.lobbyCode,
+                                                            user: this.state.playerId, 
+                                                            displayName: this.state.username}}); //changes the page
       }
     });    
 
+      socket.on("promote-to-host", () => {
+          this.setState({ isHost: true });
+      });
   }
  
 
-  //these update methods update the state according to user input. 
+  // update the state according to user input. 
   updateUsername(str){
     this.setState({username: str}, function(){
       if(this.state.username.replace(/\s+/g, "") !== ""){
@@ -162,29 +185,31 @@ class Home extends React.Component{
     else if(this.state.loggedIn && this.state.inLobby){
       
       return (
-        <div >
-          {this.state.isHost ? 
-              <button className={styles.card} 
-                id="host-lobbyButton" 
-                onClick={this.hostStartGame}>
-                  Start Game
-              </button> 
-            :
-            <div> </div> 
-            
-          }
+          <div className={styles.lobby}>
          <div className={styles.codeBox}> 
-             <h2 className={styles.lobbyCode}>Lobby Code: {this.state.lobbyCode}</h2>
+            <h2 className={styles.lobbyCode}>Lobby Code: {this.state.lobbyCode}</h2>
+            {this.state.isHost ?
+                <button className={styles.card}
+                   id="host-lobbyButton"
+                   onClick={this.hostStartGame}>
+                   Start Game
+                </button>
+                :
+               <div> </div>}
          </div>
+              
          <div className={styles.playerList}>
-                  <h2>Players connected:</h2> <h2 > <div className={styles.hostandjoin}>{this.state.lobbyPlayerList}</div></h2> </div>
+            <h2>Players connected:</h2> <h2 > <div className={styles.hostandjoin}>{this.state.lobbyPlayerList}</div></h2> </div>
         </div>
       );
       
-    }
+    } 
+    
     return null;
   }
-    
+    registerBtnClick(){
+      this.setState({registerView: true})
+    }
 
   render(){
 
@@ -194,7 +219,6 @@ class Home extends React.Component{
           <title>SEO-ker - Login</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-
         <main className={styles.main}>
           <img src="/SEO-ker.png" alt="SEO-ker" className={styles.seoker} />
           <p className={styles.description}>by n ∈ ℤ<sup>+</sup> </p>
@@ -229,3 +253,11 @@ class Home extends React.Component{
 }
 
 export default withRouter(Home)
+
+function RegisterBtn(props){
+  return (
+  <button className ={styles.viewBtn} onClick = {props.onClick}>
+      Register
+  </button>
+  );
+}

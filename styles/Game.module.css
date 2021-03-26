@@ -28,3 +28,96 @@
     line-height: 1.5;
     color: rgb(58, 58, 58)
 }
+
+.betInputBox {
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: .5rem;
+    font-size: 1.25rem;
+    font-weight: bold;
+    width: 190px;
+    text-align: center;
+}
+.card {
+    margin: 1rem;
+    flex-basis: 45%;
+    padding: 1.5rem;
+    font-size: 25px;
+    text-align: center;
+    color: #000000;
+    text-decoration: none;
+    border: 2px solid #000000;
+    border-radius: 10px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+.gameroomL {
+    color: #000000;
+    float: left;
+    padding-right: 5rem;
+}
+
+.gameroomR {
+    color: #000000;
+    float: right;
+}
+
+.gameCard {
+    margin: 1rem;
+    flex-basis: 45%;
+    padding: 1.5rem;
+    font-size: 25px;
+    text-align: center;
+    color: #000000;
+    text-decoration: none;
+    border: 2px solid #000000;
+    border-radius: 10px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    width: 400px;
+  
+    }
+
+  .gameCard:hover,
+  .gameCard:focus,
+  .gameCard:active {
+    color: #0d2cb6;
+    border-color: #0d2cb6;
+  }
+  
+  .gameCard p {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .nameListGrey {
+      color: lightgrey;
+  }
+
+  .nameListBlack {
+    color: black;
+}
+@media (max-width: 820px) {
+
+    .gameroom {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .h1 {
+        display: inline-block;
+        margin:20px;
+    }
+
+    .gameroomL {
+        margin: 20px;
+        float: none;
+    }
+
+    .gameroomR {
+        margin: 0px;
+        float: none;
+    }
+}
