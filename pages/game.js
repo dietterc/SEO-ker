@@ -50,6 +50,7 @@ class GameScreen extends React.Component {
         this.state = {
           playerId: props.router.query.user,  
           lobbyId: props.router.query.code, //this is taken as [lobbyCode] in the URL .
+          displayName: props.router.query.displayName,
           gameInfo: {
               potAmount: 0,
               dealer: "",
@@ -175,7 +176,6 @@ class GameScreen extends React.Component {
             return true
         }
         else return false
-
     }
 
     confirmTurn(){
@@ -290,6 +290,7 @@ class GameScreen extends React.Component {
                     <title>SEO-ker Game Room</title>
                     <link rel="icon" href="/favicon.ico"/>
                 </Head>   
+                <h1>{this.state.displayName}</h1>
                 <main className={gameSty.main}>
                     {this.state.roundOver ?
                         <div className={gameSty.gameroom}>

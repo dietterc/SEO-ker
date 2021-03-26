@@ -536,7 +536,8 @@ async function asyncGetCards(numCards){
   
   let cards = []
     for(var i=0; i< numCards;i++){
-      cards.push(new Card(json[i].searchString, json[i].searchValue));
+      var randomCard = Math.floor(Math.random()*numCards);
+      cards.push(new Card(json[randomCard].searchString, json[randomCard].searchValue));
     }
     console.log("asyncGetCardsReturning...")
   return cards
