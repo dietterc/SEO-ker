@@ -18,7 +18,7 @@ var activeLobbies = [];
 var activeGames = [];
 
 //assign player ID's based on an incrementing variable for now, will change to usernames later
-var nextPlayerId = 0;
+var nextPlayerId = 1;
 
 const startingChips = 1000;
 
@@ -423,13 +423,13 @@ io.on('connection', (socket) => {
     }
 
     //subtract their bet from their chips
-    game.activePlayer.chips -= Number(gameInfo.betAmount)
+    game.activePlayer.chips -= parseInt(gameInfo.betAmount)
     socket.emit("set-chips", game.activePlayer.chips) //tell the client to update chip amount
 
     //update active cards and the pot
     if(gameInfo.activeCard != null) {
       game.activeCards.push(gameInfo.activeCard);
-      game.potAmount += Number(gameInfo.betAmount);
+      game.potAmount += parseInt(gameInfo.betAmount);
     }
 
     //check if it was the dealers turn
@@ -453,6 +453,8 @@ io.on('connection', (socket) => {
         }
         else {
           io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard, game.potAmount);
+          io.to(winningPlayer.socketId).emit("set-chips", winningPlayer.chips + game.potAmount);
+
           game.potAmount = 0 //reset the pot for next round
           game.activeCards = []
         }
@@ -479,10 +481,6 @@ io.on('connection', (socket) => {
   });
 
 
-  socket.on('deal-new-hand', () => {
-      
-  })
-
   socket.on('next-round', (gameId) => {
 
     console.log(gameId)
@@ -497,13 +495,13 @@ io.on('connection', (socket) => {
 
     game.dealer = game.players[game.dealerIndex];
 
-
-    do {game.activePlayerIndex = (game.dealerIndex + 1) % game.players.length;}
-    while(game.players[activePlayerIndex].chips == 0) //player to the "left" ..or right?
+    game.activePlayerIndex = game.dealerIndex;
+    do {game.activePlayerIndex = (game.activePlayerIndex + 1) % game.players.length;}
+    while(game.players[game.activePlayerIndex].chips == 0) //player to the "left" ..or right?
     game.activePlayer = game.players[game.activePlayerIndex];
     
     for(let i = 0; i< game.players.length; i++){
-      let newHand = []
+      let newHand = [];
       newHand = game.getCards();
       game.players[i].cards = newHand;
       var playerSocket = game.players[i].socketId;
