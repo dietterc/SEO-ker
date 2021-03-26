@@ -27,8 +27,16 @@ class Home extends React.Component{
       lobbyCode: "",
       lobbyPlayerList: "",
       isHost: false,
-      registerView: false   
+      registerView: false,
+      oldDisplayName: props.router.query.user,  
+      newLobbyId: props.router.query.code,   
     };
+
+    if(this.state.newLobbyId != undefined) {
+      this.setState({username: this.state.oldDisplayName}); 
+      
+      socket.emit('join-lobby', 'joinID', this.state.oldDisplayName ,this.state.newLobbyId);
+    }
     
     //these allow you to call this.state.whatever in each of the functions. 
     //needed for all new functions 
@@ -44,6 +52,9 @@ class Home extends React.Component{
     //PUT INCOMING MESSAGES HERE
     //any message incoming to the client must be dealt with in a socket.on function
     socket.on("join-lobby", (lobby, newPlayerId) => {
+
+      this.setState({loggedIn: true}); 
+      this.setState({inLobby: true}); 
       
       this.setState({lobbyCode: lobby.lobbyId,inLobby: true, playerId: Number(newPlayerId)})
       let lobbyList = ""

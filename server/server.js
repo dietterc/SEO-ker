@@ -339,6 +339,7 @@ io.on('connection', (socket) => {
     
       socket.join(lobby.lobbyId) 
       io.to(lobby.lobbyId).emit("lobby-player-joined", lobby);
+      console.log(args[1] + " joined lobby " + lobby.lobbyId)
     }
     else{
       socket.emit("lobby-full");
@@ -411,6 +412,9 @@ io.on('connection', (socket) => {
     let code = lobbyId.toUpperCase().trim();
 
     var game = moduleExports.findGame(code, activeGames);
+    if(game == null) {
+      return
+    }
 
     var cards = game.getCards()
 
@@ -470,14 +474,38 @@ io.on('connection', (socket) => {
       winningCard = game.chooseWinningCard();
       if(winningCard.searchValue != -1) {
         //find out who's card it was 
-        winningPlayer = game.whoPlayedCard(winningCard)
+
+        winningPlayer = null
+        for(let i=0;i<game.players.length;i++) {
+          for(let j=0;j<game.players[i].cards.length;j++) {
+            console.log(game.players[i].cards[j].searchString + ", " + winningCard.searchString)
+            if(game.players[i].cards[j].searchString == winningCard.searchString) {
+              winningPlayer = game.players[i];
+              winningPlayer.chips += game.potAmount // give the winner their earnings
+            }
+          }
+        }
         if(winningPlayer == null) {
           //no winning player was found, did they leave the game?
           console.log("Error: No winning player found")
         }
         else {
-          winningPlayer.chips += game.potAmount // give the winner their earnings
-          io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard, game.potAmount);
+
+          //check if only one player with chips remains.
+          let pwc = 0; //players with chips
+          for(let i=0;i<game.players.length;i++) {
+            if(game.players[i].chips != 0) {
+              pwc += 1;
+            }
+          }
+          //if only one player remains send a slightly different round-over message (last param = true)
+          if(pwc == 1) {
+            io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard, game.potAmount, true);
+          }
+          else {
+            io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard, game.potAmount, false);
+          }
+
           io.to(winningPlayer.socketId).emit("set-chips", winningPlayer.chips + game.potAmount);
 
           game.potAmount = 0 //reset the pot for next round
@@ -502,10 +530,7 @@ io.on('connection', (socket) => {
 
   });
 
-
   socket.on('next-round', (gameId) => {
-
-    console.log(gameId)
 
     game = moduleExports.findGame(gameId, activeGames);
   
@@ -523,6 +548,28 @@ io.on('connection', (socket) => {
     io.to(gameId).emit("start-turn", gameInfo);
   });
 
+  socket.on('return-to-lobby', (gameId) => {
+
+    
+    game = moduleExports.findGame(gameId, activeGames);
+    
+    //delete the old game and lobby
+    activeGames.splice(game, 1)
+    
+
+    //create a new lobby
+    var lobbyId = moduleExports.generateCode();
+    lobby = new Lobby(lobbyId);
+    activeLobbies.push(lobby);
+
+    socket.join(lobbyId)
+    console.log("Active lobbies:");
+    for(var i=0;i<activeLobbies.length;i++) {
+      console.log(activeLobbies[i].lobbyId);
+    }
+
+    io.to(gameId).emit("move-to-homepage",lobbyId);
+  });
 });
 
 

@@ -77,6 +77,7 @@ class GameScreen extends React.Component {
             gameId: 0
           },
           hasLost: false, 
+          isGameOver: false
         };
         console.log(this.state.playerId)
         this.selectCard = this.selectCard.bind(this)
@@ -107,13 +108,14 @@ class GameScreen extends React.Component {
         });
         
         //sent when the round is over someone won the round
-        socket.on("round-over", (listCards, winner, winningCard, winningPot) => {
+        socket.on("round-over", (listCards, winner, winningCard, winningPot, isGameOver) => {
             this.setState({
                 roundOver: true,
                 roundWinner: winner,
                 roundWinCard: winningCard,
                 roundCards: listCards,
-                winningPot: winningPot
+                winningPot: winningPot,
+                isGameOver: isGameOver
             });
             console.log("caught");
 
@@ -155,6 +157,20 @@ class GameScreen extends React.Component {
         socket.on("set-chips", (newChips) =>{
             this.setState({chips: newChips})
         })
+
+        socket.on("move-to-homepage", (lobbyId) =>{
+            console.log("hey!")
+            let displayName = ""
+            for(let i=0;i<this.state.players.length;i++) {
+                if(this.state.players[i].playerId == this.state.playerId) {
+                    displayName = this.state.players[i].displayName
+                }
+            }
+
+            this.props.router.push({pathname: `/`, query: {code: lobbyId, user: displayName}}); 
+        })
+
+        
     }
 
     selectCard(newCard){
@@ -281,7 +297,36 @@ class GameScreen extends React.Component {
         socket.emit("next-round", gameId)
     }
 
+    gotoLobby(gameId) {
+        //code to send everyone back to a lobby (message)
+        socket.emit("return-to-lobby", gameId)
+    }
 
+    printRoundOverDisplay() {
+        let lobbyCard = {
+            searchString: "Back to lobby",
+            searchValue: -1,
+            gameId: this.state.lobbyId
+          }
+        if(this.state.gameInfo.dealer.playerId == this.state.playerId) {
+            if(this.state.isGameOver) {
+                return (
+                    <div>
+                        <br/>
+                        <CardView card={lobbyCard} onClick = {this.gotoLobby}/>
+                    </div>
+                )
+            }
+            else {
+                return (
+                    <div>
+                        <br/>
+                        <CardView card={this.state.fakeCard} onClick = {this.nextRound}/>
+                    </div>
+                )
+            }
+        }
+    }
 
     render(){
         return (
@@ -302,10 +347,11 @@ class GameScreen extends React.Component {
                                 All cards played:
                                 </h2>
                                 <h3>{this.printPlayedCards()}</h3>   
-                                {this.state.gameInfo.dealer.playerId == this.state.playerId ?
+                                {this.state.isGameOver ?
                                 <div>
                                     <br/>
-                                    <CardView card={this.state.fakeCard} onClick = {this.nextRound}/>
+                                    <h3>Only one player remains. {this.state.roundWinner.displayName} has won the game!</h3>
+                                    {this.printRoundOverDisplay()}
                                 </div>
                                 :<div/>
                                 }  
