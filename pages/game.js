@@ -356,6 +356,15 @@ class GameScreen extends React.Component {
                                 </div>
                                 :<div/>
                                 }  
+
+                                {!this.state.isGameOver ?
+                                <div>
+                                    <br/>
+                                    {this.printRoundOverDisplay()}
+                                </div>
+                                :<div/>
+                                } 
+
                         </div> :
                         <div className={gameSty.gameroom}>
                 
