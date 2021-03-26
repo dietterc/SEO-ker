@@ -121,6 +121,9 @@ class Home extends React.Component{
       }
     });    
 
+      socket.on("promote-to-host", () => {
+          this.setState({ isHost: true });
+      });
   }
  
 

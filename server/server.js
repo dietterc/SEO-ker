@@ -47,7 +47,8 @@ class Lobby {
         */
         //if they are the first to join set them as the host
         if(this.players.length == 1){
-          this.host = player;
+            this.host = player;
+            io.to(this.host.socketId).emit('promote-to-host');
         }
         return true;
       }
@@ -66,6 +67,7 @@ class Lobby {
             } else {
                 this.host = this.players[0];
             }
+            io.to(this.host.socketId).emit('promote-to-host');
         }
       this.players.splice(index, 1)
       //console.log(player.displayName + ' left lobby ' + this.lobbyId + ' (' + player.playerId + ')')
@@ -263,6 +265,14 @@ moduleExports.createLobby = function (id) {
 
 moduleExports.createPlayer = function (id, displayName, socketId) {
     return new Player(id, displayName, socketId);
+}
+
+moduleExports.createGame = function (id, players) {
+    return new Game(id, players);
+}
+
+moduleExports.createCard = function (searchString, searchValue) {
+    return new Card(searchString, searchValue);
 }
 //----------socket.io server-side----------
 io.on('connection', (socket) => {
