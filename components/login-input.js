@@ -41,7 +41,6 @@ export default class Login extends React.Component{
         return(
             //render the button and the view
             <div>
-                {viewChangeBtn}
                 {view}
             </div>
         );
