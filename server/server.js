@@ -228,7 +228,7 @@ moduleExports.generateCode = function () {
 
 }
 
-function findGame(code, activeGames){
+moduleExports.findGame = function (code, activeGames){
   for(var i=0;i<activeGames.length;i++) {
     if(activeGames[i].id == code) {
       return activeGames[i];
@@ -371,9 +371,9 @@ io.on('connection', (socket) => {
     //var game = null
     let code = lobbyId.toUpperCase().trim();
 
-    var game = findGame(code, activeGames)
+    var game = moduleExports.findGame(code, activeGames);
 
-    var cards = game.getCards()
+    var cards = game.getCards();
     console.log("getCards returns")
 
     //socket refreshes on page change, so assign that player their new socket.id 
@@ -406,7 +406,7 @@ io.on('connection', (socket) => {
 
   socket.on('turn-played', (gameInfo) => {
 
-    game = findGame(gameInfo.id, activeGames);
+    game = moduleExports.findGame(gameInfo.id, activeGames);
 
     if(game == null) {
       console.log("turn played for non existing game " + gameInfo.id);
@@ -485,7 +485,7 @@ io.on('connection', (socket) => {
 
     console.log(gameId)
 
-    game = findGame(gameId, activeGames);
+    game = moduleExports.findGame(gameId, activeGames);
 
   
     io.to(gameId).emit("restart-round");

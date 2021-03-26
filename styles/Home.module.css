@@ -213,10 +213,29 @@
   margin: 50px;
   text-align: center;
 }
-
+.lobby {
+    
+}
 @media (max-width: 600px) {
   .grid {
     width: 100%;
     flex-direction: column;
   }
+}
+@media (max-width: 750px) {
+
+    .lobby {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .playerList{
+        margin: 20px;
+        float:none;
+    }
+    .codeBox{
+        margin: 0px;
+        float:none;
+    }
 }

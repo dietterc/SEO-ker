@@ -16,6 +16,60 @@ describe('Server', function () {
         });
     });
 
+    describe('#findGame()', function () {
+        let player = server.createPlayer("tester1", "Tester 1", "s1id");
+        let game = server.createGame("TESTID1", [player]);
+        function newGame(id) {
+            return server.createGame(id, [player]);
+        }
+        it('should find nothing when there is no games in the list', function () {
+            let gameList = [];
+            let result = server.findGame("TESTID1", gameList);
+            assert.isNull(result);
+        });
+        it('should find the only game in the list', function () {
+            let gameList = [game];
+            let result = server.findGame("TESTID1", gameList)
+            assert.equal(result, gameList[0]);
+        });
+
+        it('should not find anything if nothing matches (one active game)', function () {
+            let gameList = [game];
+            let result = server.findGame("NotInList", gameList);
+            assert.isNull(result);
+        });
+
+        it('should find a game at the end of the list (two active games)', function () {
+            let gameList = [game, newGame("TESTID2")];
+            let result = server.findGame("TESTID2", gameList);
+            assert.equal(result, gameList[1]);
+        });
+
+        it('should find a game at the start of the list (two active games)', function () {
+            let gameList = [game, newGame("TESTID2")];
+            let result = server.findGame("TESTID1", gameList);
+            assert.equal(result, gameList[0]);
+        })
+
+        it('should find a game in the middle of the list (three active games)', function () {
+            let gameList = [game, newGame("TESTID2"), newGame("TESTID3")];
+            let result = server.findGame("TESTID2", gameList);
+            assert.equal(result, gameList[1]);
+        })
+
+        it('should find a game at the start of the list (three active games)', function () {
+            let gameList = [game, newGame("TESTID2"), newGame("TESTID3")];
+            let result = server.findGame("TESTID1", gameList);
+            assert.equal(result, gameList[0]);
+        });
+
+        it('should not find a game that is not in the list (three active games)', function () {
+            let gameList = [game, newGame("TESTID2"), newGame("TESTID3")];
+            let result = server.findGame("TESTID", gameList);
+            assert.isNull(result);
+        })
+    });
+
     describe("Testing Classes", function () {
         // Lobby Class
         describe("Lobby Class", function () {

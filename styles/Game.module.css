@@ -97,3 +97,27 @@
   .nameListBlack {
     color: black;
 }
+@media (max-width: 820px) {
+
+    .gameroom {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .h1 {
+        display: inline-block;
+        margin:20px;
+    }
+
+    .gameroomL {
+        margin: 20px;
+        float: none;
+    }
+
+    .gameroomR {
+        margin: 0px;
+        float: none;
+    }
+}
