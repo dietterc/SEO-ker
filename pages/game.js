@@ -78,6 +78,7 @@ class GameScreen extends React.Component {
           },
           hasLost: false, 
         };
+        console.log(this.state.playerId)
         this.selectCard = this.selectCard.bind(this)
         this.updateBet = this.updateBet.bind(this)
         this.confirmTurn = this.confirmTurn.bind(this)
