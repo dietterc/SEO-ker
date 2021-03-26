@@ -6,7 +6,6 @@ import LobbyInput from "../components/lobby-input.js"
 import {withRouter} from 'next/router';
 import Link from 'react';
 import Register from './register';
-import Movies from './movies';
 
 const io = require("socket.io-client");
 const socket = io();

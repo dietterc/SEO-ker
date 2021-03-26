@@ -400,8 +400,10 @@ io.on('connection', (socket) => {
     //socket refreshes on page change, so assign that player their new socket.id 
     for(var i=0;i<game.players.length;i++) {
 
-      if(game.players[i].displayName == username){
+      if(game.players[i].playerId == playerId){
         game.players[i].socketId = socket.id
+        game.players[i].cards = cards
+
       }
     }
 
@@ -416,12 +418,6 @@ io.on('connection', (socket) => {
 
     socket.emit("set-cards", cards);
     socket.emit("set-chips", startingChips);
-
-    for(let i=0;i<game.players.length;i++) {
-      if(game.players[i].playerId == playerId) {
-        game.players[i].cards = cards
-      }
-    }
 
     lobby.readyPlayers += 1;
     if(lobby.players.length == lobby.readyPlayers) {
