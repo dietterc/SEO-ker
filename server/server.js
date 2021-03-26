@@ -193,6 +193,45 @@ class Game {
         return null;
       }
     }
+
+    this.dealCards = function(){
+      for(let i = 0; i< this.players.length; i++){
+        let newHand = [];
+        newHand = this.getCards();
+        this.players[i].cards = newHand;
+        var playerSocket = this.players[i].socketId;
+        io.to(playerSocket).emit('set-cards', newHand);
+      };
+    }
+
+    //pass true if its the beginning of the next round and the 
+    //next active player is the player after the dealer
+    this.getNextActivePlayer = function(isNewRound){
+      if( isNewRound ){
+        this.activePlayerIndex = this.dealerIndex;
+      }
+      do {this.activePlayerIndex = (this.activePlayerIndex + 1) % this.players.length;}
+      while( this.players[this.activePlayerIndex].chips == 0 )
+  
+      this.activePlayer = this.players[this.activePlayerIndex];
+    }
+
+    this.getNextDealer = function(){
+      do {this.dealerIndex = (this.dealerIndex + 1) % this.players.length;}
+      while( this.players[this.dealerIndex].chips == 0 )
+  
+      this.dealer = this.players[this.dealerIndex];
+    }
+
+    this.whoPlayedCard = function(card){
+      for(let i=0;i<this.players.length;i++) {
+        for(let j=0;j<this.players[i].cards.length;j++) {
+          if(this.players[i].cards[j].searchString == card.searchString) {
+            return this.players[i];
+          }
+        }
+      }
+    }
   }
 }
 
@@ -364,7 +403,6 @@ io.on('connection', (socket) => {
     var game = findGame(code, activeGames)
 
     var cards = game.getCards()
-    console.log("getCards returns")
 
     //socket refreshes on page change, so assign that player their new socket.id 
     //hand them new cards to for sick optimization
@@ -407,11 +445,6 @@ io.on('connection', (socket) => {
       console.log(game.activePlayer.displayName + " played "+ gameInfo.activeCard.searchString+" for game " + gameInfo.id);
     }
 
-    let index = game.activePlayer.cards.indexOf(gameInfo.activeCard)
-    if(index > -1){
-      //game.activePlayer.cards.splice(index, 1) //remove card they played from hand
-    }
-
     //subtract their bet from their chips
     game.activePlayer.chips -= parseInt(gameInfo.betAmount)
     socket.emit("set-chips", game.activePlayer.chips) //tell the client to update chip amount
@@ -427,21 +460,13 @@ io.on('connection', (socket) => {
       winningCard = game.chooseWinningCard();
       if(winningCard.searchValue != -1) {
         //find out who's card it was 
-        winningPlayer = null
-        for(let i=0;i<game.players.length;i++) {
-          for(let j=0;j<game.players[i].cards.length;j++) {
-            console.log(game.players[i].cards[j].searchString + ", " + winningCard.searchString)
-            if(game.players[i].cards[j].searchString == winningCard.searchString) {
-              winningPlayer = game.players[i];
-              winningPlayer.chips += game.potAmount // give the winner their earnings
-            }
-          }
-        }
+        winningPlayer = game.whoPlayedCard(winningCard)
         if(winningPlayer == null) {
           //no winning player was found, did they leave the game?
           console.log("Error: No winning player found")
         }
         else {
+          winningPlayer.chips += game.potAmount // give the winner their earnings
           io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard, game.potAmount);
           io.to(winningPlayer.socketId).emit("set-chips", winningPlayer.chips + game.potAmount);
 
@@ -453,10 +478,7 @@ io.on('connection', (socket) => {
       io.to(game.id).emit("update-players", game.players);
     }
     else {
-      do {game.activePlayerIndex = (game.activePlayerIndex + 1) % game.players.length;}
-      while(game.players[game.activePlayerIndex].chips == 0) //player to the "left" ..or right?
-      //game.activePlayerIndex = (game.activePlayerIndex + 1) % game.players.length;
-      game.activePlayer = game.players[game.activePlayerIndex];
+      game.getNextActivePlayer(false); 
       
       gameInfo.activePlayer = game.activePlayer;
       gameInfo.betAmount = 0;
@@ -476,28 +498,14 @@ io.on('connection', (socket) => {
     console.log(gameId)
 
     game = findGame(gameId, activeGames);
-
   
     io.to(gameId).emit("restart-round");
 
-    do {game.dealerIndex = (game.dealerIndex + 1) % game.players.length;}
-    while( game.players[game.dealerIndex].chips == 0 )
+    game.getNextDealer();
 
-    game.dealer = game.players[game.dealerIndex];
+    game.getNextActivePlayer(true)
 
-    game.activePlayerIndex = game.dealerIndex;
-    do {game.activePlayerIndex = (game.activePlayerIndex + 1) % game.players.length;}
-    while(game.players[game.activePlayerIndex].chips == 0) //player to the "left" ..or right?
-    game.activePlayer = game.players[game.activePlayerIndex];
-    
-    for(let i = 0; i< game.players.length; i++){
-      let newHand = [];
-      newHand = game.getCards();
-      game.players[i].cards = newHand;
-      var playerSocket = game.players[i].socketId;
-      io.to(playerSocket).emit('set-cards', newHand);
-      console.log("new cards sent:" + newHand);
-    };
+    game.dealCards()
 
     gameInfo = new GameInfo(gameId, game.activePlayer, 0, game.dealer)
     //have to do this to update the chips on the client side

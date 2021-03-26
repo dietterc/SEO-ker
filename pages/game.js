@@ -147,17 +147,13 @@ class GameScreen extends React.Component {
                 roundWinCard: null,
                 roundCards: [],
             });
-            
-            socket.emit("deal-new-hand")
         }); 
 
         socket.on("set-cards", (newCards) => {
             this.setState({cards: newCards})
-            console.log("new Cards received")
         })
         socket.on("set-chips", (newChips) =>{
             this.setState({chips: newChips})
-            console.log("set chips to " + newChips)
         })
     }
 
@@ -337,8 +333,8 @@ class GameScreen extends React.Component {
                     <ul className = "ul"> 
                         {
                         
-                        this.state.cards.map(card =>(
-                        <li key={card.searchString}> <CardView card={card} onClick = {this.selectCard}/> </li>
+                        this.state.cards.map((card, index) =>(
+                        <li key={index}> <CardView card={card} onClick = {this.selectCard}/> </li>
                         ))}
                     </ul>
                     
