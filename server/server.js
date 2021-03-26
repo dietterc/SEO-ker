@@ -18,7 +18,7 @@ var activeLobbies = [];
 var activeGames = [];
 
 //assign player ID's based on an incrementing variable for now, will change to usernames later
-var nextPlayerId = 0;
+var nextPlayerId = 1;
 
 const startingChips = 1000;
 
@@ -282,7 +282,7 @@ io.on('connection', (socket) => {
     lobby.joinLobby(player);
     activeLobbies.push(lobby);
 
-    socket.emit("join-lobby", lobby);
+    socket.emit("join-lobby", lobby, player.playerId);
     socket.join(lobbyId)
     console.log("Active lobbies:");
     for(var i=0;i<activeLobbies.length;i++) {
