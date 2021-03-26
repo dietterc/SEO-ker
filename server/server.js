@@ -471,7 +471,8 @@ io.on('connection', (socket) => {
     }
     else {
       do {game.activePlayerIndex = (game.activePlayerIndex + 1) % game.players.length;}
-      while(game.players[game.activePlayerIndex].chips > 0) //player to the "left" ..or right?
+      while(game.players[game.activePlayerIndex].chips == 0) //player to the "left" ..or right?
+      //game.activePlayerIndex = (game.activePlayerIndex + 1) % game.players.length;
       game.activePlayer = game.players[game.activePlayerIndex];
       
       gameInfo.activePlayer = game.activePlayer;
@@ -501,13 +502,13 @@ io.on('connection', (socket) => {
     io.to(gameId).emit("restart-round");
 
     do {game.dealerIndex = (game.dealerIndex + 1) % game.players.length;}
-    while( game.players[game.dealerIndex].chips > 0 )
+    while( game.players[game.dealerIndex].chips == 0 )
 
     game.dealer = game.players[game.dealerIndex];
 
 
     do {game.activePlayerIndex = (game.dealerIndex + 1) % game.players.length;}
-    while(game.players[activePlayerIndex].chips > 0) //player to the "left" ..or right?
+    while(game.players[activePlayerIndex].chips == 0) //player to the "left" ..or right?
     game.activePlayer = game.players[game.activePlayerIndex];
     
     for(let i = 0; i< game.players.length; i++){
