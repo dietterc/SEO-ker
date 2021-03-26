@@ -44,7 +44,8 @@ class Home extends React.Component{
     //PUT INCOMING MESSAGES HERE
     //any message incoming to the client must be dealt with in a socket.on function
     socket.on("join-lobby", (lobby, newPlayerId) => {
-      this.setState({lobbyCode: lobby.lobbyId,inLobby: true, playerId: newPlayerId})
+      
+      this.setState({lobbyCode: lobby.lobbyId,inLobby: true, playerId: Number(newPlayerId)})
       let lobbyList = ""
       for(let i=0;i<lobby.players.length;i++) {
         
@@ -127,7 +128,7 @@ class Home extends React.Component{
   }
  
 
-  //these update methods update the state according to user input. 
+  // update the state according to user input. 
   updateUsername(str){
     this.setState({username: str}, function(){
       if(this.state.username.replace(/\s+/g, "") !== ""){
