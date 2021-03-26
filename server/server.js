@@ -42,13 +42,7 @@ class Lobby {
 
         this.players.push(player);
         player.lobbyId = this.lobbyId;
-        //console.log(player.displayName + ' joined lobby ' + this.lobbyId + ' (' + player.playerId + ')');
-        /*
-        console.log("Players now in lobby:");
-        for(var i=0;i<this.players.length;i++) {
-          console.log(this.players[i]);
-        }
-        */
+
         //if they are the first to join set them as the host
         if(this.players.length == 1){
           this.host = player;
@@ -72,19 +66,7 @@ class Lobby {
             }
         }
       this.players.splice(index, 1)
-      //console.log(player.displayName + ' left lobby ' + this.lobbyId + ' (' + player.playerId + ')')
-        /*
-      if(this.players.length != 0) {
-        console.log("Players now in lobby:")
-        for(var i=0;i<this.players.length;i++) {
-          console.log(this.players[i])
-        }
-      }
-      */
-      //if only one player remains set them to be the host
-      /*  if (this.players.length == 1) {
-            this.host = this.players[0]
-        } */
+
       if(this.players.length == 0) {
         this.host = ""
       }
@@ -96,14 +78,14 @@ class Lobby {
     }
     
 
-      this.isConnected = function (player) {
-          for (let i = 0; i < this.players.length; i++) {
-              if (this.players[i].playerId === player.playerId) {
-                  return true;
-              }
-          }
-          return false;
-      }
+    this.isConnected = function (player) {
+        for (let i = 0; i < this.players.length; i++) {
+            if (this.players[i].playerId === player.playerId) {
+                return true;
+            }
+        }
+        return false;
+    }
   }
 }
 
@@ -282,7 +264,7 @@ io.on('connection', (socket) => {
     lobby.joinLobby(player);
     activeLobbies.push(lobby);
 
-    socket.emit("join-lobby", lobby);
+    socket.emit("join-lobby", lobby, player.playerId);
     socket.join(lobbyId)
     console.log("Active lobbies:");
     for(var i=0;i<activeLobbies.length;i++) {
@@ -385,12 +367,11 @@ io.on('connection', (socket) => {
     console.log("getCards returns")
 
     //socket refreshes on page change, so assign that player their new socket.id 
+    //hand them new cards to for sick optimization
     for(var i=0;i<game.players.length;i++) {
-
       if(game.players[i].playerId == playerId){
         game.players[i].socketId = socket.id
         game.players[i].cards = cards
-
       }
     }
 
