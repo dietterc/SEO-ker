@@ -172,20 +172,19 @@ class Home extends React.Component{
     else if(this.state.loggedIn && this.state.inLobby){
       
       return (
-        <div >
-          {this.state.isHost ? 
-              <button className={styles.card} 
-                id="host-lobbyButton" 
-                onClick={this.hostStartGame}>
-                  Start Game
-              </button> 
-            :
-            <div> </div> 
-            
-          }
+          <div className={styles.lobby}>
          <div className={styles.codeBox}> 
             <h2 className={styles.lobbyCode}>Lobby Code: {this.state.lobbyCode}</h2>
+            {this.state.isHost ?
+                <button className={styles.card}
+                   id="host-lobbyButton"
+                   onClick={this.hostStartGame}>
+                   Start Game
+                </button>
+                :
+               <div> </div>}
          </div>
+              
          <div className={styles.playerList}>
             <h2>Players connected:</h2> <h2 > <div className={styles.hostandjoin}>{this.state.lobbyPlayerList}</div></h2> </div>
         </div>

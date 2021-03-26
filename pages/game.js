@@ -296,14 +296,14 @@ class GameScreen extends React.Component {
                 </Head>   
                 <main className={gameSty.main}>
                     {this.state.roundOver ?
-                        <div>
-                            <h1>
+                        <div className={gameSty.gameroom}>
+                            <h1 className={gameSty.h1}>
                                 {this.state.roundWinner.displayName} won {this.state.winningPot} chips with card:
                                 <br />
                                 {this.state.roundWinCard.searchString} ({this.state.roundWinCard.searchValue} searches)
                             </h1>
                                 <h2>
-                                    All cards played:
+                                All cards played:
                                 </h2>
                                 <h3>{this.printPlayedCards()}</h3>   
                                 {this.state.gameInfo.dealer.playerId == this.state.playerId ?
@@ -314,7 +314,8 @@ class GameScreen extends React.Component {
                                 :<div/>
                                 }  
                         </div> :
-                        <div>
+                        <div className={gameSty.gameroom}>
+                
                 <div className={gameSty.gameroomL}> 
                     <h3>Pot amount: {this.state.gameInfo.potAmount}</h3> 
                     
@@ -344,7 +345,7 @@ class GameScreen extends React.Component {
                     
                     
                     {this.state.isMyTurn ?
-                    <div>
+                    <div className={gameSty.gameroom}>
                         <input type="number" 
                         placeholder="Bet" 
                         id="betInput"
