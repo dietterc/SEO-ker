@@ -118,7 +118,9 @@ class Home extends React.Component{
     socket.on("host-started-game", (lobbyId) => {
       this.setState({inLobby: false});
       if(lobbyId === this.state.lobbyCode){ //only change the page if its the correct ID. probably does nothing
-        this.props.router.push({pathname: `/game`, query: {code: this.state.lobbyCode, user: this.state.playerId}}); //changes the page
+        this.props.router.push({pathname: `/game`, query: {code: this.state.lobbyCode,
+                                                            user: this.state.playerId, 
+                                                            displayName: this.state.username}}); //changes the page
       }
     });    
 
