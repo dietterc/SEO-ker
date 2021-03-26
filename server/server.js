@@ -284,12 +284,6 @@ io.on('connection', (socket) => {
 
   console.log(socket.id + ' connected');
 
-  /*
-  args[0]: playerId
-  args[1]: display name
-
-  sends a join-lobby signal to the client who sent this
-  */
   socket.on('host-lobby', (...args) => {
     var lobbyId = moduleExports.generateCode();
     
@@ -307,11 +301,6 @@ io.on('connection', (socket) => {
 
   })
 
-  /*
-  args[0]: playerId
-  args[1]: display name
-  args[2]: lobby code
-  */
   socket.on('join-lobby', (...args) => {
 
     let code = args[2].toUpperCase().trim();
@@ -363,7 +352,8 @@ io.on('connection', (socket) => {
             lobby = activeLobbies[i]
 
             lobby.leaveLobby(player)
-            socket.to(lobby.lobbyId).emit("lobby-player-left", lobby)
+
+            io.to(lobby.lobbyId).emit("lobby-player-left", lobby)
 
             if(lobby.players.length == 0) {
               //code to shutdown lobby (remove any pointers to it, js should handle the rest)
@@ -378,9 +368,6 @@ io.on('connection', (socket) => {
       
   })
 
-  /*
-  args[0] lobbyID
-  */
   socket.on('host-started-game', (lobbyId) => {
     let code = lobbyId.toUpperCase().trim();
     lobby = findLobby(code, activeLobbies)
@@ -455,13 +442,13 @@ io.on('connection', (socket) => {
     }
 
     //subtract their bet from their chips
-    game.activePlayer.chips -= gameInfo.betAmount
+    game.activePlayer.chips -= Number(gameInfo.betAmount)
     socket.emit("set-chips", game.activePlayer.chips) //tell the client to update chip amount
 
     //update active cards and the pot
     if(gameInfo.activeCard != null) {
       game.activeCards.push(gameInfo.activeCard);
-      game.potAmount += parseInt(gameInfo.betAmount);
+      game.potAmount += Number(gameInfo.betAmount);
     }
 
     //check if it was the dealers turn
@@ -493,7 +480,9 @@ io.on('connection', (socket) => {
       io.to(game.id).emit("update-players", game.players);
     }
     else {
-      game.activePlayerIndex = (game.activePlayerIndex + 1) % game.players.length
+      do {game.activePlayerIndex = (game.activePlayerIndex + 1) % game.players.length;}
+      while(game.players[game.activePlayerIndex].chips == 0) //player to the "left" ..or right?
+      //game.activePlayerIndex = (game.activePlayerIndex + 1) % game.players.length;
       game.activePlayer = game.players[game.activePlayerIndex];
       
       gameInfo.activePlayer = game.activePlayer;
@@ -522,10 +511,14 @@ io.on('connection', (socket) => {
   
     io.to(gameId).emit("restart-round");
 
-    game.dealerIndex = (game.dealerIndex + 1) % game.players.length;
-    game.dealer = game.players[game.dealerIndex]
+    do {game.dealerIndex = (game.dealerIndex + 1) % game.players.length;}
+    while( game.players[game.dealerIndex].chips == 0 )
 
-    game.activePlayerIndex = (game.dealerIndex + 1) % game.players.length; //player to the "left" ..or right?
+    game.dealer = game.players[game.dealerIndex];
+
+
+    do {game.activePlayerIndex = (game.dealerIndex + 1) % game.players.length;}
+    while(game.players[activePlayerIndex].chips == 0) //player to the "left" ..or right?
     game.activePlayer = game.players[game.activePlayerIndex];
     
     for(let i = 0; i< game.players.length; i++){
