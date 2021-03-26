@@ -147,7 +147,7 @@ class GameScreen extends React.Component {
                 roundWinCard: null,
                 roundCards: [],
             });
-            console.log(this.state.roundCards)
+            
             socket.emit("deal-new-hand")
         }); 
 
