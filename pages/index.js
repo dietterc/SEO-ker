@@ -25,7 +25,7 @@ class Home extends React.Component{
       lobbyCode: "",
       lobbyPlayerList: "",
       isHost: false,
-      registerView: false,
+      cardsSet: false,
       oldDisplayName: props.router.query.user,  
       newLobbyId: props.router.query.code,   
     };
@@ -131,9 +131,13 @@ class Home extends React.Component{
       }
     });    
 
-      socket.on("promote-to-host", () => {
-          this.setState({ isHost: true });
-      });
+    socket.on("promote-to-host", () => {
+        this.setState({ isHost: true });
+    });
+
+    socket.on('cards-set', () => {
+      this.setState({cardsSet: true})
+    })
   }
  
 
@@ -179,9 +183,8 @@ class Home extends React.Component{
           <div className={styles.lobby}>
          <div className={styles.codeBox}> 
             <h2 className={styles.lobbyCode}>Lobby Code: {this.state.lobbyCode}</h2>
-            {this.state.isHost ?
+            {this.state.isHost && this.state.cardsSet?
                 <button className={styles.card}
-                   id="host-lobbyButton"
                    onClick={this.hostStartGame}>
                    Start Game
                 </button>

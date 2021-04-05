@@ -33,7 +33,7 @@ class Lobby {
     this.isInGame = false;
     this.cardsList = [];
 
-    asyncGetCards(100).then(data => this.cardsList = data).then(() => console.log("...finished returning"))
+    asyncGetCards(100).then(data => this.cardsList = data).then(() => io.to(this.host.socketId).emit('cards-set'))
     
 
     //add player to this lobby
@@ -586,7 +586,6 @@ async function asyncGetCards(numCards){
       var randomCard = Math.floor(Math.random()*numCards);
       cards.push(new Card(json[randomCard].searchString, json[randomCard].searchValue));
     }
-    console.log("asyncGetCardsReturning...")
   return cards
 }
 
