@@ -389,7 +389,6 @@ class GameScreen extends React.Component {
                 <div className={gameSty.gameroomR}>
                     <ul className = "ul"> 
                         {
-                        
                         this.state.cards.map((card, index) =>(
                         <li key={index}> <CardView card={card} onClick = {this.selectCard}/> </li>
                         ))}

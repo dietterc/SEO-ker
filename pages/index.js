@@ -4,8 +4,6 @@ import styles from '../styles/Home.module.css';
 import LoginInput from "../components/login-input.js";
 import LobbyInput from "../components/lobby-input.js"
 import {withRouter} from 'next/router';
-import Link from 'react';
-import Register from './register';
 
 const io = require("socket.io-client");
 const socket = io();
@@ -43,9 +41,7 @@ class Home extends React.Component{
     this.updateUsername = this.updateUsername.bind(this);
     this.onJoin = this.onJoin.bind(this);
     this.onHost = this.onHost.bind(this);
-    this.readyUp = this.readyUp.bind(this);
     this.hostStartGame = this.hostStartGame.bind(this);
-    this.registerBtnClick = this.registerBtnClick.bind(this);
   }
 
   componentDidMount(){
@@ -165,11 +161,6 @@ class Home extends React.Component{
     this.setState({inLobby: true, isHost: true});
   }
 
-  readyUp(){
-
-  }
-
-
   hostStartGame(){
     socket.emit("host-started-game", this.state.lobbyCode);
   }
@@ -207,9 +198,6 @@ class Home extends React.Component{
     
     return null;
   }
-    registerBtnClick(){
-      this.setState({registerView: true})
-    }
 
   render(){
 
@@ -254,10 +242,3 @@ class Home extends React.Component{
 
 export default withRouter(Home)
 
-function RegisterBtn(props){
-  return (
-  <button className ={styles.viewBtn} onClick = {props.onClick}>
-      Register
-  </button>
-  );
-}
