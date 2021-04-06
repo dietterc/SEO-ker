@@ -9,7 +9,8 @@
     "start": "NODE_ENV=production node ./server/server.js",
     "heroku-postbuild": "npm run build",
     "test": "node ./tests/test.js",
-    "fetch-cards": "node ./server/fetch-cards.js"
+    "fetch-cards": "node ./server/fetch-cards.js",
+    "push-cards": "node ./server/push-cards.js"
   },
   "dependencies": {
     "express": "^4.17.1",
