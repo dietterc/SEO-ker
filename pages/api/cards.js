@@ -8,7 +8,7 @@ export default async (req, res) => {
   console.log("connected!!")
   const cards = await db
 
-    .collection("cards")
+    .collection("seoker_cards")
 
     .find({})
 

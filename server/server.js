@@ -19,7 +19,7 @@ var activeGames = [];
 
 //assign player ID's based on an incrementing variable for now, will change to usernames later
 var nextPlayerId = 1;
-
+const lobbyCards = 1000
 const startingChips = 1000;
 
 
@@ -33,7 +33,7 @@ class Lobby {
     this.isInGame = false;
     this.cardsList = [];
 
-    asyncGetCards(100).then(data => this.cardsList = data).then(() => io.to(this.host.socketId).emit('cards-set'))
+    asyncGetCards(lobbyCards).then(data => this.cardsList = data).then(() => io.to(this.host.socketId).emit('cards-set'))
     
 
     //add player to this lobby
@@ -93,9 +93,9 @@ class Lobby {
 
 class Player {
   constructor(id,displayName,socketId) {
-    this.displayName = displayName;
-    this.playerId = id;                //same as socket?
-    this.socketId = socketId;
+    this.displayName = displayName
+    this.playerId = id           //same as socket?
+    this.socketId = socketId
     this.lobbyId = ""          //the lobby they are connected to
     this.cards = []
     this.originalCards = []
@@ -105,14 +105,14 @@ class Player {
 
 class Card {
   constructor(searchString,searchValue) {
-    this.searchString = searchString;
-    this.searchValue = searchValue;
+    this.searchString = searchString
+    this.searchValue = searchValue
   }
 }
 
 class GameInfo {
   constructor(id, activePlayer, potAmount, dealer) {
-    this.id = id;
+    this.id = id
     this.activePlayer = activePlayer;
     this.betAmount = 0;
     this.activeCard = null;
@@ -198,10 +198,14 @@ class Game {
     this.dealCards = function(){
       for(let i = 0; i< this.players.length; i++){
         let newHand = [];
+        console.log("Old Hand for "+ this.players[i].displayName + ":" +JSON.stringify(this.players[i].cards))
         newHand = this.getCards();
         this.players[i].cards = newHand;
+
+        console.log("New Hand for "+ this.players[i].displayName + ":" + JSON.stringify(this.players[i].cards))
+        
         var playerSocket = this.players[i].socketId;
-        io.to(playerSocket).emit('set-cards', newHand);
+        io.to(playerSocket).emit('set-cards', this.players[i].cards);
       };
     }
 
@@ -533,9 +537,9 @@ io.on('connection', (socket) => {
 
     game = moduleExports.findGame(gameId, activeGames);
   
-    io.to(gameId).emit("restart-round");
+    io.to(gameId).emit("restart-round")
 
-    game.getNextDealer();
+    game.getNextDealer()
 
     game.getNextActivePlayer(true)
 
@@ -571,21 +575,41 @@ io.on('connection', (socket) => {
   });
 });
 
-
-// database connection methods by john
-
-
-
+// database connection 
+//uses an internal API call to get numCards.
 async function asyncGetCards(numCards){
   const response = await fetch(`http://localhost:${port}/api/cards`)
   const json = await response.json()
 
-  
-  let cards = []
-    for(var i=0; i< numCards;i++){
-      var randomCard = Math.floor(Math.random()*numCards);
+  let indexes = [] // array for making sure there are no duplicates
+  let cards = [] // list to store cards in
+
+    for(var i=0; i< numCards;i++){ //loop numCards times
+      var dupe = false;
+       
+        do{ //do while loop - while dupe is true
+        var randomCard = Math.floor(Math.random()*json.length);
+
+        dupe = false;
+          //loop through all cards already chosen, check their index, if it's a match, set dupe to true
+          for(var j = 0; j < indexes.length && !dupe ; j++){ 
+            if(indexes[j]==randomCard){
+              dupe = true;
+            }
+          }
+        }while(dupe)
+
+        //just in case
+        if(dupe){
+          console.log("error, dupe is true")
+        }
+        //add succesful random index to indexes list
+      indexes.push(randomCard);
+        //push new cards to database
       cards.push(new Card(json[randomCard].searchString, json[randomCard].searchValue));
     }
+    //debug print, get rid of this later
+    console.log(cards)
   return cards
 }
 
