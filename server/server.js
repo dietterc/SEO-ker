@@ -141,18 +141,6 @@ class Game {
     
     //-----functions-----
 
-    //Returns the highest card in activeCards
-    //needs to check for dupes
-    this.chooseWinningCard = function() {
-      let highestCard = new Card("null",-1);
-
-      for(let i=0;i<this.activeCards.length;i++) {
-        if(this.activeCards[i].searchValue > highestCard.searchValue) {
-          highestCard = this.activeCards[i]
-        }
-      }
-      return highestCard;
-    }
 
     this.startGame = function() {
       let gameInfo = new GameInfo(this.id,this.activePlayer,this.potAmount,this.dealer)
@@ -232,6 +220,32 @@ class Game {
           }
         }
       }
+    }
+
+    this.chooseWinners = function(){
+      let winningCards = []
+      let highestCard = new Card("null",-1);
+
+      for(let i=0;i<this.activeCards.length;i++) {
+        if(this.activeCards[i].searchValue > highestCard.searchValue) {
+          highestCard = this.activeCards[i]
+          winningCards = [highestCard]
+        }
+        else if(this.activeCards[i].searchValue == highestCard.searchValue){
+          winningCards.push(this.activeCards[i])
+        }
+      }
+      let winners = []
+      winningCards.forEach(card => {
+        let player = this.whoPlayedCard(card) //find who played all winning cards
+        winners.push(
+        {
+          player: player,
+          card: card
+        }
+        ) 
+      })
+      return winners;
     }
   }
 }
@@ -468,49 +482,34 @@ io.on('connection', (socket) => {
       game.potAmount += parseInt(gameInfo.betAmount);
     }
 
-    //check if it was the dealers turn
+    //check if it was the dealers turn, if true then the round is over and winners are chosen
     if(game.activePlayerIndex == game.dealerIndex) {
-      winningCard = game.chooseWinningCard();
-      if(winningCard.searchValue != -1) {
-        //find out who's card it was 
+      let winners = game.chooseWinners()
+      console.log(winners)
+      let lastPlayerStanding = false
 
-        winningPlayer = null
-        for(let i=0;i<game.players.length;i++) {
-          for(let j=0;j<game.players[i].cards.length;j++) {
-            console.log(game.players[i].cards[j].searchString + ", " + winningCard.searchString)
-            if(game.players[i].cards[j].searchString == winningCard.searchString) {
-              winningPlayer = game.players[i];
-              winningPlayer.chips += game.potAmount // give the winner their earnings
-            }
-          }
-        }
-        if(winningPlayer == null) {
-          //no winning player was found, did they leave the game?
-          console.log("Error: No winning player found")
-        }
-        else {
+      winners.forEach(winner => {
+        winner.player.chips += Math.floor(game.potAmount / winners.length) //split the pot between all winners 
+        io.to(winner.player.socketId).emit("set-chips", player.chips)
+      })
 
-          //check if only one player with chips remains.
-          let pwc = 0; //players with chips
-          for(let i=0;i<game.players.length;i++) {
-            if(game.players[i].chips != 0) {
-              pwc += 1;
-            }
-          }
-          //if only one player remains send a slightly different round-over message (last param = true)
-          if(pwc == 1) {
-            io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard, game.potAmount, true);
-          }
-          else {
-            io.to(game.id).emit("round-over", game.activeCards, winningPlayer, winningCard, game.potAmount, false);
-          }
-
-          io.to(winningPlayer.socketId).emit("set-chips", winningPlayer.chips + game.potAmount);
-
-          game.potAmount = 0 //reset the pot for next round
-          game.activeCards = []
+      //check if only one player with chips remains.
+      let pwc = 0; //players with chips
+      for(let i=0;i<game.players.length;i++) {
+        if(game.players[i].chips != 0) {
+          pwc += 1
         }
       }
+      if(pwc == 1) {
+        lastPlayerStanding = true
+      }
+
+      //if only one player remains send a slightly different round-over message (last param = true)
+      io.to(game.id).emit("round-over", game.activeCards, winners, game.potAmount, lastPlayerStanding);
+
+      this.potAmount = 0 //reset the pot for next round
+      this.activeCards = []
+
       //have to do this to update the chips on the client side
       io.to(game.id).emit("update-players", game.players);
     }

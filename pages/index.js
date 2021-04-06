@@ -183,13 +183,17 @@ class Home extends React.Component{
           <div className={styles.lobby}>
          <div className={styles.codeBox}> 
             <h2 className={styles.lobbyCode}>Lobby Code: {this.state.lobbyCode}</h2>
-            {this.state.isHost && this.state.cardsSet?
+            {this.state.isHost ? 
+              this.state.cardsSet ?
                 <button className={styles.card}
                    onClick={this.hostStartGame}>
                    Start Game
                 </button>
                 :
-               <div> </div>}
+                <div> <h2> loading... </h2> </div>
+              :
+               <div> </div>
+            }
          </div>
               
          <div className={styles.playerList}>

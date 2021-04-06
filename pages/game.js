@@ -109,16 +109,14 @@ class GameScreen extends React.Component {
         });
         
         //sent when the round is over someone won the round
-        socket.on("round-over", (listCards, winner, winningCard, winningPot, isGameOver) => {
+        socket.on("round-over", (listCards, winners, winningPot, isGameOver) => {
             this.setState({
                 roundOver: true,
-                roundWinner: winner,
-                roundWinCard: winningCard,
+                roundWinners: winners,
                 roundCards: listCards,
                 winningPot: winningPot,
                 isGameOver: isGameOver
             });
-            console.log("caught");
 
             if(this.state.chips == 0) {
                 this.setState({hasLost: true});
@@ -160,7 +158,6 @@ class GameScreen extends React.Component {
         })
 
         socket.on("move-to-homepage", (lobbyId) =>{
-            console.log("hey!")
             let displayName = ""
             for(let i=0;i<this.state.players.length;i++) {
                 if(this.state.players[i].playerId == this.state.playerId) {
@@ -179,7 +176,6 @@ class GameScreen extends React.Component {
             this.setState({
                 currentCard: newCard
             })
-            console.log(this.state.currentCard)
         }
     }
 
@@ -293,7 +289,6 @@ class GameScreen extends React.Component {
     }
 
     nextRound(gameId) {
-        console.log(gameId)
         socket.emit("next-round", gameId)
     }
 
@@ -329,6 +324,7 @@ class GameScreen extends React.Component {
     }
 
     render(){
+        //TODO: figure out how to map the winning cards to winning players
         return (
             <div className={gameSty.container}>
                 <Head>
@@ -339,11 +335,18 @@ class GameScreen extends React.Component {
                 <main className={gameSty.main}>
                     {this.state.roundOver ?
                         <div className={gameSty.gameroom}>
-                            <h1 className={gameSty.h1}>
-                                {this.state.roundWinner.displayName} won {this.state.winningPot} chips with card:
-                                <br />
-                                {this.state.roundWinCard.searchString} ({this.state.roundWinCard.searchValue} searches)
-                            </h1>
+
+                            <ul className ="ul"> 
+                                {this.state.roundWinners.map((winner) => {
+                                <li key = {winner.player.displayName}> 
+                                    <h1 className={gameSty.h1}>
+                                    {winner.player.displayName} won with :
+                                    <br />
+                                    {winner.card.searchString} ({winner.card.searchValue} searches)
+                                    </h1>
+                                </li> 
+                                })}
+                            </ul>
                                 <h2>
                                 All cards played:
                                 </h2>
@@ -377,7 +380,7 @@ class GameScreen extends React.Component {
                     <div>
                     <br/><br/>
                     <b>Selected Card:</b>
-                        <div className={gameSty.card}>{this.state.currentCard.searchString}</div>
+                        <CardView card = {this.state.currentCard} onClick = {this.selectCard}/> 
                     </div>
                     :
                     <div/>
@@ -389,8 +392,8 @@ class GameScreen extends React.Component {
                 <div className={gameSty.gameroomR}>
                     <ul className = "ul"> 
                         {
-                        this.state.cards.map((card, index) =>(
-                        <li key={index}> <CardView card={card} onClick = {this.selectCard}/> </li>
+                        this.state.cards.map((card) =>(
+                        <li key={card.searchString}> <CardView card={card} onClick = {this.selectCard}/> </li>
                         ))}
                     </ul>
                     
