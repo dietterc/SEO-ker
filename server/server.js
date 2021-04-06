@@ -141,21 +141,6 @@ class Game {
     
     //-----functions-----
 
-<<<<<<< HEAD
-=======
-    //Returns the highest card in activeCards
-    //needs to check for dupes
-    this.chooseWinningCard = function() {
-      let highestCard = new Card("null",-1)
-
-      for(let i=0;i<this.activeCards.length;i++) {
-        if(this.activeCards[i].searchValue > highestCard.searchValue) {
-          highestCard = this.activeCards[i]
-        }
-      }
-      return highestCard
-    }
->>>>>>> 3ca762e489bd903b54928700d71d6a46cd83d9db
 
     this.startGame = function() {
       let gameInfo = new GameInfo(this.id,this.activePlayer,this.potAmount,this.dealer)
