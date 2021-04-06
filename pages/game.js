@@ -390,7 +390,7 @@ class GameScreen extends React.Component {
                     <ul className = "ul"> 
                         {
                         this.state.cards.map((card, index) =>(
-                        <li key={index}> <CardView card={card} onClick = {this.selectCard}/> </li>
+                        <li key={card.searchString}> <CardView card={card} onClick = {this.selectCard}/> </li>
                         ))}
                     </ul>
                     
