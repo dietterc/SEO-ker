@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { Builder, By, Key, util } = require("selenium-webdriver");
 require("geckodriver");
-/*
+
 describe("Acceptance Testing", function () {
     let driver = new Builder().forBrowser("firefox").build();
     let hostDriver = new Builder().forBrowser("firefox").build();
@@ -37,4 +37,4 @@ describe("Acceptance Testing", function () {
         driver.quit();
         hostDriver.quit();
     });
-});*/
+});
