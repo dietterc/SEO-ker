@@ -58,7 +58,7 @@ class GameScreen extends React.Component {
           playerId: props.router.query.user,  
           lobbyId: props.router.query.code, //this is taken as [lobbyCode] in the URL .
           displayName: props.router.query.displayName,
-            image: "/PlayerImages/poker1.png",
+          image: "/PlayerImages/poker1.png",
           gameInfo: {
               potAmount: 0,
               dealer: "",
@@ -327,7 +327,7 @@ class GameScreen extends React.Component {
                                 {this.state.roundWinners.map((winner) => (
                                 <li key = {winner.player.playerId}> 
                                     <h1 className={gameSty.h1}>
-                                    {winner.player.displayName} won with :
+                                    {winner.player.displayName} won {this.state.winningPot} chips with :
                                     <CardView card = {winner.card} onClick = {this.dummyOnClick} showValue = {true}/>
                                     </h1>
                                 </li> 
