@@ -264,35 +264,6 @@ class GameScreen extends React.Component {
         return list
     }
 
-    printCards() {
-        var list = []
-        for(let i=0;i<this.state.cards.length;i++) {
-            let card = this.state.cards[i]
-            var jsx = (
-                <div>
-                    <CardView onClick = {this.selectCard} card={card} showValue = {false}/>
-                </div>
-            )
-            list.push(jsx)
-        }
-        return list
-    } 
-
-    printPlayedCards() {
-        var list = []
-        let sortedArray = this.state.roundCards
-        sortedArray.sort(function(a, b){return b.searchValue - a.searchValue;});
-        for(let i=0;i<sortedArray.length;i++) {
-            var jsx = (
-                <div>
-                    {sortedArray[i].searchString} ({sortedArray[i].searchValue} searches)
-                </div>
-            )
-            list.push(jsx)
-        }
-        return list
-    }
-
     nextRound(gameId) {
         socket.emit("next-round", gameId)
     }
@@ -391,7 +362,7 @@ class GameScreen extends React.Component {
                     <div>
                     <br/><br/>
                     <b>Selected Card:</b>
-                        <CardView card = {this.state.currentCard} onClick = {this.selectCard} showValue={false}/> 
+                        <div className={gameSty.card}>{this.state.currentCard.searchString}</div>
                     </div>
                     :
                     <div/>
