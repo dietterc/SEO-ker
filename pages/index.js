@@ -165,7 +165,7 @@ class Home extends React.Component{
       return (
           <div className={styles.lobby}>
          <div className={styles.codeBox}> 
-            <h2 className={styles.lobbyCode}>Lobby Code: {this.state.lobbyCode}</h2>
+            <h2 className={styles.lobbyCode} id="lobby-code">Lobby Code: {this.state.lobbyCode}</h2>
             {this.state.isHost ? 
               this.state.cardsSet ?
                 <button className={styles.card}
@@ -231,4 +231,3 @@ class Home extends React.Component{
 }
 
 export default withRouter(Home)
-

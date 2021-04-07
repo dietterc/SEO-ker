@@ -224,19 +224,23 @@ class Game {
       }
     }
 
-    this.chooseWinners = function(){
-      let winningCards = []
-      let highestCard = new Card("null",-1);
+    this.chooseWinningCards = function(){
+        let winningCards = [];
+        let highestCard = new Card("null", -1);
+        for (let i = 0; i < this.activeCards.length; i++) {
+            if (this.activeCards[i].searchValue > highestCard.searchValue) {
+                highestCard = this.activeCards[i]
+                winningCards = [highestCard]
+            }
+            else if (this.activeCards[i].searchValue == highestCard.searchValue) {
+                winningCards.push(this.activeCards[i])
+            }
+        }
+        return winningCards;
+    }
 
-      for(let i=0;i<this.activeCards.length;i++) {
-        if(this.activeCards[i].searchValue > highestCard.searchValue) {
-          highestCard = this.activeCards[i]
-          winningCards = [highestCard]
-        }
-        else if(this.activeCards[i].searchValue == highestCard.searchValue){
-          winningCards.push(this.activeCards[i])
-        }
-      }
+    this.chooseWinners = function(){
+      let winningCards = this.chooseWinningCards();
       let winners = []
       winningCards.forEach(card => {
         let player = this.whoPlayedCard(card) //find who played all winning cards
@@ -643,4 +647,4 @@ nextApp.prepare().then(() => {
   })
 })
 
-module.exports = moduleExports
+module.exports = moduleExports;
