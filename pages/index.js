@@ -4,7 +4,6 @@ import styles from '../styles/Home.module.css';
 import LoginInput from "../components/login-input.js";
 import LobbyInput from "../components/lobby-input.js"
 import {withRouter} from 'next/router';
-import PlayerName from '../components/player-name';
 import Image from 'next/image'
 const io = require("socket.io-client");
 const socket = io();
