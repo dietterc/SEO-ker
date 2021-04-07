@@ -3,7 +3,7 @@ import styles from '../styles/Home.module.css';
 import gameSty from '../styles/Game.module.css';
 import React from 'react';
 import { withRouter } from 'next/router' //gives us access to router.query
-
+import Image from 'next/image'
 const io = require("socket.io-client");
 const socket = io();
 
@@ -51,6 +51,7 @@ class GameScreen extends React.Component {
           playerId: props.router.query.user,  
           lobbyId: props.router.query.code, //this is taken as [lobbyCode] in the URL .
           displayName: props.router.query.displayName,
+            image: "/PlayerImages/poker1.png",
           gameInfo: {
               potAmount: 0,
               dealer: "",
@@ -84,8 +85,10 @@ class GameScreen extends React.Component {
         this.selectCard = this.selectCard.bind(this)
         this.updateBet = this.updateBet.bind(this)
         this.confirmTurn = this.confirmTurn.bind(this)
+
+     
         socket.emit("player-joined-game", this.state.lobbyId, this.state.playerId)
-        
+      
     }
 
 
@@ -93,6 +96,13 @@ class GameScreen extends React.Component {
 
         socket.on("update-players", (playerList) =>{
             this.setState({ players: playerList })
+              
+        for(var i = 0; i< this.state.players.length; i++){
+            if(this.state.players[i].playerId == this.state.playerId){
+                this.setState({image: this.state.players[i].image})
+                console.log("state.image:" + this.state.image)
+            }
+        }
         });
         
         //sent to all players in the game, every turn
@@ -232,6 +242,7 @@ class GameScreen extends React.Component {
             if(this.state.players[i].playerId == this.state.gameInfo.activePlayer.playerId && this.state.players[i].playerId == this.state.gameInfo.dealer.playerId) {
                 jsx = (
                     <div className={style}>
+                        <Image src= {this.state.players[i].image} width = {50} height = {50} />
                         {this.state.players[i].displayName} has {this.state.players[i].chips} chips. <b>(Dealer)</b> *
                     </div>
                 )
@@ -239,6 +250,7 @@ class GameScreen extends React.Component {
             else if(this.state.players[i].playerId == this.state.gameInfo.dealer.playerId) {
                 jsx = (
                     <div className={style}>
+                        <Image src= {this.state.players[i].image} width ={50} height = {50} />
                         {this.state.players[i].displayName} has {this.state.players[i].chips} chips. <b>(Dealer)</b>
                     </div>
                 )
@@ -246,6 +258,7 @@ class GameScreen extends React.Component {
             else if(this.state.players[i].playerId == this.state.gameInfo.activePlayer.playerId) {
                 jsx = (
                     <div className={style}>
+                        <Image src= {this.state.players[i].image} width ={50} height = {50} />
                         {this.state.players[i].displayName} has {this.state.players[i].chips} chips. *
                     </div>
                 )
@@ -253,6 +266,7 @@ class GameScreen extends React.Component {
             else {
                 jsx = (
                     <div className={style}>
+                        <Image src= {this.state.players[i].image} width ={50} height = {50} />
                         {this.state.players[i].displayName} has {this.state.players[i].chips} chips.
                     </div>
                 )
@@ -335,7 +349,7 @@ class GameScreen extends React.Component {
                     <title>SEO-ker Game Room</title>
                     <link rel="icon" href="/favicon.ico"/>
                 </Head>   
-                <h1>{this.state.displayName}</h1>
+                <h1><Image src = {this.state.image} width = {60} height = {60}/>{this.state.displayName}</h1>
                 <main className={gameSty.main}>
                     {this.state.roundOver ?
                         <div className={gameSty.gameroom}>

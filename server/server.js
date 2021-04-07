@@ -100,6 +100,8 @@ class Player {
     this.cards = []
     this.originalCards = []
     this.chips = startingChips 
+    this.index = ""
+    this.image = ""
   }
 }
 
@@ -397,6 +399,12 @@ io.on('connection', (socket) => {
     io.to(lobby.lobbyId).emit("host-started-game", lobby.lobbyId)
 
     lobby.isInGame = true;
+    for(var i = 0; i<lobby.players.length; i++){
+
+        lobby.players[i].index = i+1;
+        lobby.players[i].image = "/PlayerImages/poker"+ (i+1) + ".png"
+        console.log(lobby.players[i].image)
+    }
 
     var game = new Game(lobby.lobbyId,lobby.players, lobby.cardsList)
     
