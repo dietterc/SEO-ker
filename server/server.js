@@ -247,6 +247,20 @@ class Game {
       })
       return winners;
     }
+
+    this.getTurns = function(){
+      let turns = []
+      this.activeCards.forEach(card => {
+        let player = this.whoPlayedCard(card) //find who played all winning cards
+        turns.push(
+        {
+          player: player,
+          card: card
+        }
+        ) 
+      })
+      return turns;
+    }
   }
 }
 
@@ -504,8 +518,10 @@ io.on('connection', (socket) => {
         lastPlayerStanding = true
       }
 
+      let turns  = game.getTurns()
+
       //if only one player remains send a slightly different round-over message (last param = true)
-      io.to(game.id).emit("round-over", game.activeCards, winners, game.potAmount, lastPlayerStanding);
+      io.to(game.id).emit("round-over", turns, winners, game.potAmount, lastPlayerStanding);
 
       this.potAmount = 0 //reset the pot for next round
       this.activeCards = []

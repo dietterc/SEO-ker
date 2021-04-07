@@ -74,7 +74,7 @@ class GameScreen extends React.Component {
           roundOver: false,
           roundWinners: null,
           isMyTurn: false,
-          roundCards: [],
+          turns: [],
           winningPot: 0,
           fakeCard: {
             searchString: "Play next round",
@@ -112,11 +112,11 @@ class GameScreen extends React.Component {
         });
         
         //sent when the round is over someone won the round
-        socket.on("round-over", (listCards, winners, winningPot, isGameOver) => {
+        socket.on("round-over", (newTurns, winners, winningPot, isGameOver) => {
             this.setState({
                 roundOver: true,
                 roundWinners: winners,
-                roundCards: listCards,
+                turns: newTurns,
                 winningPot: winningPot,
                 isGameOver: isGameOver
             });
@@ -131,10 +131,7 @@ class GameScreen extends React.Component {
         
         //sent when a player leaves the lobby. contains a new list of players
         socket.on("game-player-left", (newPlayers, dealer, activePlayer) => {
-            this.setState({ players: newPlayers});
-            this.setState({ dealer: dealer});
-            this.setState({ activePlayer: activePlayer});
-
+            this.setState({ players: newPlayers, dealer: dealer, activePlayer: activePlayer});
         });
 
         //sent when the game is over. contains a lobby object with the same code. 
@@ -150,7 +147,7 @@ class GameScreen extends React.Component {
                 currentBet: 0, 
                 hasPlayedCard: false,
                 roundWinners: null,
-                roundCards: [],
+                turns: [],
             });
         }); 
 
@@ -327,9 +324,10 @@ class GameScreen extends React.Component {
                                 </h2>
 
                                 <ul className = 'ul'> 
-                                    {this.state.roundCards.map(card => (
-                                        <li key = {card.searchString} > 
-                                            <CardView card = {card} onClick = {this.dummyOnClick} showValue = {true}/>
+                                    {this.state.turns.map(turn => (
+                                        <li key = {turn.player.playerId} > 
+                                            <h3> {turn.player.displayName} played </h3>
+                                            <CardView card = {turn.card} onClick = {this.dummyOnClick} showValue = {true}/>
                                         </li> 
                                     ))}
                                 </ul>  
