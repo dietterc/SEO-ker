@@ -83,7 +83,8 @@ class GameScreen extends React.Component {
             gameId: 0
           },
           hasLost: false, 
-          isGameOver: false
+          isGameOver: false,
+          validBet: true
         };
         this.selectCard = this.selectCard.bind(this)
         this.updateBet = this.updateBet.bind(this)
@@ -142,6 +143,17 @@ class GameScreen extends React.Component {
         //sent when a player leaves the lobby. contains a new list of players
         socket.on("game-player-left", (newPlayers, dealer, activePlayer) => {
             this.setState({ players: newPlayers, dealer: dealer, activePlayer: activePlayer});
+
+            let updatedGameInfo = this.state.gameInfo;
+            updatedGameInfo.dealer = dealer;
+            updatedGameInfo.activePlayer = activePlayer;
+
+            this.setState({ 
+                isMyTurn:  activePlayer.playerId == this.state.playerId,
+                gameInfo: updatedGameInfo
+            });
+
+
         });
 
         //sent when the game is over. contains a lobby object with the same code. 
@@ -194,17 +206,26 @@ class GameScreen extends React.Component {
 
     //returns false on invalid bet
     updateBet = event => {
-        if(event.target.value >= 0){ // TODO: bet must be above minimum amount
+
+        let regEx = /[a-z]/i;
+
+        if(event.target.value > 0 && !regEx.test(event.target.value) && event.target.value <= this.state.chips){ 
             this.setState({
-                currentBet: event.target.value
+                currentBet: event.target.value,
+                validBet: true
             })
             return true
         }
-        else return false
+        else {
+            this.setState({
+                validBet: false
+            })
+            return false
+        }
     }
 
     confirmTurn(){
-        if(this.state.currentCard && this.state.currentBet >= 0 && !this.state.hasPlayedCard ){
+        if(this.state.currentCard && this.state.currentBet > 0 && !this.state.hasPlayedCard && this.state.validBet){
             var newGameInfo = {
                 id: this.state.gameInfo.id,
                 activePlayer: this.state.gameInfo.activePlayer,
@@ -235,38 +256,61 @@ class GameScreen extends React.Component {
         for(let i=0;i<this.state.players.length;i++) {
             var jsx = (<div></div>);
             let style = gameSty.nameListBlack
+            let lastBet = ""
+
             if(this.state.players[i].chips == 0) {
                 style = gameSty.nameListGrey
             }
+
+            if(this.state.players[i].lastBet != 0 && this.state.players[i].lastBet != undefined) {
+                lastBet = "Bet: " + this.state.players[i].lastBet
+            }
+
             if(this.state.players[i].playerId == this.state.gameInfo.activePlayer.playerId && this.state.players[i].playerId == this.state.gameInfo.dealer.playerId) {
                 jsx = (
                     <div className={style}>
-                        <Image src= {this.state.players[i].image} width = {50} height = {50} />
-                        {this.state.players[i].displayName} has {this.state.players[i].chips} chips. <b>(Dealer)</b> *
+                        <Image src= {this.state.players[i].image} width ={70} height = {70} />
+                        <div className={gameSty.playerInfo}>
+                            <b>{this.state.players[i].displayName}</b> <b>(Dealer)</b> *
+                            <br/>Chips: {this.state.players[i].chips}  
+                            <br/>{lastBet}
+                        </div>
                     </div>
                 )
             }    
             else if(this.state.players[i].playerId == this.state.gameInfo.dealer.playerId) {
                 jsx = (
                     <div className={style}>
-                        <Image src= {this.state.players[i].image} width ={50} height = {50} />
-                        {this.state.players[i].displayName} has {this.state.players[i].chips} chips. <b>(Dealer)</b>
+                        <Image src= {this.state.players[i].image} width ={70} height = {70} />
+                        <div className={gameSty.playerInfo}>
+                            <b>{this.state.players[i].displayName}</b> <b>(Dealer)</b>
+                            <br/>Chips: {this.state.players[i].chips}
+                            <br/>{lastBet}
+                        </div>
                     </div>
                 )
             }
             else if(this.state.players[i].playerId == this.state.gameInfo.activePlayer.playerId) {
                 jsx = (
                     <div className={style}>
-                        <Image src= {this.state.players[i].image} width ={50} height = {50} />
-                        {this.state.players[i].displayName} has {this.state.players[i].chips} chips. *
+                        <Image src= {this.state.players[i].image} width ={70} height = {70} />
+                        <div className={gameSty.playerInfo}>
+                            <b>{this.state.players[i].displayName}</b> *
+                            <br/>Chips: {this.state.players[i].chips}
+                            <br/>{lastBet}
+                        </div>
                     </div>
                 )
             }
             else {
                 jsx = (
                     <div className={style}>
-                        <Image src= {this.state.players[i].image} width ={50} height = {50} />
-                        {this.state.players[i].displayName} has {this.state.players[i].chips} chips.
+                        <Image src= {this.state.players[i].image} width ={70} height = {70} />
+                        <div className={gameSty.playerInfo}>
+                            <b>{this.state.players[i].displayName}</b>
+                            <br/>Chips: {this.state.players[i].chips}
+                            <br/>{lastBet}
+                        </div>
                     </div>
                 )
             }
@@ -397,14 +441,22 @@ class GameScreen extends React.Component {
                         <input type="number" 
                         placeholder="Bet" 
                         id="betInput"
-                        onChange={this.updateBet}
-                        className={gameSty.betInputBox}/>
+                        onChange={this.updateBet} 
+                        className={gameSty.betInputBox} />
                         
                         <button className={gameSty.card} 
                         id="confirmTurn"
                         onClick={this.confirmTurn}>
                                         Confirm Turn
                         </button>
+                        {!this.state.validBet ?
+                            <div className={gameSty.gameroom}>
+                                <b>Please input a valid bet. (1 to {this.state.chips})</b>
+                            </div> 
+
+                            : 
+                            <div/> 
+                            }
                     </div> 
 
                     : 

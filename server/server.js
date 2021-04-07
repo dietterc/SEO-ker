@@ -99,10 +99,10 @@ class Player {
     this.socketId = socketId  //this is the socket id for the player.
     this.lobbyId = ""          //the lobby they are connected to
     this.cards = []
-    this.originalCards = []
     this.chips = startingChips 
     this.index = ""
     this.image = ""
+    this.lastBet = 0
   }
 }
 
@@ -153,6 +153,8 @@ class Game {
 
     this.removePlayer = function(player) {
       var index = this.players.indexOf(player)
+
+
       this.players.splice(index, 1)
 
       if(index == this.dealerIndex) {
@@ -192,6 +194,12 @@ class Game {
         this.players[i].cards = newHand
         var playerSocket = this.players[i].socketId
         io.to(playerSocket).emit('set-cards', this.players[i].cards)
+      }
+    }
+
+    this.resetLastBets = function() {
+      for(let i = 0; i< this.players.length; i++){
+        this.players[i].lastBet = 0;
       }
     }
 
@@ -492,6 +500,7 @@ io.on('connection', (socket) => {
     //subtract their bet from their chips
     game.activePlayer.chips -= parseInt(gameInfo.betAmount)
     socket.emit("set-chips", game.activePlayer.chips) //tell the client to update chip amount
+    game.activePlayer.lastBet = parseInt(gameInfo.betAmount)
 
     //update active cards and the pot
     if(gameInfo.activeCard != null) {
@@ -563,6 +572,8 @@ io.on('connection', (socket) => {
     game.getNextActivePlayer(true)
 
     game.dealCards()
+
+    game.resetLastBets()
 
     gameInfo = new GameInfo(gameId, game.activePlayer, 0, game.dealer)
     //have to do this to update the chips on the client side
