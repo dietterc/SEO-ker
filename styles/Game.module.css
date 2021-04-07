@@ -92,11 +92,13 @@
 
   .nameListGrey {
       color: lightgrey;
+      width: fit-content;
   }
 
   .nameListBlack {
     color: black;
-}
+    width: fit-content;
+  }
 @media (max-width: 820px) {
 
     .gameroom {
@@ -120,4 +122,11 @@
         margin: 0px;
         float: none;
     }
+}
+
+.playerInfo {
+    text-align: left;
+    margin-left: 10px;
+    margin-top: 5px;
+    float:right;
 }
