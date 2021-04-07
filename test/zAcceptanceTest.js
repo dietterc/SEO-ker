@@ -1,10 +1,17 @@
 const { expect } = require("chai");
 const { Builder, By, Key, util } = require("selenium-webdriver");
-require("geckodriver");
-
+require("geckodriver")
+const firefox = require("selenium-webdriver/firefox");
+const options = new firefox.Options().addArguments('-headless');
 describe("Acceptance Testing", function () {
-    let driver = new Builder().forBrowser("firefox").build();
-    let hostDriver = new Builder().forBrowser("firefox").build();
+    let driver = new Builder()
+        .forBrowser("firefox")
+        .setFirefoxOptions(options)
+        .build();
+    let hostDriver = new Builder()
+        .forBrowser("firefox")
+        .setFirefoxOptions(options)
+        .build();
     let lobbyCode = "";
 
     it("User Story: Create a User with a Username", async () => {
