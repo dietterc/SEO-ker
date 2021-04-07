@@ -33,7 +33,7 @@ class Lobby {
     this.isInGame = false
     this.cardsList = []
 
-    asyncGetCards(lobbyCards).then(data => this.cardsList = data).then(() => io.to(this.host.socketId).emit('cards-set'))
+    asyncGetCards(lobbyCards).then(data => this.cardsList = data).then(() => io.to(this.lobbyId).emit('cards-set'))
     
 
     //add player to this lobby
