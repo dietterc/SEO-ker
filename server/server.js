@@ -5,6 +5,7 @@ const app = require('express')()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
 const next = require('next')
+const { default: game } = require('../pages/game')
 
 const port = parseInt(process.env.PORT, 10) || 3000
 const dev = process.env.NODE_ENV !== 'production'
@@ -248,6 +249,14 @@ class Game {
 
     this.getTurns = function(){
      return this.activeTurns;
+    }
+
+    this.resetPot = function(){
+      this.potAmount = 0 //reset the pot for next round
+    }
+
+    this.resetTurns = function(){
+      this.activeTurns = []
     }
   }
 }
@@ -521,8 +530,9 @@ io.on('connection', (socket) => {
       //if only one player remains send a slightly different round-over message (last param = true)
       io.to(game.id).emit("round-over", turns, winners, game.potAmount, lastPlayerStanding);
 
-      game.potAmount = 0 //reset the pot for next round
-      game.activeTurns = []
+      game.resetPot()
+      game.resetTurns()
+
 
       //have to do this to update the chips on the client side
       io.to(game.id).emit("update-players", game.players)
