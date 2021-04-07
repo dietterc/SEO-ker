@@ -57,9 +57,7 @@ class GameScreen extends React.Component {
               activePlayer: ""
           }, 
           players: [], 
-          cards: [
-           
-          ],
+          cards: [],
           chips: 0, 
           currentCard: null,
           currentBet: 0, 
@@ -67,8 +65,7 @@ class GameScreen extends React.Component {
           dealer: "",
           activePlayer: "",
           roundOver: false,
-          roundWinner: null,
-          roundWinCard: null,
+          roundWinners: null,
           isMyTurn: false,
           roundCards: [],
           winningPot: 0,
@@ -80,7 +77,6 @@ class GameScreen extends React.Component {
           hasLost: false, 
           isGameOver: false
         };
-        console.log(this.state.playerId)
         this.selectCard = this.selectCard.bind(this)
         this.updateBet = this.updateBet.bind(this)
         this.confirmTurn = this.confirmTurn.bind(this)
@@ -121,6 +117,8 @@ class GameScreen extends React.Component {
             if(this.state.chips == 0) {
                 this.setState({hasLost: true});
             }
+
+            console.log(winners)
             
         });
         
@@ -144,8 +142,7 @@ class GameScreen extends React.Component {
                 currentCard: null,
                 currentBet: 0, 
                 hasPlayedCard: false,
-                roundWinner: null,
-                roundWinCard: null,
+                roundWinners: null,
                 roundCards: [],
             });
         }); 
@@ -273,7 +270,6 @@ class GameScreen extends React.Component {
     } 
 
     printPlayedCards() {
-        console.log(this.state.roundCards)
         var list = []
         let sortedArray = this.state.roundCards
         sortedArray.sort(function(a, b){return b.searchValue - a.searchValue;});
@@ -337,15 +333,14 @@ class GameScreen extends React.Component {
                         <div className={gameSty.gameroom}>
 
                             <ul className ="ul"> 
-                                {this.state.roundWinners.map((winner) => {
-                                <li key = {winner.player.displayName}> 
+                                {this.state.roundWinners.map((winner) => (
+                                <li key = {winner.player.playerId}> 
                                     <h1 className={gameSty.h1}>
                                     {winner.player.displayName} won with :
-                                    <br />
                                     {winner.card.searchString} ({winner.card.searchValue} searches)
                                     </h1>
                                 </li> 
-                                })}
+                                ))}
                             </ul>
                                 <h2>
                                 All cards played:
@@ -354,7 +349,7 @@ class GameScreen extends React.Component {
                                 {this.state.isGameOver ?
                                 <div>
                                     <br/>
-                                    <h3>Only one player remains. {this.state.roundWinner.displayName} has won the game!</h3>
+                                    <h3>Only one player remains. {this.state.roundWinners[0].player.displayName} has won the game!</h3>
                                     {this.printRoundOverDisplay()}
                                 </div>
                                 :<div/>
@@ -390,7 +385,7 @@ class GameScreen extends React.Component {
 
 
                 <div className={gameSty.gameroomR}>
-                    <ul className = "ul"> 
+                    <ul className= 'ul'> 
                         {
                         this.state.cards.map((card) =>(
                         <li key={card.searchString}> <CardView card={card} onClick = {this.selectCard}/> </li>

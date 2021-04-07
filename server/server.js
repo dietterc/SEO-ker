@@ -603,8 +603,6 @@ async function asyncGetCards(numCards){
         //push new cards to database
       cards.push(new Card(json[randomCard].searchString, json[randomCard].searchValue))
     }
-    //debug print, get rid of this later
-    console.log(cards)
   return cards
 }
 
