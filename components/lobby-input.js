@@ -29,7 +29,7 @@ export default class LobbyInput extends React.Component{
     render(){
       return(
         <div >
-            <h2 className={styles.hostandjoin}>Welcome, {this.state.username}.</h2>
+            <h2 className={styles.hostandjoin} name = "welcome">Welcome, {this.state.username}.</h2>
             <div className={styles.hostandjoin}>
             <div>
             <button className={styles.card} 

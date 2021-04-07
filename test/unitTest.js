@@ -1,8 +1,7 @@
-
 const assert = require('chai').assert;
 const server = require('../server/server.js');
 
-describe('Server', function () {
+describe('Unit Tests', function () {
 
     describe('#generateCode()', function () {
         it('return type string', function () {
