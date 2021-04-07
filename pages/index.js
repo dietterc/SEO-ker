@@ -4,7 +4,7 @@ import styles from '../styles/Home.module.css';
 import LoginInput from "../components/login-input.js";
 import LobbyInput from "../components/lobby-input.js"
 import {withRouter} from 'next/router';
-
+import Image from 'next/image'
 const io = require("socket.io-client");
 const socket = io();
 
@@ -42,8 +42,35 @@ class Home extends React.Component{
     this.onJoin = this.onJoin.bind(this);
     this.onHost = this.onHost.bind(this);
     this.hostStartGame = this.hostStartGame.bind(this);
+    this.updateLobbyList = this.updateLobbyList.bind(this)
   }
+  updateLobbyList(lobby){
+    let lobbyList = []
+    for(let i=0;i<lobby.players.length;i++) {
+      let newPlayer = {
+                    displayName: lobby.players[i].displayName,
+                    id: i + 1
+                   } 
+      if(lobby.host.playerId == lobby.players[i].playerId) {
+              newPlayer.displayName += " (host)"
+        }
+      lobbyList.push(newPlayer)
+      
+    }
 
+    this.setState({lobbyPlayerList: lobbyList.map((plyr) => (
+        <div key={plyr.playerId}>
+
+              <Image src = {"/PlayerImages/poker"+plyr.id+".png"} width = {50} height= {50}/>
+
+              <span className={styles.playerName}> {plyr.displayName} </span>
+        </div>
+        
+      ))
+    }
+    );
+
+  }
   componentDidMount(){
     //PUT INCOMING MESSAGES HERE
     //any message incoming to the client must be dealt with in a socket.on function
@@ -53,21 +80,7 @@ class Home extends React.Component{
       this.setState({inLobby: true}); 
       
       this.setState({lobbyCode: lobby.lobbyId,inLobby: true, playerId: Number(newPlayerId)})
-      let lobbyList = ""
-      for(let i=0;i<lobby.players.length;i++) {
-        
-        lobbyList += lobby.players[i].displayName
-
-        if(lobby.host.playerId == lobby.players[i].playerId) {
-          lobbyList += " (host)"
-        }
-        
-        if(i != lobby.players.length - 1) {
-          lobbyList += "\n"
-        }
-      }
-      
-      this.setState({lobbyPlayerList: lobbyList.split('\n').map((str, index) => <div className={styles.playerName} key={index}>{str}</div>)});
+      this.updateLobbyList(lobby)
     });
 
     socket.on("lobby-not-found", () => {
@@ -83,43 +96,12 @@ class Home extends React.Component{
 
     socket.on("lobby-player-joined", (lobby) => {
       this.setState({lobbyCode: lobby.lobbyId})
-      let lobbyList = ""
-  
-      for(let i=0;i<lobby.players.length;i++) {
-        
-        lobbyList += lobby.players[i].displayName
-
-        if(lobby.host.playerId == lobby.players[i].playerId) {
-          lobbyList += " (host)"
-        }
-        
-        if(i != lobby.players.length - 1) {
-          lobbyList += "\n"
-        }
-      }
-      this.setState({lobbyPlayerList: lobbyList.split('\n').map((str, index) => <div className={styles.playerName} key={index}>{str}</div>)});
-  
+      this.updateLobbyList(lobby)
     });
 
     socket.on("lobby-player-left", (lobby) => {
       this.setState({lobbyCode: lobby.lobbyId})
-      let lobbyList = ""
-  
-      for(let i=0;i<lobby.players.length;i++) {
-        
-        lobbyList += lobby.players[i].displayName
-
-        if(lobby.host.playerId == lobby.players[i].playerId) {
-          lobbyList += " (host)"
-        }
-        
-        if(i != lobby.players.length - 1) {
-          lobbyList += "\n"
-        }
-      }
-        this.setState({
-            lobbyPlayerList: lobbyList.split('\n').map((str, index) => <div className={styles.playerName} key={index}>{str}</div>)});
-  
+     this.updateLobbyList(lobby)
     });
 
     socket.on("host-started-game", (lobbyId) => {
@@ -127,7 +109,8 @@ class Home extends React.Component{
       if(lobbyId === this.state.lobbyCode){ //only change the page if its the correct ID. probably does nothing
         this.props.router.push({pathname: `/game`, query: {code: this.state.lobbyCode,
                                                             user: this.state.playerId, 
-                                                            displayName: this.state.username}}); //changes the page
+                                                            displayName: this.state.username
+                                                            }}); //changes the page
       }
     });    
 
@@ -197,7 +180,7 @@ class Home extends React.Component{
          </div>
               
          <div className={styles.playerList}>
-            <h2>Players connected:</h2> <h2 > <div className={styles.hostandjoin}>{this.state.lobbyPlayerList}</div></h2> </div>
+            <h2>Players connected:</h2> <h2 > <div className={styles.hostandjoin}> {this.state.lobbyPlayerList}</div></h2> </div>
         </div>
       );
       
