@@ -16,7 +16,8 @@ class CardView extends React.Component{
                 searchString: props.card.searchString,
                 searchValue: props.card.searchValue
             },
-            gameId: props.card.gameId
+            gameId: props.card.gameId,
+            showValue: props.showValue
 
         }
 
@@ -35,7 +36,13 @@ class CardView extends React.Component{
 
     render(){
         return(
-            <div onClick = {this.cardsleClick} className={gameSty.gameCard}> {this.state.card.searchString} </div>
+            <div onClick = {this.cardsleClick} className={gameSty.gameCard}> 
+                {this.state.card.searchString} 
+                {this.state.showValue ?
+                <h3> {this.state.card.searchValue}</h3>
+            :
+            <div/>}
+            </div>
         );
     }
 }
@@ -167,7 +174,9 @@ class GameScreen extends React.Component {
 
         
     }
-
+    dummyOnClick(x){
+        //do nothing
+    }
     selectCard(newCard){
         if(!this.state.hasPlayedCard){ // dont set new card if one has been played
             this.setState({
@@ -261,7 +270,7 @@ class GameScreen extends React.Component {
             let card = this.state.cards[i]
             var jsx = (
                 <div>
-                    <CardView onClick = {this.selectCard} card={card}/>
+                    <CardView onClick = {this.selectCard} card={card} showValue = {false}/>
                 </div>
             )
             list.push(jsx)
@@ -304,7 +313,7 @@ class GameScreen extends React.Component {
                 return (
                     <div>
                         <br/>
-                        <CardView card={lobbyCard} onClick = {this.gotoLobby}/>
+                        <CardView card={lobbyCard} onClick = {this.gotoLobby} showValue={false}/>
                     </div>
                 )
             }
@@ -312,7 +321,7 @@ class GameScreen extends React.Component {
                 return (
                     <div>
                         <br/>
-                        <CardView card={this.state.fakeCard} onClick = {this.nextRound}/>
+                        <CardView card={this.state.fakeCard} onClick = {this.nextRound} showValue={false}/>
                     </div>
                 )
             }
@@ -337,7 +346,7 @@ class GameScreen extends React.Component {
                                 <li key = {winner.player.playerId}> 
                                     <h1 className={gameSty.h1}>
                                     {winner.player.displayName} won with :
-                                    {winner.card.searchString} ({winner.card.searchValue} searches)
+                                    <CardView card = {winner.card} onClick = {this.dummyOnClick} showValue = {true}/>
                                     </h1>
                                 </li> 
                                 ))}
@@ -345,7 +354,14 @@ class GameScreen extends React.Component {
                                 <h2>
                                 All cards played:
                                 </h2>
-                                <h3>{this.printPlayedCards()}</h3>   
+
+                                <ul className = 'ul'> 
+                                    {this.state.roundCards.map(card => (
+                                        <li key = {card.searchString} > 
+                                            <CardView card = {card} onClick = {this.dummyOnClick} showValue = {true}/>
+                                        </li> 
+                                    ))}
+                                </ul>  
                                 {this.state.isGameOver ?
                                 <div>
                                     <br/>
@@ -375,7 +391,7 @@ class GameScreen extends React.Component {
                     <div>
                     <br/><br/>
                     <b>Selected Card:</b>
-                        <CardView card = {this.state.currentCard} onClick = {this.selectCard}/> 
+                        <CardView card = {this.state.currentCard} onClick = {this.selectCard} showValue={false}/> 
                     </div>
                     :
                     <div/>
@@ -388,7 +404,7 @@ class GameScreen extends React.Component {
                     <ul className= 'ul'> 
                         {
                         this.state.cards.map((card) =>(
-                        <li key={card.searchString}> <CardView card={card} onClick = {this.selectCard}/> </li>
+                        <li key={card.searchString}> <CardView card={card} onClick = {this.selectCard} showValue = {false}/> </li>
                         ))}
                     </ul>
                     
