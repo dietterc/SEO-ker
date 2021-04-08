@@ -3,7 +3,6 @@ import styles from '../styles/Home.module.css';
 import gameSty from '../styles/Game.module.css';
 import React from 'react';
 import { withRouter } from 'next/router' //gives us access to router.query
-import Image from 'next/image'
 const io = require("socket.io-client");
 const socket = io();
 
