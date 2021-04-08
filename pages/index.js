@@ -44,7 +44,8 @@ class Home extends React.Component{
     this.onJoin = this.onJoin.bind(this);
     this.onHost = this.onHost.bind(this);
     this.hostStartGame = this.hostStartGame.bind(this);
-    this.updateLobbyList = this.updateLobbyList.bind(this)
+    this.updateLobbyList = this.updateLobbyList.bind(this);
+    this.changeUsername = this. changeUsername.bind(this)
   }
   updateLobbyList(lobby){
     let lobbyList = []
@@ -157,6 +158,10 @@ class Home extends React.Component{
     this.setState({inLobby: true, isHost: true});
   }
 
+  changeUsername(){
+    this.setState({inLobby: false, loggedIn: false})
+  }
+
   hostStartGame(){
     if(this.state.startingChips > 0){
       socket.emit("host-started-game", this.state.lobbyCode, this.state.startingChips);
@@ -169,7 +174,7 @@ class Home extends React.Component{
       return <LoginInput onSubmit={this.updateUsername}/>
     }
     else if(this.state.loggedIn && !this.state.inLobby){
-      return <LobbyInput username={this.state.username} onJoin={this.onJoin} onHost={this.onHost}/>
+      return <LobbyInput username={this.state.username} onJoin={this.onJoin} onHost={this.onHost} changeUsername={this.changeUsername}/>
     }
     else if(this.state.loggedIn && this.state.inLobby){
       
