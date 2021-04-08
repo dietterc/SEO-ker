@@ -33,7 +33,7 @@ class Lobby {
     this.isInGame = false
     this.cardsList = []
 
-    asyncGetCards(lobbyCards).then(data => this.cardsList = data).then(() => io.to(this.host.socketId).emit('cards-set'))
+    asyncGetCards(lobbyCards).then(data => this.cardsList = data).then(() => io.to(this.lobbyId).emit('cards-set'))
     
 
     //add player to this lobby
@@ -98,10 +98,10 @@ class Player {
     this.socketId = socketId  //this is the socket id for the player.
     this.lobbyId = ""          //the lobby they are connected to
     this.cards = []
-    this.originalCards = []
     this.chips = startingChips 
     this.index = ""
     this.image = ""
+    this.lastBet = 0
   }
 }
 
@@ -132,7 +132,8 @@ class Game {
     this.activePlayerIndex = (this.dealerIndex + 1) % this.players.length //player to the "left" ..or right?
     this.activePlayer = this.players[this.activePlayerIndex]
     this.potAmount = 0
-    this.activeCards = [] //the cards currently played
+
+    this.activeTurns = []
     
     //for giving out cards
     this.allCards=cardsList
@@ -151,16 +152,16 @@ class Game {
 
     this.removePlayer = function(player) {
       var index = this.players.indexOf(player)
+
+
       this.players.splice(index, 1)
 
       if(index == this.dealerIndex) {
-        this.dealerIndex = (this.dealerIndex + 1) % this.players.length
-        this.dealer = this.players[this.dealerIndex]
+        this.getNextDealer();
       }
 
       if(index == this.activePlayerIndex) {
-        this.activePlayerIndex = (this.activePlayerIndex + 1) % this.players.length
-        this.activePlayer = this.players[this.activePlayerIndex]
+        this.getNextActivePlayer(false)
       }
       io.to(this.id).emit("game-player-left", this.players, this.dealer, this.activePlayer)
     }
@@ -192,7 +193,13 @@ class Game {
         this.players[i].cards = newHand
         var playerSocket = this.players[i].socketId
         io.to(playerSocket).emit('set-cards', this.players[i].cards)
-      };
+      }
+    }
+
+    this.resetLastBets = function() {
+      for(let i = 0; i< this.players.length; i++){
+        this.players[i].lastBet = 0;
+      }
     }
 
     //pass true if its the beginning of the next round and the 
@@ -224,48 +231,39 @@ class Game {
       }
     }
 
-    this.chooseWinningCards = function(){
-        let winningCards = [];
-        let highestCard = new Card("null", -1);
-        for (let i = 0; i < this.activeCards.length; i++) {
-            if (this.activeCards[i].searchValue > highestCard.searchValue) {
-                highestCard = this.activeCards[i]
-                winningCards = [highestCard]
-            }
-            else if (this.activeCards[i].searchValue == highestCard.searchValue) {
-                winningCards.push(this.activeCards[i])
-            }
+    this.chooseWinners = function(){
+
+      let highestCard = new Card("null",-1);
+
+      let winningTurns = []
+
+      for(let i=0;i<this.activeTurns.length;i++) {
+        if(this.activeTurns[i].card.searchValue > highestCard.searchValue) {
+          highestCard = this.activeTurns[i].card
+          winningTurns = [this.activeTurns[i]]
         }
-        return winningCards;
+        else if(this.activeTurns[i].card.searchValue == highestCard.searchValue){
+          winningTurns.push(this.activeTurns[i])
+        }
+      }
+
+      return winningTurns;
     }
 
-    this.chooseWinners = function(){
-      let winningCards = this.chooseWinningCards();
-      let winners = []
-      winningCards.forEach(card => {
-        let player = this.whoPlayedCard(card) //find who played all winning cards
-        winners.push(
-        {
-          player: player,
-          card: card
-        }
-        ) 
-      })
-      return winners;
+    this.playTurn = function(turn){
+      this.activeTurns.push(turn)
     }
 
     this.getTurns = function(){
-      let turns = []
-      this.activeCards.forEach(card => {
-        let player = this.whoPlayedCard(card) //find who played all winning cards
-        turns.push(
-        {
-          player: player,
-          card: card
-        }
-        ) 
-      })
-      return turns;
+     return this.activeTurns;
+    }
+
+    this.resetPot = function(){
+      this.potAmount = 0 //reset the pot for next round
+    }
+
+    this.resetTurns = function(){
+      this.activeTurns = []
     }
   }
 }
@@ -501,10 +499,15 @@ io.on('connection', (socket) => {
     //subtract their bet from their chips
     game.activePlayer.chips -= parseInt(gameInfo.betAmount)
     socket.emit("set-chips", game.activePlayer.chips) //tell the client to update chip amount
+    game.activePlayer.lastBet = parseInt(gameInfo.betAmount)
 
     //update active cards and the pot
     if(gameInfo.activeCard != null) {
-      game.activeCards.push(gameInfo.activeCard)
+      let turn = {
+        player: game.activePlayer,
+        card: gameInfo.activeCard
+      }
+      game.playTurn(turn)
       game.potAmount += parseInt(gameInfo.betAmount)
     }
 
@@ -516,7 +519,7 @@ io.on('connection', (socket) => {
 
       winners.forEach(winner => {
         winner.player.chips += Math.floor(game.potAmount / winners.length) //split the pot between all winners 
-        io.to(winner.player.socketId).emit("set-chips", player.chips)
+        io.to(winner.player.socketId).emit("set-chips", winner.player.chips)
       })
 
       //check if only one player with chips remains.
@@ -530,13 +533,14 @@ io.on('connection', (socket) => {
         lastPlayerStanding = true
       }
 
-      let turns  = game.getTurns()
+      let turns = game.getTurns()
 
       //if only one player remains send a slightly different round-over message (last param = true)
       io.to(game.id).emit("round-over", turns, winners, game.potAmount, lastPlayerStanding);
 
-      this.potAmount = 0 //reset the pot for next round
-      this.activeCards = []
+      game.resetPot()
+      game.resetTurns()
+
 
       //have to do this to update the chips on the client side
       io.to(game.id).emit("update-players", game.players)
@@ -567,6 +571,8 @@ io.on('connection', (socket) => {
     game.getNextActivePlayer(true)
 
     game.dealCards()
+
+    game.resetLastBets()
 
     gameInfo = new GameInfo(gameId, game.activePlayer, 0, game.dealer)
     //have to do this to update the chips on the client side
