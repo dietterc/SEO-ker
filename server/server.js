@@ -19,7 +19,7 @@ var activeGames = []
 
 //assign player ID's based on an incrementing variable for now, will change to usernames later
 var nextPlayerId = 1
-const lobbyCards = 10 //1000
+const lobbyCards = 1000
 const startingChips = 1000
 
 
