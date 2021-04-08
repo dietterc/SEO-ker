@@ -166,6 +166,9 @@ class Home extends React.Component{
     if(this.state.startingChips > 0){
       socket.emit("host-started-game", this.state.lobbyCode, this.state.startingChips);
     }
+    else{
+      socket.emit("host-started-game", this.state.lobbyCode, 1000);
+    }
   }
 
   //handles which react component is to be loaded under the logo
