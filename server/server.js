@@ -244,7 +244,7 @@ class Game {
       let winningTurns = []
 
       for(let i=0;i<this.activeTurns.length;i++) {
-        if(this.activeTurns[i].card.searchValue > highestCard.searchValue) {
+        if(parseInt(this.activeTurns[i].card.searchValue) > parseInt(highestCard.searchValue)) {
           highestCard = this.activeTurns[i].card
           winningTurns = [this.activeTurns[i]]
         }

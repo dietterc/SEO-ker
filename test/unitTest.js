@@ -304,65 +304,7 @@ describe('Unit Tests', function () {
                     assert.equal(game.id, "TESTID");
                 });
             });
-            /*
-            describe('#chooseWinningCards()', function () {
-                let game = server.createGame("TESTID", []);
-                this.beforeEach(function () {
-                    game.activeCards = [server.createCard("Card 1", 300)];
-                });
-                it("should be able to select the only card as winner", function () {
-                    let result = game.chooseWinningCards();
-                    assert.equal(result.length, 1);
-                    assert.equal(result[0], game.activeCards[0]);
-                });
-                it("should be able to select the right most card as winner", function () {
-                    game.activeCards.push(server.createCard("Card 2", 500));
-                    let result = game.chooseWinningCards();
-                    assert.equal(result.length, 1);
-                    assert.equal(result[0], game.activeCards[1]);
-                });
-                it("should be able to select the left most card as winner", function () {
-                    game.activeCards.push(server.createCard("Card 2", 200));
-                    let result = game.chooseWinningCards();
-                    assert.equal(result.length, 1);
-                    assert.equal(result[0], game.activeCards[0]);
-                });
-                it("should be able to select the middle card as winner", function () {
-                    game.activeCards.push(server.createCard("Card 2", 888));
-                    game.activeCards.push(server.createCard("Card 3", 822));
-                    let result = game.chooseWinningCards();
-                    assert.equal(result.length, 1);
-                    assert.equal(result[0], game.activeCards[1]);
-                });
-                it("should be able to select multiple of the highest cards as winner (all cases)", function () {
-                    // only 2 cards and they tie
-                    game.activeCards.push(server.createCard("Card 2", 300));
-                    let result = game.chooseWinningCards();
-                    assert.deepEqual(result, game.activeCards);
-
-                    // 3 cards where left most 2 ties
-                    game.activeCards.push(server.createCard("Card 3", 100));
-                    result = game.chooseWinningCards();
-                    assert.deepEqual(result, [game.activeCards[0], game.activeCards[1]]);
-
-                    // 3 cards where right most 2 ties
-                    game.activeCards[0].searchValue = 100;
-                    game.activeCards[2].searchValue = 300;
-                    result = game.chooseWinningCards();
-                    assert.deepEqual(result, [game.activeCards[1], game.activeCards[2]]);
-
-                    // 3 cards where left most and right most is the highest and ties
-                    game.activeCards[0].searchValue = 500;
-                    game.activeCards[2].searchValue = 500;
-                    result = game.chooseWinningCards();
-                    assert.deepEqual(result, [game.activeCards[0], game.activeCards[2]]);
-
-                    // all 3 cards ties
-                    game.activeCards[1].searchValue = 500;
-                    result = game.chooseWinningCards();
-                    assert.deepEqual(result, game.activeCards);
-                });
-            });*/
+            
         });
     });
 

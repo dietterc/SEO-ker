@@ -368,9 +368,9 @@ class GameScreen extends React.Component {
                         <div className={gameSty.gameroom}>
 
                             <ul className ="ul"> 
-                                {this.state.roundWinners.map((winner) => (
+                                {this.state.roundWinners.map((winner,i) => (
                                 <li key = {winner.player.playerId}> 
-                                    <h1 className={gameSty.h1}>
+                                        <h1 className={gameSty.h1} id={"winner"+i}>
                                     {winner.player.displayName} won {this.state.winningPot} chips with :
                                     <CardView card = {winner.card} onClick = {this.dummyOnClick} showValue = {true}/>
                                     </h1>
@@ -410,7 +410,7 @@ class GameScreen extends React.Component {
                         <div className={gameSty.gameroom}>
                 
                 <div className={gameSty.gameroomL}> 
-                    <h3>Pot amount: {this.state.gameInfo.potAmount}</h3> 
+                    <h3 id="potAmount">Pot amount: {this.state.gameInfo.potAmount}</h3> 
                     
                     {this.printPlayers()}
 
@@ -430,8 +430,8 @@ class GameScreen extends React.Component {
                 <div className={gameSty.gameroomR}>
                     <ul className= 'ul'> 
                         {
-                        this.state.cards.map((card) =>(
-                        <li key={card.searchString}> <CardView card={card} onClick = {this.selectCard} showValue = {false}/> </li>
+                        this.state.cards.map((card,i) =>(
+                            <li key={i} id={i}> <CardView card={card} onClick = {this.selectCard} showValue = {false}/> </li>
                         ))}
                     </ul>
                     
@@ -450,7 +450,7 @@ class GameScreen extends React.Component {
                                         Confirm Turn
                         </button>
                         {!this.state.validBet ?
-                            <div className={gameSty.gameroom}>
+                            <div className={gameSty.gameroom} id="invalidBet">
                                 <b>Please input a valid bet. (1 to {this.state.chips})</b>
                             </div> 
 
