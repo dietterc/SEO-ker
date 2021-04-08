@@ -179,6 +179,15 @@ class Game {
         hand.push(this.allCards[this.cardsIndex + 2])
         this.cardsIndex += 3
       }
+      else {
+        this.cardsIndex = 0;
+
+        hand.push(this.allCards[this.cardsIndex])
+        hand.push(this.allCards[this.cardsIndex + 1])
+        hand.push(this.allCards[this.cardsIndex + 2])
+        this.cardsIndex += 3
+      }
+
       if(hand.length != 0) {
         return hand
       }
