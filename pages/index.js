@@ -29,6 +29,7 @@ class Home extends React.Component{
       cardsSet: false,
       oldDisplayName: props.router.query.user,  
       newLobbyId: props.router.query.code,   
+      startingChips: 0
     };
 
     if(this.state.newLobbyId != undefined) {
@@ -124,6 +125,12 @@ class Home extends React.Component{
       this.setState({cardsSet: true})
     })
   }
+
+  updateStartingChips = event =>{
+    if(event.target.value > 0 ){
+      this.setState({startingChips: event.target.value})
+    }
+  }
  
 
   // update the state according to user input. 
@@ -151,7 +158,9 @@ class Home extends React.Component{
   }
 
   hostStartGame(){
-    socket.emit("host-started-game", this.state.lobbyCode);
+    if(this.state.startingChips > 0){
+      socket.emit("host-started-game", this.state.lobbyCode, this.state.startingChips);
+    }
   }
 
   //handles which react component is to be loaded under the logo
@@ -179,7 +188,13 @@ class Home extends React.Component{
                 <div> <h2> loading... </h2> </div>
               
               }
-            </div>
+              <input type="number" 
+                        placeholder="Starting chips" 
+                        id="startingChipsInput"
+                        onChange={this.updateStartingChips} 
+                        className={styles.lobbyCodeBox} />
+              </div>
+               
             : <div/>
             } 
          </div>

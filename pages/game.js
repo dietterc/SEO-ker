@@ -209,10 +209,10 @@ class GameScreen extends React.Component {
     updateBet = event => {
 
         let regEx = /[a-z]/i;
-
-        if(event.target.value > 0 && !regEx.test(event.target.value) && event.target.value <= this.state.chips){ 
+        let bet = Number(event.target.value)
+        if(!regEx.test(event.target.value) &&  bet > 0 && bet <= this.state.chips){ 
             this.setState({
-                currentBet: event.target.value,
+                currentBet: bet,
                 validBet: true
             })
             return true
@@ -408,7 +408,7 @@ class GameScreen extends React.Component {
                                 } 
 
                         </div> :
-                        <div className={gameSty.gameroom}>
+                <div className={gameSty.gameroom}>
                 
                 <div className={gameSty.gameroomL}> 
                     <h3>Pot amount: {this.state.gameInfo.potAmount}</h3> 
@@ -437,7 +437,7 @@ class GameScreen extends React.Component {
                     </ul>
                     
                     
-                    {this.state.isMyTurn ?
+                    {this.state.isMyTurn && this.state.chips > 0?
                     <div className={gameSty.gameroom}>
                         <input type="number" 
                         placeholder="Bet" 
