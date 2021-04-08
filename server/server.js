@@ -204,11 +204,13 @@ class Game {
 
     this.dealCards = function(){
       for(let i = 0; i< this.players.length; i++){
-        let newHand = []
-        newHand = this.getCards()
-        this.players[i].cards = newHand
-        var playerSocket = this.players[i].socketId
-        io.to(playerSocket).emit('set-cards', this.players[i].cards)
+        if(this.players[i].chips > 0){
+          let newHand = []
+          newHand = this.getCards()
+          this.players[i].cards = newHand
+          var playerSocket = this.players[i].socketId
+          io.to(playerSocket).emit('set-cards', this.players[i].cards)
+        }
       }
     }
 
