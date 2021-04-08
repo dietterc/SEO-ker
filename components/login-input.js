@@ -9,6 +9,7 @@ export default class LoginInput extends React.Component{
         super(props)
         this.state = {
             username: "",
+            validUsername: true
         };
 
         this.updateUsername = this.updateUsername.bind(this);
@@ -21,7 +22,12 @@ export default class LoginInput extends React.Component{
 
     onSubmit = (event) => {
         event.preventDefault()
-        this.props.onSubmit(this.state.username)
+        if(this.state.username.length <= 16){
+            this.props.onSubmit(this.state.username)
+        }
+        else {
+            this.setState({validUsername: false})
+        }
     }
     render(){
         return(
@@ -30,7 +36,20 @@ export default class LoginInput extends React.Component{
                                                          placeholder="Enter Display Name" 
                                                          name="username" 
                                                          onChange={this.updateUsername} required/>
-                <button type= "submit" className={styles.card}>Confirm</button>
+                <button type= "submit" className={styles.card}>Confirm</button>  
+                {!this.state.validUsername? 
+                   <div className ='invalidText'> max 16 characters </div>   
+                : 
+                 <div/> 
+                }
+                <style jsx>{
+                        `
+                        .invalidText{
+                            color: red;
+                        }
+                    `}
+                </style>
+                
                 </form> 
         );
     }
