@@ -213,8 +213,12 @@
   margin: 50px;
   text-align: center;
 }
-.lobby {
-    
+
+.rules{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 @media (max-width: 600px) {
   .grid {
