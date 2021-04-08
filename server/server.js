@@ -157,11 +157,13 @@ class Game {
       this.players.splice(index, 1)
 
       if(index == this.dealerIndex) {
-        this.getNextDealer();
+        this.dealerIndex = (this.dealerIndex + 1) % this.players.length
+        this.dealer = this.players[this.dealerIndex]
       }
 
       if(index == this.activePlayerIndex) {
-        this.getNextActivePlayer(false)
+        this.activePlayerIndex = (this.activePlayerIndex + 1) % this.players.length
+        this.activePlayer = this.players[this.activePlayerIndex]
       }
       io.to(this.id).emit("game-player-left", this.players, this.dealer, this.activePlayer)
     }
