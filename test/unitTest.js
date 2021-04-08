@@ -304,7 +304,7 @@ describe('Unit Tests', function () {
                     assert.equal(game.id, "TESTID");
                 });
             });
-
+            /*
             describe('#chooseWinningCards()', function () {
                 let game = server.createGame("TESTID", []);
                 this.beforeEach(function () {
@@ -362,7 +362,7 @@ describe('Unit Tests', function () {
                     result = game.chooseWinningCards();
                     assert.deepEqual(result, game.activeCards);
                 });
-            });
+            });*/
         });
     });
 

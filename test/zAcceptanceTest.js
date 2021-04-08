@@ -2,6 +2,7 @@ const { expect } = require("chai");
 const { Builder, By, Key, util } = require("selenium-webdriver");
 require("geckodriver")
 const firefox = require("selenium-webdriver/firefox");
+const { async } = require("../.next/static/chunks/pages");
 const options = new firefox.Options().addArguments('-headless');
 describe("Acceptance Testing", function () {
     let driver = new Builder()
@@ -15,7 +16,7 @@ describe("Acceptance Testing", function () {
     let lobbyCode = "";
 
     it("User Story: Create a User with a Username", async () => {
-        await driver.sleep(10000);
+        await driver.sleep(2000);
         await driver.get("http://localhost:3000/");
         await driver.findElement(By.name("username")).sendKeys("Selenium", Key.RETURN);
         await driver.sleep(1000);
