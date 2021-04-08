@@ -396,6 +396,11 @@ io.on('connection', (socket) => {
             player = activeGames[i].players[j]
             game = activeGames[i]
             game.removePlayer(player)
+            if(game.players.length == 0){
+              activeGames.splice(i, 1)
+              console.log("game "+game.id+" deleted")
+            }
+            break;
             //message 'game-player-left' sent in above method
 
           }
