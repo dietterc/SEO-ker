@@ -5,6 +5,7 @@ import LoginInput from "../components/login-input.js";
 import LobbyInput from "../components/lobby-input.js"
 import {withRouter} from 'next/router';
 import Image from 'next/image'
+import Rules from '../components/rules.js'
 const io = require("socket.io-client");
 const socket = io();
 
@@ -209,14 +210,7 @@ class Home extends React.Component{
   
         <footer className={styles.footer}>
           <p>
-          <a
-            href="https://github.com/dietterc/SEO-ker/wiki/Rules"
-            target="_blank"
-          >
-            Rules: {'\t'}
-            <img src="/Rule_Book.png" alt="Rule Book" className={styles.logo} />
-          </a>
-          
+          <Rules /> 
           <a
             href="https://github.com/dietterc/SEO-ker"
             target="_blank"
