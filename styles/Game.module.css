@@ -82,6 +82,7 @@
   .gameCard:active {
     color: #0d2cb6;
     border-color: #0d2cb6;
+    cursor: pointer;
   }
   
   .gameCard p {
