@@ -15,7 +15,7 @@ describe("Acceptance Testing", function () {
     let lobbyCode = "";
     describe("Feature 1 - User Creation", async () => {
         it("Create a User with a Username", async () => {
-            await driver.sleep(2000);
+            await driver.sleep(4000);
             await driver.get("http://localhost:3000/");
             await driver.sleep(100);
             await driver.findElement(By.name("username")).sendKeys("Selenium", Key.RETURN);
