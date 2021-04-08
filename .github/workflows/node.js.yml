@@ -4,7 +4,7 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ main, acceptance-test, heroku-test ]
+    branches: [ main, heroku-test ]
   pull_request:
     branches: [ main, heroku-test ]
 
