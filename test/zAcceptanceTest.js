@@ -15,7 +15,8 @@ describe("Acceptance Testing", function () {
     let lobbyCode = "";
 
     it("User Story: Create a User with a Username", async () => {
-        await driver.get("http://127.0.0.1:3000/");
+        await driver.sleep(10000);
+        await driver.get("http://localhost:3000/");
         await driver.findElement(By.name("username")).sendKeys("Selenium", Key.RETURN);
         await driver.sleep(1000);
         let result = await driver.findElement(By.name("welcome")).getText();
@@ -23,7 +24,7 @@ describe("Acceptance Testing", function () {
         expect(result).to.equal("Welcome, Selenium.");
     });
     it("User Story: Host a Lobby", async () => {
-        await hostDriver.get("http://127.0.0.1:3000/");
+        await hostDriver.get("http://localhost:3000/");
         await hostDriver.findElement(By.name("username")).sendKeys("Selenium Host", Key.RETURN);
         await hostDriver.sleep(1000);
         await hostDriver.findElement(By.id("host-lobbyButton")).click();

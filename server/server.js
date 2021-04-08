@@ -221,16 +221,6 @@ class Game {
       this.dealer = this.players[this.dealerIndex]
     }
 
-    this.whoPlayedCard = function(card){
-      for(let i=0;i<this.players.length;i++) {
-        for(let j=0;j<this.players[i].cards.length;j++) {
-          if(this.players[i].cards[j].searchString == card.searchString) {
-            return this.players[i]
-          }
-        }
-      }
-    }
-
     this.chooseWinners = function(){
 
       let highestCard = new Card("null",-1);
