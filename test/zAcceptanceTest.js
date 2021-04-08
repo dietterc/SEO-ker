@@ -2,7 +2,6 @@ const { expect } = require("chai");
 const { Builder, By, Key, util } = require("selenium-webdriver");
 require("geckodriver")
 const firefox = require("selenium-webdriver/firefox");
-const { async } = require("../.next/static/chunks/pages");
 const options = new firefox.Options().addArguments('-headless');
 describe("Acceptance Testing", function () {
     let driver = new Builder()
