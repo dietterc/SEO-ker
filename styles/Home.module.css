@@ -139,8 +139,20 @@
   text-align: center;
 }
 
+.token {
+  float: left;
+  width: 58px;
+  height: 58px;
+}
+
+.lobbyPlayer {
+  margin: 25px;
+  
+}
+
 .playerName {
-  margin: 1rem;
+  width: 75%;
+  margin-left: 75px;
   flex-basis: 45%;
   padding: .5rem;
   text-align: center;

@@ -66,6 +66,7 @@ class Lobby {
                 this.host = this.players[0]
             }
             io.to(this.host.socketId).emit('promote-to-host');
+            asyncGetCards(lobbyCards).then(data => this.cardsList = data).then(() => io.to(this.lobbyId).emit('cards-set'))
         }
       this.players.splice(index, 1)
 
@@ -157,12 +158,16 @@ class Game {
       this.players.splice(index, 1)
 
       if(index == this.dealerIndex) {
-        this.dealerIndex = (this.dealerIndex + 1) % this.players.length
+        if(index == this.players.length) {
+          this.dealerIndex = 0;
+        }
         this.dealer = this.players[this.dealerIndex]
       }
 
       if(index == this.activePlayerIndex) {
-        this.activePlayerIndex = (this.activePlayerIndex + 1) % this.players.length
+        if(index == this.players.length) {
+          this.activePlayerIndex = 0;
+        }
         this.activePlayer = this.players[this.activePlayerIndex]
       }
       io.to(this.id).emit("game-player-left", this.players, this.dealer, this.activePlayer)
@@ -180,6 +185,15 @@ class Game {
         hand.push(this.allCards[this.cardsIndex + 2])
         this.cardsIndex += 3
       }
+      else {
+        this.cardsIndex = 0;
+
+        hand.push(this.allCards[this.cardsIndex])
+        hand.push(this.allCards[this.cardsIndex + 1])
+        hand.push(this.allCards[this.cardsIndex + 2])
+        this.cardsIndex += 3
+      }
+
       if(hand.length != 0) {
         return hand
       }
@@ -221,16 +235,6 @@ class Game {
       while( this.players[this.dealerIndex].chips == 0 )
   
       this.dealer = this.players[this.dealerIndex]
-    }
-
-    this.whoPlayedCard = function(card){
-      for(let i=0;i<this.players.length;i++) {
-        for(let j=0;j<this.players[i].cards.length;j++) {
-          if(this.players[i].cards[j].searchString == card.searchString) {
-            return this.players[i]
-          }
-        }
-      }
     }
 
     this.chooseWinners = function(){
