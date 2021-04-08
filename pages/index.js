@@ -115,7 +115,7 @@ class Home extends React.Component{
     });    
 
     socket.on("promote-to-host", () => {
-        this.setState({ isHost: true });
+        this.setState({ isHost: true, cardsSet: true});
     });
 
     socket.on('cards-set', () => {
