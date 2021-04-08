@@ -33,6 +33,7 @@ class Home extends React.Component{
 
     if(this.state.newLobbyId != undefined) {
       this.setState({username: this.state.oldDisplayName}); 
+      this.setState({lobbyCode: this.state.newLobbyId});
       
       socket.emit('join-lobby', 'joinID', this.state.oldDisplayName ,this.state.newLobbyId);
     }
