@@ -61,7 +61,7 @@ class Home extends React.Component{
     this.setState({lobbyPlayerList: lobbyList.map((plyr) => (
         <div key={plyr.playerId}>
 
-              <Image src = {"/PlayerImages/poker"+plyr.id+".png"} width = {50} height= {50}/>
+              <Image src = {"/PlayerImages/poker"+plyr.id+".png"} width={50} height={50} className={styles.token}/>
 
               <span className={styles.playerName}> {plyr.displayName} </span>
         </div>

@@ -139,8 +139,14 @@
   text-align: center;
 }
 
+.token {
+
+  
+
+}
+
 .playerName {
-  margin: 1rem;
+  margin-left: 1rem;
   flex-basis: 45%;
   padding: .5rem;
   text-align: center;
