@@ -21,22 +21,23 @@ class CardView extends React.Component{
 
         }
 
-        this.cardsleClick = this.cardsleClick.bind(this)
+        this.cardsClick = this.cardsClick.bind(this)
     }
 
-    cardsleClick(){
+    cardsClick(){
         if(this.state.card.searchValue == -1) {
             this.props.onClick(this.state.gameId);
         }
         else {
             this.props.onClick(this.state.card);
+            console.log(this.state.card)
         }
 
     }
 
     render(){
         return(
-            <div onClick = {this.cardsleClick} className={gameSty.gameCard}> 
+            <div onClick = {this.cardsClick} className={gameSty.gameCard}> 
                 {this.state.card.searchString} 
                 {this.state.showValue ?
                 <h3> {this.state.card.searchValue}</h3>

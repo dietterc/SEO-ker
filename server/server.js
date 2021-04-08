@@ -157,11 +157,17 @@ class Game {
       this.players.splice(index, 1)
 
       if(index == this.dealerIndex) {
-        this.getNextDealer();
+        if(index == this.players.length) {
+          this.dealerIndex = 0;
+        }
+        this.dealer = this.players[this.dealerIndex]
       }
 
       if(index == this.activePlayerIndex) {
-        this.getNextActivePlayer(false)
+        if(index == this.players.length) {
+          this.activePlayerIndex = 0;
+        }
+        this.activePlayer = this.players[this.activePlayerIndex]
       }
       io.to(this.id).emit("game-player-left", this.players, this.dealer, this.activePlayer)
     }
@@ -178,6 +184,15 @@ class Game {
         hand.push(this.allCards[this.cardsIndex + 2])
         this.cardsIndex += 3
       }
+      else {
+        this.cardsIndex = 0;
+
+        hand.push(this.allCards[this.cardsIndex])
+        hand.push(this.allCards[this.cardsIndex + 1])
+        hand.push(this.allCards[this.cardsIndex + 2])
+        this.cardsIndex += 3
+      }
+
       if(hand.length != 0) {
         return hand
       }
