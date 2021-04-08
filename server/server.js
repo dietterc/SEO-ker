@@ -321,7 +321,8 @@ function findLobby(code, activeLobbies){
   }
   return null
 }
-//for testing purposes
+
+// for testing purposes
 moduleExports.createLobby = function (id) {
     return new Lobby(id)
 }
@@ -451,7 +452,6 @@ io.on('connection', (socket) => {
     if(lobbyId == null || playerId == null) {
       return
     }
-    //var game = null
     let code = lobbyId.toUpperCase().trim()
 
     var game = moduleExports.findGame(code, activeGames)
@@ -659,4 +659,4 @@ nextApp.prepare().then(() => {
   })
 })
 
-module.exports = moduleExports
+module.exports = moduleExports;
