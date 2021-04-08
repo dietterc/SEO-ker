@@ -1,7 +1,7 @@
 const assert = require('chai').assert;
 
-describe('Server', function () {
-    it("Works!", function () {
+describe('Integration Testing', function () {
+    it("worked", function () {
         assert.isTrue(true);
     });
 });
