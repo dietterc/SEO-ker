@@ -66,6 +66,7 @@ class Lobby {
                 this.host = this.players[0]
             }
             io.to(this.host.socketId).emit('promote-to-host');
+            asyncGetCards(lobbyCards).then(data => this.cardsList = data).then(() => io.to(this.lobbyId).emit('cards-set'))
         }
       this.players.splice(index, 1)
 
