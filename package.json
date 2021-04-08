@@ -16,6 +16,7 @@
     "next": "10.0.5",
     "react": "17.0.1",
     "react-dom": "17.0.1",
+    "react-popup": "^0.10.0",
     "reactjs-popup": "^2.0.4",
     "socket.io": "^3.1.1",
     "socket.io-client": "^3.1.1"
