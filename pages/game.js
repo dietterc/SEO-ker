@@ -411,7 +411,7 @@ class GameScreen extends React.Component {
                 <div className={gameSty.gameroom}>
                 
                 <div className={gameSty.gameroomL}> 
-                    <h3>Pot amount: {this.state.gameInfo.potAmount}</h3> 
+                    <h3>{this.state.gameInfo.potAmount} chips in the pot</h3> 
                     
                     {this.printPlayers()}
 
