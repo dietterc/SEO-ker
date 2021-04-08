@@ -270,7 +270,7 @@ class GameScreen extends React.Component {
             if(this.state.players[i].playerId == this.state.gameInfo.activePlayer.playerId && this.state.players[i].playerId == this.state.gameInfo.dealer.playerId) {
                 jsx = (
                     <div className={style}>
-                        <Image src= {this.state.players[i].image} width ={70} height = {70} />
+                        <img src= {this.state.players[i].image} width ={58} height = {58} />
                         <div className={gameSty.playerInfo}>
                             <b>{this.state.players[i].displayName}</b> <b>(Dealer)</b> *
                             <br/>Chips: {this.state.players[i].chips}  
@@ -282,7 +282,7 @@ class GameScreen extends React.Component {
             else if(this.state.players[i].playerId == this.state.gameInfo.dealer.playerId) {
                 jsx = (
                     <div className={style}>
-                        <Image src= {this.state.players[i].image} width ={70} height = {70} />
+                        <img src= {this.state.players[i].image} width ={58} height = {58} />
                         <div className={gameSty.playerInfo}>
                             <b>{this.state.players[i].displayName}</b> <b>(Dealer)</b>
                             <br/>Chips: {this.state.players[i].chips}
@@ -294,7 +294,7 @@ class GameScreen extends React.Component {
             else if(this.state.players[i].playerId == this.state.gameInfo.activePlayer.playerId) {
                 jsx = (
                     <div className={style}>
-                        <Image src= {this.state.players[i].image} width ={70} height = {70} />
+                        <img src= {this.state.players[i].image} width ={58} height = {58} />
                         <div className={gameSty.playerInfo}>
                             <b>{this.state.players[i].displayName}</b> *
                             <br/>Chips: {this.state.players[i].chips}
@@ -306,7 +306,7 @@ class GameScreen extends React.Component {
             else {
                 jsx = (
                     <div className={style}>
-                        <Image src= {this.state.players[i].image} width ={70} height = {70} />
+                        <img src= {this.state.players[i].image} width ={58} height = {58} />
                         <div className={gameSty.playerInfo}>
                             <b>{this.state.players[i].displayName}</b>
                             <br/>Chips: {this.state.players[i].chips}
@@ -356,14 +356,14 @@ class GameScreen extends React.Component {
     }
 
     render(){
-        //TODO: figure out how to map the winning cards to winning players
+
         return (
             <div className={gameSty.container}>
                 <Head>
                     <title>SEO-ker Game Room</title>
                     <link rel="icon" href="/favicon.ico"/>
                 </Head>   
-                <h1><Image src = {this.state.image} width = {60} height = {60}/>{this.state.displayName}</h1>
+                <h1><img src = {this.state.image} width = {58} height = {58}/><br/>{this.state.displayName}</h1>
                 <main className={gameSty.main}>
                     {this.state.roundOver ?
                         <div className={gameSty.gameroom}>

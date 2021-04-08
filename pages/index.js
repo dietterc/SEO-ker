@@ -59,11 +59,12 @@ class Home extends React.Component{
     }
 
     this.setState({lobbyPlayerList: lobbyList.map((plyr) => (
-        <div key={plyr.playerId}>
-
-              <Image src = {"/PlayerImages/poker"+plyr.id+".png"} width={50} height={50} className={styles.token}/>
-
-              <span className={styles.playerName}> {plyr.displayName} </span>
+        <div key={plyr.playerId} >
+          <div className={styles.lobbyPlayer}>
+              <img src = {"/PlayerImages/poker"+plyr.id+".png"} className={styles.token}/>
+              
+              <div className={styles.playerName}> {plyr.displayName} </div>
+          </div>
         </div>
         
       ))
@@ -115,7 +116,7 @@ class Home extends React.Component{
     });    
 
     socket.on("promote-to-host", () => {
-        this.setState({ isHost: true, cardsSet: true});
+        this.setState({ isHost: true});
     });
 
     socket.on('cards-set', () => {
@@ -165,18 +166,22 @@ class Home extends React.Component{
       return (
           <div className={styles.lobby}>
          <div className={styles.codeBox}> 
+         
             <h2 className={styles.lobbyCode}>Lobby Code: {this.state.lobbyCode}</h2>
             {this.state.isHost ? 
-              this.state.cardsSet ?
+              <div>
+              {this.state.cardsSet ?
                 <button className={styles.card}
                    onClick={this.hostStartGame}>
                    Start Game
                 </button>
                 :
                 <div> <h2> loading... </h2> </div>
-              :
-               <div> </div>
-            }
+              
+              }
+            </div>
+            : <div/>
+            } 
          </div>
               
          <div className={styles.playerList}>
