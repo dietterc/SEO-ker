@@ -371,7 +371,7 @@ class GameScreen extends React.Component {
                                 {this.state.roundWinners.map((winner,i) => (
                                 <li key = {winner.player.playerId}> 
                                         <h1 className={gameSty.h1} id={"winner"+i}>
-                                    {winner.player.displayName} won {this.state.winningPot} chips with :
+                                    {winner.player.displayName} won {Math.floor(this.state.winningPot / this.state.roundWinners.length)} chips with :
                                     <CardView card = {winner.card} onClick = {this.dummyOnClick} showValue = {true}/>
                                     </h1>
                                 </li> 
