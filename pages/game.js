@@ -3,7 +3,6 @@ import styles from '../styles/Home.module.css';
 import gameSty from '../styles/Game.module.css';
 import React from 'react';
 import { withRouter } from 'next/router' //gives us access to router.query
-
 const io = require("socket.io-client");
 const socket = io();
 
@@ -16,14 +15,15 @@ class CardView extends React.Component{
                 searchString: props.card.searchString,
                 searchValue: props.card.searchValue
             },
-            gameId: props.card.gameId
+            gameId: props.card.gameId,
+            showValue: props.showValue
 
         }
 
-        this.cardsleClick = this.cardsleClick.bind(this)
+        this.cardsClick = this.cardsClick.bind(this)
     }
 
-    cardsleClick(){
+    cardsClick(){
         if(this.state.card.searchValue == -1) {
             this.props.onClick(this.state.gameId);
         }
@@ -35,7 +35,13 @@ class CardView extends React.Component{
 
     render(){
         return(
-            <div onClick = {this.cardsleClick} className={gameSty.gameCard}> {this.state.card.searchString} </div>
+            <div onClick = {this.cardsClick} id={this.state.card.searchString}  className={gameSty.gameCard}> 
+                {this.state.card.searchString} 
+                {this.state.showValue ?
+                <h3> {this.state.card.searchValue}</h3>
+            :
+            <div/>}
+            </div>
         );
     }
 }
@@ -51,15 +57,14 @@ class GameScreen extends React.Component {
           playerId: props.router.query.user,  
           lobbyId: props.router.query.code, //this is taken as [lobbyCode] in the URL .
           displayName: props.router.query.displayName,
+          image: "/PlayerImages/poker1.png",
           gameInfo: {
               potAmount: 0,
               dealer: "",
               activePlayer: ""
           }, 
           players: [], 
-          cards: [
-           
-          ],
+          cards: [],
           chips: 0, 
           currentCard: null,
           currentBet: 0, 
@@ -67,10 +72,9 @@ class GameScreen extends React.Component {
           dealer: "",
           activePlayer: "",
           roundOver: false,
-          roundWinner: null,
-          roundWinCard: null,
+          roundWinners: null,
           isMyTurn: false,
-          roundCards: [],
+          turns: [],
           winningPot: 0,
           fakeCard: {
             searchString: "Play next round",
@@ -78,14 +82,16 @@ class GameScreen extends React.Component {
             gameId: 0
           },
           hasLost: false, 
-          isGameOver: false
+          isGameOver: false,
+          validBet: true
         };
-        console.log(this.state.playerId)
         this.selectCard = this.selectCard.bind(this)
         this.updateBet = this.updateBet.bind(this)
         this.confirmTurn = this.confirmTurn.bind(this)
+
+     
         socket.emit("player-joined-game", this.state.lobbyId, this.state.playerId)
-        
+      
     }
 
 
@@ -93,6 +99,13 @@ class GameScreen extends React.Component {
 
         socket.on("update-players", (playerList) =>{
             this.setState({ players: playerList })
+              
+        for(var i = 0; i< this.state.players.length; i++){
+            if(this.state.players[i].playerId == this.state.playerId){
+                this.setState({image: this.state.players[i].image})
+                console.log("state.image:" + this.state.image)
+            }
+        }
         });
         
         //sent to all players in the game, every turn
@@ -109,28 +122,36 @@ class GameScreen extends React.Component {
         });
         
         //sent when the round is over someone won the round
-        socket.on("round-over", (listCards, winner, winningCard, winningPot, isGameOver) => {
+        socket.on("round-over", (newTurns, winners, winningPot, isGameOver) => {
             this.setState({
                 roundOver: true,
-                roundWinner: winner,
-                roundWinCard: winningCard,
-                roundCards: listCards,
+                roundWinners: winners,
+                turns: newTurns,
                 winningPot: winningPot,
                 isGameOver: isGameOver
             });
-            console.log("caught");
 
             if(this.state.chips == 0) {
                 this.setState({hasLost: true});
             }
+
+            console.log(winners)
             
         });
         
         //sent when a player leaves the lobby. contains a new list of players
         socket.on("game-player-left", (newPlayers, dealer, activePlayer) => {
-            this.setState({ players: newPlayers});
-            this.setState({ dealer: dealer});
-            this.setState({ activePlayer: activePlayer});
+            this.setState({ players: newPlayers, dealer: dealer, activePlayer: activePlayer});
+
+            let updatedGameInfo = this.state.gameInfo;
+            updatedGameInfo.dealer = dealer;
+            updatedGameInfo.activePlayer = activePlayer;
+
+            this.setState({ 
+                isMyTurn:  activePlayer.playerId == this.state.playerId,
+                gameInfo: updatedGameInfo
+            });
+
 
         });
 
@@ -146,9 +167,8 @@ class GameScreen extends React.Component {
                 currentCard: null,
                 currentBet: 0, 
                 hasPlayedCard: false,
-                roundWinner: null,
-                roundWinCard: null,
-                roundCards: [],
+                roundWinners: null,
+                turns: [],
             });
         }); 
 
@@ -160,42 +180,45 @@ class GameScreen extends React.Component {
         })
 
         socket.on("move-to-homepage", (lobbyId) =>{
-            console.log("hey!")
-            let displayName = ""
-            for(let i=0;i<this.state.players.length;i++) {
-                if(this.state.players[i].playerId == this.state.playerId) {
-                    displayName = this.state.players[i].displayName
-                }
-            }
 
-            this.props.router.push({pathname: `/`, query: {code: lobbyId, user: displayName}}); 
+            this.props.router.push({pathname: `/`, query: {code: lobbyId, displayName: this.state.displayName}}); 
         })
 
         
     }
-
+    dummyOnClick(x){
+        //do nothing
+    }
     selectCard(newCard){
         if(!this.state.hasPlayedCard){ // dont set new card if one has been played
             this.setState({
                 currentCard: newCard
             })
-            console.log(this.state.currentCard)
         }
     }
 
     //returns false on invalid bet
     updateBet = event => {
-        if(event.target.value >= 0){ // TODO: bet must be above minimum amount
+
+        let regEx = /[a-z]/i;
+        let bet = parseInt(event.target.value)
+        if(!regEx.test(event.target.value) &&  bet > 0 && bet <= this.state.chips){ 
             this.setState({
-                currentBet: event.target.value
+                currentBet: bet,
+                validBet: true
             })
             return true
         }
-        else return false
+        else {
+            this.setState({
+                validBet: false
+            })
+            return false
+        }
     }
 
     confirmTurn(){
-        if(this.state.currentCard && this.state.currentBet >= 0 && !this.state.hasPlayedCard ){
+        if(this.state.currentCard && this.state.currentBet > 0 && !this.state.hasPlayedCard && this.state.validBet){
             var newGameInfo = {
                 id: this.state.gameInfo.id,
                 activePlayer: this.state.gameInfo.activePlayer,
@@ -226,34 +249,61 @@ class GameScreen extends React.Component {
         for(let i=0;i<this.state.players.length;i++) {
             var jsx = (<div></div>);
             let style = gameSty.nameListBlack
+            let lastBet = ""
+
             if(this.state.players[i].chips == 0) {
                 style = gameSty.nameListGrey
             }
+
+            if(this.state.players[i].lastBet != 0 && this.state.players[i].lastBet != undefined) {
+                lastBet = "Bet: " + this.state.players[i].lastBet
+            }
+
             if(this.state.players[i].playerId == this.state.gameInfo.activePlayer.playerId && this.state.players[i].playerId == this.state.gameInfo.dealer.playerId) {
                 jsx = (
                     <div className={style}>
-                        {this.state.players[i].displayName} has {this.state.players[i].chips} chips. <b>(Dealer)</b> *
+                        <img src= {this.state.players[i].image} width ={58} height = {58} />
+                        <div className={gameSty.playerInfo}>
+                            <b>{this.state.players[i].displayName}</b> <b>(Dealer)</b> *
+                            <br/>Chips: {this.state.players[i].chips}  
+                            <br/>{lastBet}
+                        </div>
                     </div>
                 )
             }    
             else if(this.state.players[i].playerId == this.state.gameInfo.dealer.playerId) {
                 jsx = (
                     <div className={style}>
-                        {this.state.players[i].displayName} has {this.state.players[i].chips} chips. <b>(Dealer)</b>
+                        <img src= {this.state.players[i].image} width ={58} height = {58} />
+                        <div className={gameSty.playerInfo}>
+                            <b>{this.state.players[i].displayName}</b> <b>(Dealer)</b>
+                            <br/>Chips: {this.state.players[i].chips}
+                            <br/>{lastBet}
+                        </div>
                     </div>
                 )
             }
             else if(this.state.players[i].playerId == this.state.gameInfo.activePlayer.playerId) {
                 jsx = (
                     <div className={style}>
-                        {this.state.players[i].displayName} has {this.state.players[i].chips} chips. *
+                        <img src= {this.state.players[i].image} width ={58} height = {58} />
+                        <div className={gameSty.playerInfo}>
+                            <b>{this.state.players[i].displayName}</b> *
+                            <br/>Chips: {this.state.players[i].chips}
+                            <br/>{lastBet}
+                        </div>
                     </div>
                 )
             }
             else {
                 jsx = (
                     <div className={style}>
-                        {this.state.players[i].displayName} has {this.state.players[i].chips} chips.
+                        <img src= {this.state.players[i].image} width ={58} height = {58} />
+                        <div className={gameSty.playerInfo}>
+                            <b>{this.state.players[i].displayName}</b>
+                            <br/>Chips: {this.state.players[i].chips}
+                            <br/>{lastBet}
+                        </div>
                     </div>
                 )
             }
@@ -262,38 +312,7 @@ class GameScreen extends React.Component {
         return list
     }
 
-    printCards() {
-        var list = []
-        for(let i=0;i<this.state.cards.length;i++) {
-            let card = this.state.cards[i]
-            var jsx = (
-                <div>
-                    <CardView onClick = {this.selectCard} card={card}/>
-                </div>
-            )
-            list.push(jsx)
-        }
-        return list
-    } 
-
-    printPlayedCards() {
-        console.log(this.state.roundCards)
-        var list = []
-        let sortedArray = this.state.roundCards
-        sortedArray.sort(function(a, b){return b.searchValue - a.searchValue;});
-        for(let i=0;i<sortedArray.length;i++) {
-            var jsx = (
-                <div>
-                    {sortedArray[i].searchString} ({sortedArray[i].searchValue} searches)
-                </div>
-            )
-            list.push(jsx)
-        }
-        return list
-    }
-
     nextRound(gameId) {
-        console.log(gameId)
         socket.emit("next-round", gameId)
     }
 
@@ -313,7 +332,7 @@ class GameScreen extends React.Component {
                 return (
                     <div>
                         <br/>
-                        <CardView card={lobbyCard} onClick = {this.gotoLobby}/>
+                        <CardView card={lobbyCard} onClick = {this.gotoLobby} showValue={false}/>
                     </div>
                 )
             }
@@ -321,7 +340,7 @@ class GameScreen extends React.Component {
                 return (
                     <div>
                         <br/>
-                        <CardView card={this.state.fakeCard} onClick = {this.nextRound}/>
+                        <CardView card={this.state.fakeCard} onClick = {this.nextRound} showValue={false}/>
                     </div>
                 )
             }
@@ -329,29 +348,44 @@ class GameScreen extends React.Component {
     }
 
     render(){
+
         return (
             <div className={gameSty.container}>
                 <Head>
                     <title>SEO-ker Game Room</title>
                     <link rel="icon" href="/favicon.ico"/>
                 </Head>   
-                <h1>{this.state.displayName}</h1>
+                <h1><img src = {this.state.image} width = {58} height = {58}/><br/>{this.state.displayName}</h1>
                 <main className={gameSty.main}>
                     {this.state.roundOver ?
                         <div className={gameSty.gameroom}>
-                            <h1 className={gameSty.h1}>
-                                {this.state.roundWinner.displayName} won {this.state.winningPot} chips with card:
-                                <br />
-                                {this.state.roundWinCard.searchString} ({this.state.roundWinCard.searchValue} searches)
-                            </h1>
+
+                            <ul className ="ul"> 
+                                {this.state.roundWinners.map((winner,i) => (
+                                <li key = {winner.player.playerId}> 
+                                        <h1 className={gameSty.h1} id={"winner"+i}>
+                                    {winner.player.displayName} won {Math.floor(this.state.winningPot / this.state.roundWinners.length)} chips with :
+                                    <CardView card = {winner.card} onClick = {this.dummyOnClick} showValue = {true}/>
+                                    </h1>
+                                </li> 
+                                ))}
+                            </ul>
                                 <h2>
                                 All cards played:
                                 </h2>
-                                <h3>{this.printPlayedCards()}</h3>   
+
+                                <ul className = 'ul'> 
+                                    {this.state.turns.map(turn => (
+                                        <li key = {turn.player.playerId} > 
+                                            <h3> {turn.player.displayName} played </h3>
+                                            <CardView card = {turn.card} onClick = {this.dummyOnClick} showValue = {true}/>
+                                        </li> 
+                                    ))}
+                                </ul>  
                                 {this.state.isGameOver ?
                                 <div>
                                     <br/>
-                                    <h3>Only one player remains. {this.state.roundWinner.displayName} has won the game!</h3>
+                                    <h3>Only one player remains. {this.state.roundWinners[0].player.displayName} has won the game!</h3>
                                     {this.printRoundOverDisplay()}
                                 </div>
                                 :<div/>
@@ -366,10 +400,10 @@ class GameScreen extends React.Component {
                                 } 
 
                         </div> :
-                        <div className={gameSty.gameroom}>
+                <div className={gameSty.gameroom}>
                 
                 <div className={gameSty.gameroomL}> 
-                    <h3>Pot amount: {this.state.gameInfo.potAmount}</h3> 
+                    <h3 id="potHeader">{this.state.gameInfo.potAmount} chips in the pot</h3> 
                     
                     {this.printPlayers()}
 
@@ -387,28 +421,35 @@ class GameScreen extends React.Component {
 
 
                 <div className={gameSty.gameroomR}>
-                    <ul className = "ul"> 
+                    <ul className= 'ul'> 
                         {
-                        
-                        this.state.cards.map((card, index) =>(
-                        <li key={index}> <CardView card={card} onClick = {this.selectCard}/> </li>
+                        this.state.cards.map((card,i) =>(
+                            <li key={card.searchString} id={i}> <CardView card={card} onClick = {this.selectCard} showValue = {false}/> </li>
                         ))}
                     </ul>
                     
                     
-                    {this.state.isMyTurn ?
+                    {this.state.isMyTurn && this.state.chips > 0?
                     <div className={gameSty.gameroom}>
                         <input type="number" 
                         placeholder="Bet" 
                         id="betInput"
-                        onChange={this.updateBet}
-                        className={gameSty.betInputBox}/>
+                        onChange={this.updateBet} 
+                        className={gameSty.betInputBox} />
                         
                         <button className={gameSty.card} 
                         id="confirmTurn"
                         onClick={this.confirmTurn}>
                                         Confirm Turn
                         </button>
+                        {!this.state.validBet ?
+                            <div className={gameSty.gameroom} id="invalidBet">
+                                <b>Please input a valid bet. (1 to {this.state.chips})</b>
+                            </div> 
+
+                            : 
+                            <div/> 
+                            }
                     </div> 
 
                     : 

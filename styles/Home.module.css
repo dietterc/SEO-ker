@@ -129,6 +129,17 @@
   text-align: center;
 }
 
+
+.changeUsername{
+  text-align: center;
+  cursor: pointer;
+  color: grey;
+}
+
+.changeUsername:hover{
+  color: black;
+}
+
 .lobbyCodeBox {
   border: 2px solid black;
   border-radius: 5px;
@@ -139,8 +150,20 @@
   text-align: center;
 }
 
+.token {
+  float: left;
+  width: 58px;
+  height: 58px;
+}
+
+.lobbyPlayer {
+  margin: 25px;
+  
+}
+
 .playerName {
-  margin: 1rem;
+  width: 75%;
+  margin-left: 75px;
   flex-basis: 45%;
   padding: .5rem;
   text-align: center;
@@ -213,8 +236,12 @@
   margin: 50px;
   text-align: center;
 }
-.lobby {
-    
+
+.rules{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 @media (max-width: 600px) {
   .grid {

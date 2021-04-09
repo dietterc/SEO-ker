@@ -1,8 +1,7 @@
-
 const assert = require('chai').assert;
 const server = require('../server/server.js');
 
-describe('Server', function () {
+describe('Unit Tests', function () {
 
     describe('#generateCode()', function () {
         it('return type string', function () {
@@ -18,9 +17,9 @@ describe('Server', function () {
 
     describe('#findGame()', function () {
         let player = server.createPlayer("tester1", "Tester 1", "s1id");
-        let game = server.createGame("TESTID1", [player]);
+        let game = server.createGame("TESTID1", [player], null, 0);
         function newGame(id) {
-            return server.createGame(id, [player]);
+            return server.createGame(id, [player], null, 0);
         }
         it('should find nothing when there is no games in the list', function () {
             let gameList = [];
@@ -67,7 +66,7 @@ describe('Server', function () {
             let gameList = [game, newGame("TESTID2"), newGame("TESTID3")];
             let result = server.findGame("TESTID", gameList);
             assert.isNull(result);
-        })
+        });
     });
 
     describe("Testing Classes", function () {
@@ -226,7 +225,7 @@ describe('Server', function () {
                     });
                     after(function () {
                         lobby.joinLobby(player1);
-                    })
+                    });
                 });
 
             });
@@ -280,7 +279,7 @@ describe('Server', function () {
                         it("Tester 9 should be connected", function () {
                             assert.isTrue(lobby.isConnected(nineth));
                         });
-                    })
+                    });
                 });
             });
         });
@@ -290,7 +289,7 @@ describe('Server', function () {
             
             describe('initial game state', function () {
                 let game = server.createGame("TESTID",
-                    [server.createPlayer("tester1", "Tester 1", "s1id")]);
+                    [server.createPlayer("tester1", "Tester 1", "s1id")], null, 0);
                 it("should not be null", function () {
                     assert.isNotNull(game);
                 });
@@ -306,32 +305,123 @@ describe('Server', function () {
                 });
             });
 
-            describe('#chooseWinningCard()', function () {
-                let game = server.createGame("TESTID", []);
+            describe('#chooseWinners()', function () {
+                let game = server.createGame("TESTID", [], null, 0);
                 this.beforeEach(function () {
-                    game.activeCards = [server.createCard("Card 1", 300)];
+                    game.activeTurns = [{ player: server.createPlayer(1, "tester1", "SID"), card: server.createCard("Card 1", 300) }];
+                });
+                it("should be able to select the only turn as winner", function () {
+                    let result = game.chooseWinners();
+                    assert.equal(result.length, 1);
+                    assert.equal(result[0], game.activeTurns[0]);
+                });
+                it("should be able to select the right most turn as winner", function () {
+                    game.activeTurns.push({ player: server.createPlayer(2, "tester2", "SID2"), card: server.createCard("Card 2", 500) });
+                    let result = game.chooseWinners();
+                    assert.equal(result.length, 1);
+                    assert.equal(result[0], game.activeTurns[1]);
+                });
+                it("should be able to select the left most turn as winner", function () {
+                    game.activeTurns.push({ player: server.createPlayer(2, "tester2", "SID2"), card: server.createCard("Card 2", 200) });
+                    let result = game.chooseWinners();
+                    assert.equal(result.length, 1);
+                    assert.equal(result[0], game.activeTurns[0]);
+                });
+                it("should be able to select the middle turn as winner", function () {
+                    game.activeTurns.push({ player: server.createPlayer(2, "tester2", "SID2"), card: server.createCard("Card 2", 1888) });
+                    game.activeTurns.push({ player: server.createPlayer(3, "tester3", "SID3"), card: server.createCard("Card 3", 882) });
+                    let result = game.chooseWinners();
+                    assert.equal(result.length, 1);
+                    assert.equal(result[0], game.activeTurns[1]);
+                });
+                it("should be able to select multiple of the highest turns as winner (all cases)", function () {
+                    // only 2 cards and they tie
+                    game.activeTurns.push({ player: server.createPlayer(2, "tester2", "SID2"), card: server.createCard("Card 2", 300) });
+                    let result = game.chooseWinners();
+                    assert.deepEqual(result, game.activeTurns);
+
+                    // 3 cards where left most 2 ties
+                    game.activeTurns.push({ player: server.createPlayer(3, "tester3", "SID3"), card: server.createCard("Card 3", 100) });
+                    result = game.chooseWinners();
+                    assert.deepEqual(result, [game.activeTurns[0], game.activeTurns[1]]);
+
+                    // 3 cards where right most 2 ties
+                    game.activeTurns[0].card.searchValue = 100;
+                    game.activeTurns[2].card.searchValue = 300;
+                    result = game.chooseWinners();
+                    assert.deepEqual(result, [game.activeTurns[1], game.activeTurns[2]]);
+
+                    // 3 cards where left most and right most is the highest and ties
+                    game.activeTurns[0].card.searchValue = 500;
+                    game.activeTurns[2].card.searchValue = 500;
+                    result = game.chooseWinners();
+                    assert.deepEqual(result, [game.activeTurns[0], game.activeTurns[2]]);
+
+                    // all 3 cards ties
+                    game.activeTurns[1].card.searchValue = 500;
+                    result = game.chooseWinners();
+                    assert.deepEqual(result, game.activeTurns);
+                });
+            });
+
+            describe("#playTurn(turn), #getTurns(), and #resetTurns()", function () {
+                let game;
+                this.beforeEach(function () {
+                    game = server.createGame(
+                        "gameID",
+                        [server.createPlayer("tID1", "tester1", "sid1"), server.createPlayer("tID2", "tester2", "sid2")],
+                        [server.createCard("Card 1", 100), server.createCard("Card 2", 200), server.createCard("Card 3", 300)], 1000
+                    );
                 })
-                it("should select the card with 300", function () {
-                    let result = game.chooseWinningCard();
-                    assert.equal(result, game.activeCards[0]);
+                it("should have no turns yet", function () {
+                    let result = game.getTurns();
+                    assert.deepEqual(result, []);
                 });
-                it("should select the card with 500", function () {
-                    game.activeCards.push(server.createCard("Card 2", 500));
-                    let result = game.chooseWinningCard();
-                    assert.equal(result, game.activeCards[1]);
+                it("should have a turn", function () {
+                    let turn = {
+                        player: game.activePlayer[0],
+                        card: game.allCards[0]
+                    }
+                    game.playTurn(turn);
+                    let result = game.getTurns();
+                    assert.equal(result.length, 1);
+                    assert.deepEqual(result[0], turn);
                 });
-                it("should select the card with 300", function () {
-                    game.activeCards.push(server.createCard("Card 2", 200));
-                    let result = game.chooseWinningCard();
-                    assert.equal(result, game.activeCards[0]);
-                })
-                it("should select the card with 888", function () {
-                    game.activeCards.push(server.createCard("Card 2", 888));
-                    game.activeCards.push(server.createCard("Card 3", 822));
-                    let result = game.chooseWinningCard();
-                    assert.equal(result, game.activeCards[1]);
+                it("should have 2 turns and can be reset", function () {
+                    let turns = [
+                        {
+                        player: game.activePlayer[0],
+                        card: game.allCards[0]
+                        },
+                        {
+                        player: game.activePlayer[0],
+                        card: game.allCards[0]
+                        }
+                    ];
+                    game.playTurn(turns[1]);
+                    game.playTurn(turns[0]);
+                    
+                    let result = game.getTurns();
+                    assert.equal(result.length, 2);
+                    assert.deepEqual(result[0], turns[1]);
+                    assert.deepEqual(result[1], turns[0]);
+
+                    game.resetTurns();
+
+                    result = game.getTurns();
+                    assert.equal(result.length, 0);
                 });
-            })
+            });
+
+            describe("#resetPot", function () {
+                it("Can reset the pot", function () {
+                    let game = server.createGame('', [], [], 0);
+                    game.potAmount = 1000;
+                    game.resetPot();
+                    let result = game.potAmount;
+                    assert.equal(result, 0);
+                });
+            });
         });
     });
 
