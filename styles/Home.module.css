@@ -129,6 +129,16 @@
   text-align: center;
 }
 
+
+.changeUsername{
+  text-align: center;
+  cursor: pointer;
+}
+
+.changeUsername:hover{
+  color: grey;
+}
+
 .lobbyCodeBox {
   border: 2px solid black;
   border-radius: 5px;

@@ -20,7 +20,6 @@ var activeGames = []
 //assign player ID's based on an incrementing variable for now, will change to usernames later
 var nextPlayerId = 1
 const lobbyCards = 1000
-const startingChips = 1000
 
 
 //----------objects----------
@@ -93,7 +92,7 @@ class Lobby {
 }
 
 class Player {
-  constructor(id,displayName,socketId) {
+  constructor(id,displayName,socketId, startingChips) {
     this.displayName = displayName
     this.playerId = id           //this is the player id, (0,1,,2,3,4....) that identifies them uniquely.
     this.socketId = socketId  //this is the socket id for the player.
@@ -125,7 +124,7 @@ class GameInfo {
 }
 
 class Game {
-  constructor(id,players,cardsList) {
+  constructor(id,players,cardsList, startingChips) {
     this.id = id
     this.players = players
     this.dealerIndex = Math.floor(Math.random() * this.players.length)
@@ -133,6 +132,7 @@ class Game {
     this.activePlayerIndex = (this.dealerIndex + 1) % this.players.length //player to the "left" ..or right?
     this.activePlayer = this.players[this.activePlayerIndex]
     this.potAmount = 0
+    this.startingChips = startingChips
 
     this.activeTurns = []
     
@@ -204,11 +204,13 @@ class Game {
 
     this.dealCards = function(){
       for(let i = 0; i< this.players.length; i++){
-        let newHand = []
-        newHand = this.getCards()
-        this.players[i].cards = newHand
-        var playerSocket = this.players[i].socketId
-        io.to(playerSocket).emit('set-cards', this.players[i].cards)
+        if(this.players[i].chips > 0){
+          let newHand = []
+          newHand = this.getCards()
+          this.players[i].cards = newHand
+          var playerSocket = this.players[i].socketId
+          io.to(playerSocket).emit('set-cards', this.players[i].cards)
+        }
       }
     }
 
@@ -328,11 +330,11 @@ moduleExports.createLobby = function (id) {
 }
 
 moduleExports.createPlayer = function (id, displayName, socketId) {
-    return new Player(id, displayName, socketId)
+    return new Player(id, displayName, socketId, 0)
 }
 
 moduleExports.createGame = function (id, players) {
-    return new Game(id, players)
+    return new Game(id, players, null, 0)
 }
 
 moduleExports.createCard = function (searchString, searchValue) {
@@ -346,7 +348,7 @@ io.on('connection', (socket) => {
   socket.on('host-lobby', (...args) => {
     var lobbyId = moduleExports.generateCode();
     
-    player = new Player(nextPlayerId++,args[1],socket.id);
+    player = new Player(nextPlayerId++,args[1],socket.id, 0);
     lobby = new Lobby(lobbyId)
     lobby.joinLobby(player)
     activeLobbies.push(lobby)
@@ -371,7 +373,7 @@ io.on('connection', (socket) => {
       return
     }
 
-    player = new Player(nextPlayerId++,"" + args[1],socket.id)  
+    player = new Player(nextPlayerId++,"" + args[1],socket.id, 0)  
     if(lobby.joinLobby(player)){
       socket.emit("join-lobby", lobby, player.playerId)
     
@@ -433,7 +435,7 @@ io.on('connection', (socket) => {
       
   })
 
-  socket.on('host-started-game', (lobbyId) => {
+  socket.on('host-started-game', (lobbyId, startingChips) => {
     let code = lobbyId.toUpperCase().trim()
     lobby = findLobby(code, activeLobbies)
 
@@ -447,7 +449,7 @@ io.on('connection', (socket) => {
         console.log(lobby.players[i].image)
     }
 
-    var game = new Game(lobby.lobbyId,lobby.players, lobby.cardsList)
+    var game = new Game(lobby.lobbyId,lobby.players, lobby.cardsList, startingChips)
     
     activeGames.push(game)
   });
@@ -467,11 +469,13 @@ io.on('connection', (socket) => {
     var cards = game.getCards()
 
     //socket refreshes on page change, so assign that player their new socket.id 
-    //hand them new cards to for sick optimization
+    //hand them new cards and chips too for sick optimization
     for(var i=0;i<game.players.length;i++) {
       if(game.players[i].playerId == playerId){
         game.players[i].socketId = socket.id
         game.players[i].cards = cards
+        game.players[i].chips = game.startingChips
+        break
       }
     }
 
@@ -479,13 +483,14 @@ io.on('connection', (socket) => {
     //subscribe the socket to the room called lobbyId
     socket.join(lobbyId)
 
-    //send everyone in the room an updated list of players
-    io.to(lobby.lobbyId).emit("update-players", game.players )
-
     //send them their cards and chips
 
+
     socket.emit("set-cards", cards)
-    socket.emit("set-chips", startingChips)
+    socket.emit("set-chips", game.startingChips)
+
+    //send everyone in the room an updated list of players
+    io.to(lobby.lobbyId).emit("update-players", game.players )
 
     lobby.readyPlayers += 1
     if(lobby.players.length == lobby.readyPlayers) {
@@ -508,10 +513,16 @@ io.on('connection', (socket) => {
     }
 
     //subtract their bet from their chips
-    game.activePlayer.chips -= parseInt(gameInfo.betAmount)
-    socket.emit("set-chips", game.activePlayer.chips) //tell the client to update chip amount
-    game.activePlayer.lastBet = parseInt(gameInfo.betAmount)
-
+    if(gameInfo.betAmount <= game.activePlayer.chips){
+      game.activePlayer.chips -= parseInt(gameInfo.betAmount)
+      socket.emit("set-chips", game.activePlayer.chips) //tell the client to update chip amount
+      game.activePlayer.lastBet = parseInt(gameInfo.betAmount)  
+    }
+    else{
+      console.log(game.activePlayer+" bet "+gameInfo.betAmount+" chips when they had "+game.activePlayer.chips)
+      socket.emit("invalid-bet")
+    }
+    
     //update active cards and the pot
     if(gameInfo.activeCard != null) {
       let turn = {
