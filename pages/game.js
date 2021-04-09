@@ -181,14 +181,8 @@ class GameScreen extends React.Component {
         })
 
         socket.on("move-to-homepage", (lobbyId) =>{
-            let displayName = ""
-            for(let i=0;i<this.state.players.length;i++) {
-                if(this.state.players[i].playerId == this.state.playerId) {
-                    displayName = this.state.players[i].displayName
-                }
-            }
 
-            this.props.router.push({pathname: `/`, query: {code: lobbyId, user: displayName}}); 
+            this.props.router.push({pathname: `/`, query: {code: lobbyId, displayName: this.state.displayName}}); 
         })
 
         
@@ -208,7 +202,7 @@ class GameScreen extends React.Component {
     updateBet = event => {
 
         let regEx = /[a-z]/i;
-        let bet = Number(event.target.value)
+        let bet = parseInt(event.target.value)
         if(!regEx.test(event.target.value) &&  bet > 0 && bet <= this.state.chips){ 
             this.setState({
                 currentBet: bet,

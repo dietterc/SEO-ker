@@ -38,7 +38,7 @@ export default class LoginInput extends React.Component{
                                                          onChange={this.updateUsername} required/>
                 <button type= "submit" className={styles.card}>Confirm</button>  
                 {!this.state.validUsername? 
-                   <div className ='invalidText'> max 16 characters </div>   
+                   <div className ='invalidText'> Username must be less than 16 characters. </div>   
                 : 
                  <div/> 
                 }

@@ -19,7 +19,7 @@ class Home extends React.Component{
   constructor(props){
     super(props);
     this.state = {
-      username: "",
+      username: props.router.query.displayName,
       playerId: "",
       loggedIn: false,
       inLobby: false,
@@ -27,7 +27,7 @@ class Home extends React.Component{
       lobbyPlayerList: "",
       isHost: false,
       cardsSet: false,
-      oldDisplayName: props.router.query.user,  
+      oldDisplayName: props.router.query.displayName,  
       newLobbyId: props.router.query.code,   
       startingChips: 0
     };
@@ -35,6 +35,7 @@ class Home extends React.Component{
     if(this.state.newLobbyId != undefined) {
       this.setState({username: this.state.oldDisplayName}); 
       this.setState({lobbyCode: this.state.newLobbyId});
+      console.log(this.state.oldDisplayName)
       
       socket.emit('join-lobby', 'joinID', this.state.oldDisplayName ,this.state.newLobbyId);
     }
@@ -129,9 +130,15 @@ class Home extends React.Component{
   }
 
   updateStartingChips = event =>{
-    if(event.target.value > 0 ){
-      this.setState({startingChips: event.target.value})
+
+    let regEx = /[a-z]/i;
+    let amount = parseInt(event.target.value)
+
+    if(!regEx.test(event.target.value) && amount > 0 ){
+      this.setState({startingChips: amount})
     }
+
+
   }
  
 
