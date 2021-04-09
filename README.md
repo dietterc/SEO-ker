@@ -28,5 +28,6 @@ Run this: (node, express, socket.io, and npm are required)
 ```bash
 npm run dev
 ```
-Runs on [http://localhost:3000](http://localhost:3000) 
+Runs on [http://localhost:3000](http://localhost:3000)
+
 Hosted on Heroku at [SEO-ker](https://seoker.herokuapp.com/)
