@@ -1,8 +1,10 @@
-const { expect } = require("chai");
+const chai = require("chai");
+const expect = chai.expect;
+const assert = chai.assert;
 const { Builder, By, Key, util } = require("selenium-webdriver");
 require("geckodriver")
 const firefox = require("selenium-webdriver/firefox");
-const options = new firefox.Options().addArguments('-headless');
+const options = new firefox.Options().addArguments('');//-headless');
 describe("Acceptance Testing", function () {
     let driver = new Builder()
         .forBrowser("firefox")
@@ -13,10 +15,17 @@ describe("Acceptance Testing", function () {
         .setFirefoxOptions(options)
         .build();
     let lobbyCode = "";
+
+    describe("Initializing connection", async () => {
+        it("should connect to localhost:3000", async () => {
+            await driver.sleep(4000); //Wait a bit for localhost
+            await driver.get("http://localhost:3000/");
+            await hostDriver.get("http://localhost:3000/");
+        });
+    });
+
     describe("Feature 1 - User Creation", async () => {
         it("Create a User with a Username", async () => {
-            await driver.sleep(4000);
-            await driver.get("http://localhost:3000/");
             await driver.sleep(100);
             await driver.findElement(By.name("username")).sendKeys("Selenium", Key.RETURN);
             let result = await driver.findElement(By.name("welcome")).getText();
@@ -27,7 +36,6 @@ describe("Acceptance Testing", function () {
 
     describe("Feature 2 - Host/Join a Lobby", async () => {
         it("Host a Lobby", async () => {
-            await hostDriver.get("http://localhost:3000/");
             await hostDriver.sleep(100);
             await hostDriver.findElement(By.name("username")).sendKeys("Selenium Host", Key.RETURN);
             await hostDriver.findElement(By.id("host-lobbyButton")).click();
@@ -64,17 +72,17 @@ describe("Acceptance Testing", function () {
             let result = "";
             while (!loaded) {
                 try {
-                    result = await hostDriver.findElement(By.id("potAmount")).getText();
+                    result = await hostDriver.findElement(By.id("potHeader")).getText();
                     loaded = true;
                 } catch (err) {
                     await hostDriver.sleep(10);
                 }
             }
-            result = result.split(":");
+            result = result.split("chips");
             result = result[0].trim();
-            expect(result).to.equal("Pot amount");
+            expect(result).to.equal("0");
             try {
-                result = await driver.findElement(By.id("potAmount")).getText();
+                result = await driver.findElement(By.id("potHeader")).getText();
             } catch (err) {
                 expect("").to.equal("Joined person did not join!")
             }
@@ -140,13 +148,13 @@ describe("Acceptance Testing", function () {
                     expect(result).to.equal(playerOne.name);
                 }
             }
-            
         });
     });
 
-
-    after("Closing Browsers",async () => {
-        driver.quit();
-        hostDriver.quit();
+    describe("Ending...", async () => {
+        it("Closing Browsers", async () => {
+            driver.quit();
+            hostDriver.quit();
+        });
     });
 });
