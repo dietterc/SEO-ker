@@ -35,7 +35,7 @@ class CardView extends React.Component{
 
     render(){
         return(
-            <div onClick = {this.cardsClick} className={gameSty.gameCard}> 
+            <div onClick = {this.cardsClick} id={this.state.card.searchString}  className={gameSty.gameCard}> 
                 {this.state.card.searchString} 
                 {this.state.showValue ?
                 <h3> {this.state.card.searchValue}</h3>

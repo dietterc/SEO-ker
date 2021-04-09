@@ -17,9 +17,9 @@ describe('Unit Tests', function () {
 
     describe('#findGame()', function () {
         let player = server.createPlayer("tester1", "Tester 1", "s1id");
-        let game = server.createGame("TESTID1", [player]);
+        let game = server.createGame("TESTID1", [player], null, 0);
         function newGame(id) {
-            return server.createGame(id, [player]);
+            return server.createGame(id, [player], null, 0);
         }
         it('should find nothing when there is no games in the list', function () {
             let gameList = [];
@@ -289,7 +289,7 @@ describe('Unit Tests', function () {
             
             describe('initial game state', function () {
                 let game = server.createGame("TESTID",
-                    [server.createPlayer("tester1", "Tester 1", "s1id")]);
+                    [server.createPlayer("tester1", "Tester 1", "s1id")], null, 0);
                 it("should not be null", function () {
                     assert.isNotNull(game);
                 });
@@ -306,7 +306,7 @@ describe('Unit Tests', function () {
             });
 
             describe('#chooseWinners()', function () {
-                let game = server.createGame("TESTID", []);
+                let game = server.createGame("TESTID", [], null, 0);
                 this.beforeEach(function () {
                     game.activeTurns = [{ player: server.createPlayer(1, "tester1", "SID"), card: server.createCard("Card 1", 300) }];
                 });
@@ -361,6 +361,65 @@ describe('Unit Tests', function () {
                     game.activeTurns[1].card.searchValue = 500;
                     result = game.chooseWinners();
                     assert.deepEqual(result, game.activeTurns);
+                });
+            });
+
+            describe("#playTurn(turn), #getTurns(), and #resetTurns()", function () {
+                let game;
+                this.beforeEach(function () {
+                    game = server.createGame(
+                        "gameID",
+                        [server.createPlayer("tID1", "tester1", "sid1"), server.createPlayer("tID2", "tester2", "sid2")],
+                        [server.createCard("Card 1", 100), server.createCard("Card 2", 200), server.createCard("Card 3", 300)], 1000
+                    );
+                })
+                it("should have no turns yet", function () {
+                    let result = game.getTurns();
+                    assert.deepEqual(result, []);
+                });
+                it("should have a turn", function () {
+                    let turn = {
+                        player: game.activePlayer[0],
+                        card: game.allCards[0]
+                    }
+                    game.playTurn(turn);
+                    let result = game.getTurns();
+                    assert.equal(result.length, 1);
+                    assert.deepEqual(result[0], turn);
+                });
+                it("should have 2 turns and can be reset", function () {
+                    let turns = [
+                        {
+                        player: game.activePlayer[0],
+                        card: game.allCards[0]
+                        },
+                        {
+                        player: game.activePlayer[0],
+                        card: game.allCards[0]
+                        }
+                    ];
+                    game.playTurn(turns[1]);
+                    game.playTurn(turns[0]);
+                    
+                    let result = game.getTurns();
+                    assert.equal(result.length, 2);
+                    assert.deepEqual(result[0], turns[1]);
+                    assert.deepEqual(result[1], turns[0]);
+
+                    game.resetTurns();
+
+                    result = game.getTurns();
+                    assert.equal(result.length, 0);
+                });
+            });
+
+            describe("#resetPot", function () {
+                it("Can reset the pot", function () {
+                    let game = server.createGame('', [], [], 0);
+                    game.potAmount = 1000;
+                    game.resetPot();
+                    let result = game.potAmount;
+                    assert.equal(result, 0);
                 });
             });
         });

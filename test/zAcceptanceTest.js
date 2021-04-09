@@ -4,7 +4,7 @@ const assert = chai.assert;
 const { Builder, By, Key, util } = require("selenium-webdriver");
 require("geckodriver")
 const firefox = require("selenium-webdriver/firefox");
-const options = new firefox.Options().addArguments('');//-headless');
+const options = new firefox.Options().addArguments('-headless');
 describe("Acceptance Testing", function () {
     let driver = new Builder()
         .forBrowser("firefox")
@@ -88,7 +88,7 @@ describe("Acceptance Testing", function () {
             }
         });
 
-        it("Play a round", async () => {
+        it("Play a Round", async () => {
             await hostDriver.findElement(By.id("0")).click();
             await driver.findElement(By.id("0")).click();
             let hostPlayer = false;
@@ -148,6 +148,26 @@ describe("Acceptance Testing", function () {
                     expect(result).to.equal(playerOne.name);
                 }
             }
+
+            // Click play next round
+            try {
+                await driver.findElement(By.id("Play next round"));
+                driverToUse = driver;
+            } catch (err) {
+                driverToUse = hostDriver;
+            }
+            await driverToUse.findElement(By.id("Play next round")).click();
+        });
+
+        it("Play a Game (all in)", async () => {
+            // Keep on betting 500s until someone loses
+        });
+    });
+
+    describe("Feature: Deployed with Heroku", async () => {
+        it("Connects to the SEO-ker website", async () => {
+            await driver.get("https://seoker.herokuapp.com/");
+            await hostDriver.get("https://seoker.herokuapp.com/");
         });
     });
 

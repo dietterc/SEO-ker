@@ -372,8 +372,8 @@ moduleExports.createPlayer = function (id, displayName, socketId) {
     return new Player(id, displayName, socketId, 0)
 }
 
-moduleExports.createGame = function (id, players) {
-    return new Game(id, players, null, 0)
+moduleExports.createGame = function (id, players, cards, startingChips) {
+    return new Game(id, players, cards, startingChips)
 }
 
 moduleExports.createCard = function (searchString, searchValue) {
