@@ -23,9 +23,10 @@ Comprehensive rules for SEO-ker can be found [here](https://github.com/dietterc/
 
 ### Starting the app
 
-run this: (node, express, socket.io, and npm are required)
-
+Run this: (node, express, socket.io, and npm are required)
+ 
 ```bash
 npm run dev
 ```
 Runs on [http://localhost:3000](http://localhost:3000) 
+Hosted on Heroku at [SEO-ker](https://seoker.herokuapp.com/)
