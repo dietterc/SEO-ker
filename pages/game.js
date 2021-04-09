@@ -29,14 +29,13 @@ class CardView extends React.Component{
         }
         else {
             this.props.onClick(this.state.card);
-            console.log(this.state.card)
         }
 
     }
 
     render(){
         return(
-            <div onClick = {this.cardsClick} className={gameSty.gameCard}> 
+            <div onClick = {this.cardsClick} id={this.state.card.searchString}  className={gameSty.gameCard}> 
                 {this.state.card.searchString} 
                 {this.state.showValue ?
                 <h3> {this.state.card.searchValue}</h3>
@@ -181,14 +180,8 @@ class GameScreen extends React.Component {
         })
 
         socket.on("move-to-homepage", (lobbyId) =>{
-            let displayName = ""
-            for(let i=0;i<this.state.players.length;i++) {
-                if(this.state.players[i].playerId == this.state.playerId) {
-                    displayName = this.state.players[i].displayName
-                }
-            }
 
-            this.props.router.push({pathname: `/`, query: {code: lobbyId, user: displayName}}); 
+            this.props.router.push({pathname: `/`, query: {code: lobbyId, displayName: this.state.displayName}}); 
         })
 
         
@@ -208,10 +201,10 @@ class GameScreen extends React.Component {
     updateBet = event => {
 
         let regEx = /[a-z]/i;
-
-        if(event.target.value > 0 && !regEx.test(event.target.value) && event.target.value <= this.state.chips){ 
+        let bet = parseInt(event.target.value)
+        if(!regEx.test(event.target.value) &&  bet > 0 && bet <= this.state.chips){ 
             this.setState({
-                currentBet: event.target.value,
+                currentBet: bet,
                 validBet: true
             })
             return true
@@ -407,10 +400,10 @@ class GameScreen extends React.Component {
                                 } 
 
                         </div> :
-                        <div className={gameSty.gameroom}>
+                <div className={gameSty.gameroom}>
                 
                 <div className={gameSty.gameroomL}> 
-                    <h3 id="potAmount">Pot amount: {this.state.gameInfo.potAmount}</h3> 
+                    <h3 id="potHeader">{this.state.gameInfo.potAmount} chips in the pot</h3> 
                     
                     {this.printPlayers()}
 
@@ -431,12 +424,12 @@ class GameScreen extends React.Component {
                     <ul className= 'ul'> 
                         {
                         this.state.cards.map((card,i) =>(
-                            <li key={i} id={i}> <CardView card={card} onClick = {this.selectCard} showValue = {false}/> </li>
+                            <li key={card.searchString} id={i}> <CardView card={card} onClick = {this.selectCard} showValue = {false}/> </li>
                         ))}
                     </ul>
                     
                     
-                    {this.state.isMyTurn ?
+                    {this.state.isMyTurn && this.state.chips > 0?
                     <div className={gameSty.gameroom}>
                         <input type="number" 
                         placeholder="Bet" 

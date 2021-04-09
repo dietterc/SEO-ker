@@ -12,6 +12,7 @@ export default class LobbyInput extends React.Component{
       this.updateLobbyCode = this.updateLobbyCode.bind(this);
       this.hostLobby = this.hostLobby.bind(this);
       this.joinLobby = this.joinLobby.bind(this);
+      this.changeUsername = this.changeUsername.bind(this)
     }
   
     hostLobby(){
@@ -25,11 +26,16 @@ export default class LobbyInput extends React.Component{
     updateLobbyCode = event =>{
       this.setState({lobbyId: event.target.value});
     }
+
+    changeUsername(){
+      this.props.changeUsername()
+    }
   
     render(){
       return(
         <div >
             <h2 className={styles.hostandjoin} name = "welcome">Welcome, {this.state.username}.</h2>
+            <p className={styles.changeUsername} onClick = {this.changeUsername}> Change username </p>
             <div className={styles.hostandjoin}>
             <div>
             <button className={styles.card} 

@@ -19,7 +19,7 @@ class Home extends React.Component{
   constructor(props){
     super(props);
     this.state = {
-      username: "",
+      username: props.router.query.displayName,
       playerId: "",
       loggedIn: false,
       inLobby: false,
@@ -27,13 +27,15 @@ class Home extends React.Component{
       lobbyPlayerList: "",
       isHost: false,
       cardsSet: false,
-      oldDisplayName: props.router.query.user,  
+      oldDisplayName: props.router.query.displayName,  
       newLobbyId: props.router.query.code,   
+      startingChips: 0
     };
 
     if(this.state.newLobbyId != undefined) {
       this.setState({username: this.state.oldDisplayName}); 
       this.setState({lobbyCode: this.state.newLobbyId});
+      console.log(this.state.oldDisplayName)
       
       socket.emit('join-lobby', 'joinID', this.state.oldDisplayName ,this.state.newLobbyId);
     }
@@ -44,7 +46,8 @@ class Home extends React.Component{
     this.onJoin = this.onJoin.bind(this);
     this.onHost = this.onHost.bind(this);
     this.hostStartGame = this.hostStartGame.bind(this);
-    this.updateLobbyList = this.updateLobbyList.bind(this)
+    this.updateLobbyList = this.updateLobbyList.bind(this);
+    this.changeUsername = this. changeUsername.bind(this)
   }
   updateLobbyList(lobby){
     let lobbyList = []
@@ -125,6 +128,18 @@ class Home extends React.Component{
       this.setState({cardsSet: true})
     })
   }
+
+  updateStartingChips = event =>{
+
+    let regEx = /[a-z]/i;
+    let amount = parseInt(event.target.value)
+
+    if(!regEx.test(event.target.value) && amount > 0 ){
+      this.setState({startingChips: amount})
+    }
+
+
+  }
  
 
   // update the state according to user input. 
@@ -151,8 +166,17 @@ class Home extends React.Component{
     this.setState({inLobby: true, isHost: true});
   }
 
+  changeUsername(){
+    this.setState({inLobby: false, loggedIn: false})
+  }
+
   hostStartGame(){
-    socket.emit("host-started-game", this.state.lobbyCode);
+    if(this.state.startingChips > 0){
+      socket.emit("host-started-game", this.state.lobbyCode, this.state.startingChips);
+    }
+    else{
+      socket.emit("host-started-game", this.state.lobbyCode, 1000);
+    }
   }
 
   //handles which react component is to be loaded under the logo
@@ -161,7 +185,7 @@ class Home extends React.Component{
       return <LoginInput onSubmit={this.updateUsername}/>
     }
     else if(this.state.loggedIn && !this.state.inLobby){
-      return <LobbyInput username={this.state.username} onJoin={this.onJoin} onHost={this.onHost}/>
+      return <LobbyInput username={this.state.username} onJoin={this.onJoin} onHost={this.onHost} changeUsername={this.changeUsername}/>
     }
     else if(this.state.loggedIn && this.state.inLobby){
       
@@ -180,7 +204,13 @@ class Home extends React.Component{
                 <div> <h2> loading... </h2> </div>
               
               }
-            </div>
+              <input type="number" 
+                        placeholder="Starting chips" 
+                        id="startingChipsInput"
+                        onChange={this.updateStartingChips} 
+                        className={styles.lobbyCodeBox} />
+              </div>
+               
             : <div/>
             } 
          </div>
