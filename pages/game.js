@@ -29,7 +29,6 @@ class CardView extends React.Component{
         }
         else {
             this.props.onClick(this.state.card);
-            console.log(this.state.card)
         }
 
     }
