@@ -35,7 +35,7 @@ export default class LobbyInput extends React.Component{
       return(
         <div >
             <h2 className={styles.hostandjoin} name = "welcome">Welcome, {this.state.username}.</h2>
-            <p className={styles.changeUsername} onClick = {this.changeUsername}> change username </p>
+            <p className={styles.changeUsername} onClick = {this.changeUsername}> Change username </p>
             <div className={styles.hostandjoin}>
             <div>
             <button className={styles.card} 

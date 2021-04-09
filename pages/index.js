@@ -187,10 +187,10 @@ class Home extends React.Component{
          <div className={styles.codeBox}> 
             <h2 className={styles.lobbyCode} id="lobby-code">Lobby Code: {this.state.lobbyCode}</h2>
             {this.state.isHost ? 
-              <div>
+              <div id="startGame">
               {this.state.cardsSet ?
                 <button className={styles.card}
-                   onClick={this.hostStartGame}>
+                   onClick={this.hostStartGame} id = "startGameButton">
                    Start Game
                 </button>
                 :

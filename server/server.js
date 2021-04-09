@@ -162,6 +162,12 @@ class Game {
           this.dealerIndex = 0;
         }
         this.dealer = this.players[this.dealerIndex]
+
+        if(index == this.activePlayerIndex) {
+
+          endRound(this)
+
+        }
       }
 
       if(index == this.activePlayerIndex) {
@@ -246,7 +252,7 @@ class Game {
       let winningTurns = []
 
       for(let i=0;i<this.activeTurns.length;i++) {
-        if(this.activeTurns[i].card.searchValue > highestCard.searchValue) {
+        if(parseInt(this.activeTurns[i].card.searchValue) > parseInt(highestCard.searchValue)) {
           highestCard = this.activeTurns[i].card
           winningTurns = [this.activeTurns[i]]
         }
@@ -322,6 +328,39 @@ function findLobby(code, activeLobbies){
     }
   }
   return null
+}
+
+function endRound(game) {
+  let winners = game.chooseWinners()
+  console.log(winners)
+  let lastPlayerStanding = false
+
+  winners.forEach(winner => {
+    winner.player.chips += Math.floor(game.potAmount / winners.length) //split the pot between all winners 
+    io.to(winner.player.socketId).emit("set-chips", winner.player.chips)
+  })
+
+  //check if only one player with chips remains.
+  let pwc = 0; //players with chips
+  for(let i=0;i<game.players.length;i++) {
+    if(game.players[i].chips != 0) {
+      pwc += 1
+    }
+  }
+  if(pwc == 1) {
+    lastPlayerStanding = true
+  }
+
+  let turns = game.getTurns()
+
+  //if only one player remains send a slightly different round-over message (last param = true)
+  io.to(game.id).emit("round-over", turns, winners, game.potAmount, lastPlayerStanding);
+
+  game.resetPot()
+  game.resetTurns()
+
+  //have to do this to update the chips on the client side
+  io.to(game.id).emit("update-players", game.players)
 }
 
 // for testing purposes
@@ -535,37 +574,7 @@ io.on('connection', (socket) => {
 
     //check if it was the dealers turn, if true then the round is over and winners are chosen
     if(game.activePlayerIndex == game.dealerIndex) {
-      let winners = game.chooseWinners()
-      console.log(winners)
-      let lastPlayerStanding = false
-
-      winners.forEach(winner => {
-        winner.player.chips += Math.floor(game.potAmount / winners.length) //split the pot between all winners 
-        io.to(winner.player.socketId).emit("set-chips", winner.player.chips)
-      })
-
-      //check if only one player with chips remains.
-      let pwc = 0; //players with chips
-      for(let i=0;i<game.players.length;i++) {
-        if(game.players[i].chips != 0) {
-          pwc += 1
-        }
-      }
-      if(pwc == 1) {
-        lastPlayerStanding = true
-      }
-
-      let turns = game.getTurns()
-
-      //if only one player remains send a slightly different round-over message (last param = true)
-      io.to(game.id).emit("round-over", turns, winners, game.potAmount, lastPlayerStanding);
-
-      game.resetPot()
-      game.resetTurns()
-
-
-      //have to do this to update the chips on the client side
-      io.to(game.id).emit("update-players", game.players)
+      endRound(game)
     }
     else {
       game.getNextActivePlayer(false); 

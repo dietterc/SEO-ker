@@ -133,10 +133,11 @@
 .changeUsername{
   text-align: center;
   cursor: pointer;
+  color: grey;
 }
 
 .changeUsername:hover{
-  color: grey;
+  color: black;
 }
 
 .lobbyCodeBox {
