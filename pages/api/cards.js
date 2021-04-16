@@ -11,7 +11,6 @@ export default async (req, res) => {
     // If you do, you need to change "lobbyCards in server/server.js" to be 100, 
     //there aren't enough cards in the bad dataset.
 
-    //.collection("cards")
     .collection("seoker_cards")
 
     .find({})
