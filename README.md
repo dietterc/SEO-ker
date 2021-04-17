@@ -3,12 +3,12 @@ COMP4350 project for group Team n, n ∈ ℤ+
 
 | Name | GitHub Username 
 | --- | --- 
-| **John Manning** | **manningj**
+| John Manning * | manningj
 | Meng Ching Chiang | GinCS 
 | Colton Dietterle | dietterc
 | Conner Kulbaski | ckulbaski
 
-Note: the leader is in bold
+Note: the leader has a * next to them
 
 ### Description
 The details of this project can be found on the [homepage](https://github.com/dietterc/SEO-ker/wiki) of our Wiki.
